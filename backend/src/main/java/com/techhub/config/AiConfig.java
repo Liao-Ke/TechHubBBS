@@ -34,8 +34,11 @@ public class AiConfig {
     /** 最大重试次数 */
     private int maxRetries;
 
+    /**
+     * 创建 AI 调用的 RestTemplate，10s 连接与读取超时。
+     */
     @Bean
-    public RestTemplate restTemplate() {
+    public RestTemplate aiRestTemplate() {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(timeout * 1000);
         factory.setReadTimeout(timeout * 1000);

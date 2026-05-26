@@ -94,19 +94,20 @@ public class UserServiceImpl implements UserService {
         return vo;
     }
 
-    private UserProfileVO toUserProfileVO(User user) {
-        if (user == null) {
-            return null;
+        private UserProfileVO toUserProfileVO(User user) {
+            if (user == null) {
+                return null;
+            }
+            UserProfileVO vo = new UserProfileVO();
+            vo.setId(user.getId().toString());
+            vo.setUsername(user.getUsername());
+            vo.setAvatarUrl(user.getAvatarUrl());
+            vo.setBio(user.getBio());
+            vo.setRole(user.getRole());
+            vo.setStatus(user.getStatus());
+            vo.setCreateTime(user.getCreateTime());
+            return vo;
         }
-        UserProfileVO vo = new UserProfileVO();
-        vo.setId(user.getId().toString());
-        vo.setUsername(user.getUsername());
-        vo.setAvatarUrl(user.getAvatarUrl());
-        vo.setBio(user.getBio());
-        vo.setRole(user.getRole());
-        vo.setCreateTime(user.getCreateTime());
-        return vo;
-    }
 
     private PostVO toPostVO(Post post) {
         if (post == null) {
