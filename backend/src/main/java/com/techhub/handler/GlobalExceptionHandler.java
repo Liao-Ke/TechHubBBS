@@ -43,9 +43,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public R<Void> handleAccessDeniedException(AccessDeniedException e) {
+    public ResponseEntity<R<Void>> handleAccessDeniedException(AccessDeniedException e) {
         log.warn("权限不足: {}", e.getMessage());
-        return R.error(ResultCode.FORBIDDEN, "没有访问权限");
+        return ResponseEntity.status(ResultCode.FORBIDDEN.getCode())
+                .body(R.error(ResultCode.FORBIDDEN, "没有访问权限"));
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
