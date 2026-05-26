@@ -4,6 +4,7 @@ import com.techhub.common.BusinessException;
 import com.techhub.common.R;
 import com.techhub.common.ResultCode;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -18,9 +19,9 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
-    public R<Void> handleBusinessException(BusinessException e) {
+    public ResponseEntity<R<Void>> handleBusinessException(BusinessException e) {
         log.warn("业务异常: code={}, message={}", e.getCode(), e.getMessage());
-        return R.error(e.getCode(), e.getMessage());
+        return ResponseEntity.status(e.getCode()).body(R.error(e.getCode(), e.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
