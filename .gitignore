@@ -1,0 +1,48 @@
+# ==================== IDE & Editor ====================
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# ==================== Java / Maven ====================
+target/
+!.mvn/wrapper/maven-wrapper.jar
+*.class
+*.jar
+*.war
+
+# ==================== Node / Frontend ====================
+node_modules/
+dist/
+.env.local
+.env.*.local
+*.log
+pnpm-lock.yaml
+
+# ==================== Gradle (if used) ====================
+.gradle/
+build/
+
+# ==================== Docker ====================
+docker-compose.override.yml
+
+# ==================== OS ====================
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ==================== OpenCode / Project ====================
+.omo/
+.opencode/
+.sisyphus/
+
+# ==================== Environment ====================
+.env
+*.env
+
+# ==================== Uploads / Data ====================
+/data/uploads/
+uploads/
