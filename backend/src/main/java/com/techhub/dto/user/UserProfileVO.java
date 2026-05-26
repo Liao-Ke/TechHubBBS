@@ -10,5 +10,6 @@ public class UserProfileVO {
     private String avatarUrl;
     private String bio;
     private String role;
+    private Integer status;
     private LocalDateTime createTime;
 }
