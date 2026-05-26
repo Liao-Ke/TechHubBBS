@@ -1,0 +1,31 @@
+# ==================== TechHub 生产环境配置 ====================
+# 仅包含与 application.yml 不同的覆写项，Spring Boot 自动合并。
+# 激活方式: --spring.profiles.active=prod 或 SPRING_PROFILES_ACTIVE=prod
+
+# ==================== 服务器配置 ====================
+server:
+  port: ${SERVER_PORT:8080}
+
+# ==================== MyBatis-Plus 配置 ====================
+# 生产环境关闭 SQL 日志打印
+mybatis-plus:
+  configuration:
+    log-impl:   # 设为空，禁用 SQL 日志输出
+
+# ==================== Knife4j API 文档 ====================
+# 生产环境关闭 API 文档
+knife4j:
+  enable: false
+
+# ==================== CORS 配置 ====================
+# 请根据实际部署域名修改 allowed-origins
+cors:
+  allowed-origins: ${CORS_ORIGINS:https://your-domain.com}
+
+# ==================== 文件存储配置 ====================
+# 生产环境域名需替换为实际域名
+dromara:
+  x-file-storage:
+    local:
+      - platform: local-1
+        domain: ${FILE_DOMAIN:https://your-domain.com/file/}

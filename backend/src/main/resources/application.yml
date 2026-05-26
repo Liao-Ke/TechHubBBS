@@ -75,7 +75,7 @@ ai:
   api-key: ${AI_API_KEY:}
   api-url: ${AI_API_URL:https://api.openai.com/v1}
   model: ${AI_MODEL:gpt-3.5-turbo}
-  timeout: 30                                # 秒
+  timeout: 10                                # 秒
   max-retries: 2
 
 # ==================== 文件存储配置 (x-file-storage) ====================

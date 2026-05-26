@@ -285,7 +285,7 @@ src/
 GET    /api/v1/posts              # 帖子列表（分页）
 GET    /api/v1/posts/{id}         # 帖子详情
 POST   /api/v1/posts              # 发布帖子
-PUT    /api/v1/posts/{id}         # 编辑帖子
+PATCH  /api/v1/posts/{id}         # 编辑帖子
 DELETE /api/v1/posts/{id}         # 删除帖子（软删除）
 ```
 
@@ -310,8 +310,8 @@ DELETE /api/v1/posts/{id}         # 删除帖子（软删除）
 
 ### 7.2 禁止
 
-- 禁止使用外键约束（应用层保证一致性）
-- 禁止使用 `TEXT` 类型（用 `LONGTEXT` 替代以支持大文章）
+- 禁止不定义外键约束（关键关联表应定义 FOREIGN KEY 以维护参照完整性，可设置 ON DELETE CASCADE）
+- 禁止使用 `TEXT` 类型存储文章正文（帖子/草稿正文等大字段使用 `LONGTEXT`，其他短文本场景可使用 `TEXT`）
 - 禁止存储明文密码
 
 ---
