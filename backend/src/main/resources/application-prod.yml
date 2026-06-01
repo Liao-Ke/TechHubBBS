@@ -26,6 +26,7 @@ cors:
 # 生产环境域名需替换为实际域名
 dromara:
   x-file-storage:
-    local:
-      - platform: local-1
+    local-plus:
+      - platform: local
         domain: ${FILE_DOMAIN:https://your-domain.com/file/}
+        storage-path: ${UPLOAD_PATH:/app/uploads/}

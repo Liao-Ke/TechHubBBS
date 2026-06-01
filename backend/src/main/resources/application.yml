@@ -1,6 +1,11 @@
 # ==================== TechHub 应用主配置 ====================
 server:
   port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
 
 spring:
   profiles:
@@ -81,11 +86,11 @@ ai:
 # ==================== 文件存储配置 (x-file-storage) ====================
 dromara:
   x-file-storage:
-    default-platform: local-1
-    local:
-      - platform: local-1
+    default-platform: local
+    local-plus:
+      - platform: local
         enable-storage: true
-        base-path: /data/uploads/
+        storage-path: /home/Lsk/Documents/Code/Projects/TechHubBBS/backend/uploads/
         domain: http://localhost:8080/file/
 
 # ==================== Knife4j API 文档 ====================

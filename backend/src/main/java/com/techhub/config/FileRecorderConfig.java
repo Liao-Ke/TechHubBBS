@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * 文件上传记录配置
@@ -65,7 +66,9 @@ public class FileRecorderConfig {
 
             private FileDetail toFileDetail(FileInfo info, ObjectMapper om) {
                 FileDetail detail = new FileDetail();
-                detail.setId(info.getId());
+                detail.setId(info.getId() != null && !info.getId().isEmpty()
+                        ? info.getId()
+                        : UUID.randomUUID().toString().replace("-", ""));
                 detail.setUrl(info.getUrl());
                 detail.setSize(info.getSize());
                 detail.setFilename(info.getFilename());

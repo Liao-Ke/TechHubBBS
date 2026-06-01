@@ -1,4 +1,9 @@
 <script setup lang="ts">
+import { ref } from 'vue'
+import { Loading } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+import { fileApi } from '@/api/modules/file'
+
 const emit = defineEmits<{
   insert: [syntax: string]
 }>()
@@ -17,7 +22,6 @@ const buttons: ToolbarButton[] = [
   { label: 'H2', syntax: '## ', title: '二级标题' },
   { label: 'H3', syntax: '### ', title: '三级标题' },
   { label: '🔗', syntax: '[text](url)', title: '链接' },
-  { label: '🖼', syntax: '![alt](url)', title: '图片' },
   { label: '`', syntax: '`code`', title: '行内代码' },
   { label: '{ }', syntax: '```\n\n```', title: '代码块' },
   { label: '❝', syntax: '> ', title: '引用' },
@@ -26,6 +30,38 @@ const buttons: ToolbarButton[] = [
 
 function handleInsert(syntax: string) {
   emit('insert', syntax)
+}
+
+// ------ Image upload ------
+const fileInput = ref<HTMLInputElement | null>(null)
+const imageUploading = ref(false)
+
+function handleImageClick() {
+  fileInput.value?.click()
+}
+
+async function handleImageSelected(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+
+  imageUploading.value = true
+  try {
+    const res = await fileApi.upload(file, 'post_image')
+    if (res && res.code === 200 && res.data) {
+      const url = res.data.url
+      const syntax = `![${file.name}](${url})`
+      emit('insert', syntax)
+    } else {
+      ElMessage.error('图片上传失败')
+    }
+  } catch {
+    ElMessage.error('图片上传失败，请重试')
+  } finally {
+    imageUploading.value = false
+    // Reset input so the same file can be re-selected
+    input.value = ''
+  }
 }
 </script>
 
@@ -41,6 +77,26 @@ function handleInsert(syntax: string) {
       @click="handleInsert(btn.syntax)"
     >
       {{ btn.label }}
+    </el-button>
+
+    <input
+      ref="fileInput"
+      type="file"
+      accept="image/jpeg,image/png,image/gif,image/webp"
+      hidden
+      @change="handleImageSelected"
+    />
+
+    <el-button
+      title="上传图片"
+      text
+      size="small"
+      :disabled="imageUploading"
+      class="md-toolbar__btn"
+      @click="handleImageClick"
+    >
+      <el-icon v-if="imageUploading" class="is-loading"><Loading /></el-icon>
+      <span v-else>🖼</span>
     </el-button>
   </div>
 </template>

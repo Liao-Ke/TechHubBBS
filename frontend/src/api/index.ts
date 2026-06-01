@@ -31,12 +31,22 @@ export async function onRequestInterceptor(context: any): Promise<void> {
   // Dynamic import to avoid circular dependency with stores / utils
   const { getToken } = await import('@/utils/token')
   const token = getToken()
-  if (token) {
-    context.options.headers = {
-      ...(context.options.headers as Record<string, string> | undefined),
-      Authorization: `Bearer ${token}`,
-    }
+
+  const headers: Record<string, string> = {
+    ...(context.options.headers as Record<string, string> | undefined),
   }
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`
+  }
+
+  // For FormData requests, let the browser set the correct multipart Content-Type
+  // with boundary — otherwise the default application/json header can break uploads.
+  if (context.options.body instanceof FormData) {
+    delete headers['Content-Type']
+  }
+
+  context.options.headers = headers
 }
 
 export async function onResponseInterceptor(context: any): Promise<void> {
