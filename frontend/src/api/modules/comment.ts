@@ -17,10 +17,10 @@ export const commentApi = {
   remove: (id: string) => api<R<null>>(`/comments/${id}`, { method: 'DELETE' }),
 
   /** Like a comment */
-  like: (id: string) => api<R<null>>(`/comments/${id}/like`, { method: 'POST' }),
+  like: (id: string) => api<R<null>>(`/comments/${id}/likes`, { method: 'POST' }),
 
   /** Unlike a comment */
-  unlike: (id: string) => api<R<null>>(`/comments/${id}/like`, { method: 'DELETE' }),
+  unlike: (id: string) => api<R<null>>(`/comments/${id}/likes`, { method: 'DELETE' }),
 
   /** Recommend a comment as divine */
   recommend: (id: string) => api<R<null>>(`/comments/${id}/recommend`, { method: 'POST' }),

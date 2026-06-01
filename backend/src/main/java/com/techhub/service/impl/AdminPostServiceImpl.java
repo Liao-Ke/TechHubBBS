@@ -30,13 +30,17 @@ public class AdminPostServiceImpl implements AdminPostService {
     private final CategoryMapper categoryMapper;
 
     @Override
-    public PageResult<PostVO> listAllPosts(int page, int size, String keyword) {
+    public PageResult<PostVO> listAllPosts(int page, int size, String keyword, Long categoryId) {
         LambdaQueryWrapper<Post> wrapper = new LambdaQueryWrapper<>();
 
         if (keyword != null && !keyword.isBlank()) {
             wrapper.and(w -> w.like(Post::getTitle, keyword)
                     .or()
                     .like(Post::getContent, keyword));
+        }
+
+        if (categoryId != null) {
+            wrapper.eq(Post::getCategoryId, categoryId);
         }
 
         wrapper.orderByDesc(Post::getType).orderByDesc(Post::getCreateTime);

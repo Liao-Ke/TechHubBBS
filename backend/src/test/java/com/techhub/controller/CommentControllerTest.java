@@ -8,6 +8,7 @@ import com.techhub.dto.comment.CommentCreateRequest;
 import com.techhub.dto.comment.CommentVO;
 import com.techhub.security.JwtTokenProvider;
 import com.techhub.service.CommentService;
+import com.techhub.service.DivineCommentService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -53,6 +54,9 @@ class CommentControllerTest {
 
     @MockitoBean
     private JwtTokenProvider jwtTokenProvider;
+
+    @MockitoBean
+    private DivineCommentService divineCommentService;
 
     @MockitoBean
     private RedisConnectionFactory redisConnectionFactory;
@@ -174,6 +178,73 @@ class CommentControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.message").value("删除成功"));
+    }
+
+    // ==================== POST /api/v1/comments/{id}/recommend ====================
+
+    @Test
+    @DisplayName("recommendComment — 推荐神评成功")
+    void recommendComment_Success() throws Exception {
+        doNothing().when(divineCommentService).recommend(100L);
+
+        mockMvc.perform(post("/api/v1/comments/100/recommend")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.message").value("推荐成功"));
+    }
+
+    // ==================== DELETE /api/v1/comments/{id}/recommend ====================
+
+    @Test
+    @DisplayName("cancelRecommendComment — 取消推荐神评成功")
+    void cancelRecommendComment_Success() throws Exception {
+        doNothing().when(divineCommentService).cancelRecommend(100L);
+
+        mockMvc.perform(delete("/api/v1/comments/100/recommend")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.message").value("取消推荐成功"));
+    }
+
+    // ==================== GET /api/v1/posts/{postId}/comments/divine ====================
+
+    @Test
+    @DisplayName("listDivineComments — 返回神评列表")
+    void listDivineComments_ReturnsDivineComments() throws Exception {
+        CommentVO vo1 = new CommentVO();
+        vo1.setId("301");
+        vo1.setContent("神评内容1");
+        vo1.setPostId("10");
+        vo1.setUserId("1");
+        vo1.setUsername("testuser");
+        vo1.setIsDivine(true);
+        vo1.setCreateTime(LocalDateTime.now());
+
+        CommentVO vo2 = new CommentVO();
+        vo2.setId("302");
+        vo2.setContent("神评内容2");
+        vo2.setPostId("10");
+        vo2.setUserId("2");
+        vo2.setUsername("otheruser");
+        vo2.setIsDivine(true);
+        vo2.setCreateTime(LocalDateTime.now());
+
+        when(divineCommentService.listDivineComments(10L)).thenReturn(List.of(vo1, vo2));
+
+        mockMvc.perform(get("/api/v1/posts/10/comments/divine")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.data").isArray())
+                .andExpect(jsonPath("$.data", hasSize(2)))
+                .andExpect(jsonPath("$.data[0].id").value("301"))
+                .andExpect(jsonPath("$.data[0].content").value("神评内容1"))
+                .andExpect(jsonPath("$.data[0].isDivine").value(true))
+                .andExpect(jsonPath("$.data[1].id").value("302"))
+                .andExpect(jsonPath("$.data[1].content").value("神评内容2"))
+                .andExpect(jsonPath("$.data[1].isDivine").value(true));
     }
 
     @Test

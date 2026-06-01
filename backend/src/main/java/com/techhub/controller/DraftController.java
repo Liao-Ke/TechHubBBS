@@ -32,6 +32,11 @@ public class DraftController {
         return R.ok(draftService.checkDraft(postId));
     }
 
+    @GetMapping("/{id}")
+    public R<PostDraft> getDraft(@PathVariable Long id) {
+        return R.ok(draftService.getById(id));
+    }
+
     @DeleteMapping("/{id}")
     public R<Void> deleteDraft(@PathVariable Long id) {
         draftService.deleteDraft(id);

@@ -25,9 +25,9 @@ public class UserController {
     }
 
     @PatchMapping("/me")
-    public R<Void> updateProfile(@Valid @RequestBody UserUpdateRequest request) {
+    public R<UserDetailVO> updateProfile(@Valid @RequestBody UserUpdateRequest request) {
         userService.updateProfile(request);
-        return R.ok("更新成功");
+        return R.ok(userService.getCurrentUser());
     }
 
     @GetMapping("/{id}")

@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 @Data
 public class AiSummaryResponse {
     private String id;
+    private String postId;
     private String content;
     private Integer status;
     private String errorMessage;

@@ -25,6 +25,7 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -84,7 +85,7 @@ class AdminPostControllerTest {
         PostVO postVO = mockPost();
         PageResult<PostVO> pageResult = PageResult.of(List.of(postVO), 1, 20, 1);
 
-        when(adminPostService.listAllPosts(anyInt(), anyInt(), eq(null)))
+        when(adminPostService.listAllPosts(anyInt(), anyInt(), isNull(), isNull()))
                 .thenReturn(pageResult);
 
         mockMvc.perform(get("/api/v1/admin/posts")
@@ -103,7 +104,7 @@ class AdminPostControllerTest {
     void listAllPosts_AsModerator_Success() throws Exception {
         PageResult<PostVO> pageResult = PageResult.of(List.of(), 0, 20, 1);
 
-        when(adminPostService.listAllPosts(anyInt(), anyInt(), eq(null)))
+        when(adminPostService.listAllPosts(anyInt(), anyInt(), isNull(), isNull()))
                 .thenReturn(pageResult);
 
         mockMvc.perform(get("/api/v1/admin/posts")

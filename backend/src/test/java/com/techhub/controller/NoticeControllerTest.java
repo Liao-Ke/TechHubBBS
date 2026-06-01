@@ -2,6 +2,7 @@ package com.techhub.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.techhub.common.BusinessException;
+import com.techhub.common.PageResult;
 import com.techhub.common.ResultCode;
 import com.techhub.dto.category.CategoryNoticeCreateRequest;
 import com.techhub.dto.category.CategoryNoticeUpdateRequest;
@@ -212,5 +213,81 @@ class NoticeControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.message").value("删除成功"));
+    }
+
+    // ==================== GET /notices ====================
+
+    @Test
+    @DisplayName("list — 分页获取公告列表成功")
+    void list_Paginated_Success() throws Exception {
+        CategoryNoticeVO notice1 = new CategoryNoticeVO();
+        notice1.setId("1");
+        notice1.setCategoryId("10");
+        notice1.setTitle("置顶公告");
+        notice1.setContent("重要");
+        notice1.setType(0);
+        notice1.setAuthorId("1");
+        notice1.setAuthorName("admin");
+        notice1.setIsPinned(1);
+        notice1.setStatus(1);
+        notice1.setCreateTime(LocalDateTime.now());
+        notice1.setUpdateTime(LocalDateTime.now());
+
+        CategoryNoticeVO notice2 = new CategoryNoticeVO();
+        notice2.setId("2");
+        notice2.setCategoryId("10");
+        notice2.setTitle("普通公告");
+        notice2.setContent("一般");
+        notice2.setType(1);
+        notice2.setAuthorId("1");
+        notice2.setAuthorName("admin");
+        notice2.setIsPinned(0);
+        notice2.setStatus(1);
+        notice2.setCreateTime(LocalDateTime.now());
+        notice2.setUpdateTime(LocalDateTime.now());
+
+        PageResult<CategoryNoticeVO> pageResult = new PageResult<>(List.of(notice1, notice2), 2, 20, 1);
+
+        when(noticeService.getNoticePage(null, 1, 20)).thenReturn(pageResult);
+
+        mockMvc.perform(get("/api/v1/notices")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.data.records").isArray())
+                .andExpect(jsonPath("$.data.records[0].id").value("1"))
+                .andExpect(jsonPath("$.data.records[0].title").value("置顶公告"))
+                .andExpect(jsonPath("$.data.total").value(2))
+                .andExpect(jsonPath("$.data.size").value(20))
+                .andExpect(jsonPath("$.data.current").value(1));
+    }
+
+    @Test
+    @DisplayName("list — 按类型筛选公告")
+    void list_FilterByType() throws Exception {
+        CategoryNoticeVO notice = new CategoryNoticeVO();
+        notice.setId("3");
+        notice.setCategoryId("10");
+        notice.setTitle("活动公告");
+        notice.setContent("活动内容");
+        notice.setType(1);
+        notice.setAuthorId("1");
+        notice.setAuthorName("admin");
+        notice.setIsPinned(0);
+        notice.setStatus(1);
+        notice.setCreateTime(LocalDateTime.now());
+        notice.setUpdateTime(LocalDateTime.now());
+
+        PageResult<CategoryNoticeVO> pageResult = new PageResult<>(List.of(notice), 1, 20, 1);
+
+        when(noticeService.getNoticePage(1, 1, 20)).thenReturn(pageResult);
+
+        mockMvc.perform(get("/api/v1/notices")
+                        .param("type", "1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.data.records[0].type").value(1))
+                .andExpect(jsonPath("$.data.total").value(1));
     }
 }

@@ -32,11 +32,11 @@ export const adminApi = {
 
   /** Ban or unban a user */
   banUser: (id: string, ban: boolean) =>
-    api<R<null>>(`/admin/users/${id}/ban`, { method: 'PATCH', body: { ban } }),
+    api<R<null>>(`/admin/users/${id}/ban`, { method: 'PATCH', query: { ban } }),
 
   /** Set a user's role */
   setRole: (id: string, role: string) =>
-    api<R<null>>(`/admin/users/${id}/role`, { method: 'PATCH', body: { role } }),
+    api<R<null>>(`/admin/users/${id}/role`, { method: 'PATCH', query: { role } }),
 
   // ---------------------------------------------------------------------------
   // Posts
@@ -48,7 +48,7 @@ export const adminApi = {
 
   /** Set post type (e.g. normal, pinned, essence) */
   setPostType: (id: string, type: number) =>
-    api<R<null>>(`/admin/posts/${id}/type`, { method: 'PATCH', body: { type } }),
+    api<R<null>>(`/admin/posts/${id}/type`, { method: 'PATCH', query: { type } }),
 
   /** Lock a post (prevent new comments) */
   lockPost: (id: string) =>
@@ -76,5 +76,5 @@ export const adminApi = {
 
   /** Set or unset a comment as divine */
   setDivine: (id: string, divine: boolean) =>
-    api<R<null>>(`/admin/comments/${id}/divine`, { method: 'PATCH', body: { divine } }),
+    api<R<null>>(`/admin/comments/${id}/divine`, { method: 'PATCH', query: { divine } }),
 }

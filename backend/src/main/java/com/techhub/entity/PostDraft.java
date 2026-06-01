@@ -22,6 +22,9 @@ public class PostDraft {
 
     private Integer visibility;
 
+    @TableField(exist = false)
+    private String categoryName;
+
     private LocalDateTime lastSavedAt;
 
     @TableField(fill = FieldFill.INSERT)

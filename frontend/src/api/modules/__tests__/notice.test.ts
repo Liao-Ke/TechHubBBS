@@ -14,17 +14,24 @@ describe('noticeApi', () => {
     vi.clearAllMocks()
   })
 
-  it('getList calls GET /notices with query params', () => {
+  it('getList calls /categories/{id}/notices when categoryId is provided', () => {
     noticeApi.getList({ categoryId: 'cat-1', type: 'NOTICE', page: 1, size: 20 })
+    expect(api).toHaveBeenCalledWith('/categories/cat-1/notices', {
+      query: { type: 'NOTICE' },
+    })
+  })
+
+  it('getList calls /notices when no categoryId', () => {
+    noticeApi.getList({ type: 'NOTICE', page: 1, size: 20 })
     expect(api).toHaveBeenCalledWith('/notices', {
-      query: { categoryId: 'cat-1', type: 'NOTICE', page: 1, size: 20 },
+      query: { type: 'NOTICE', page: 1, size: 20 },
     })
   })
 
   it('getList works without params', () => {
     noticeApi.getList()
     expect(api).toHaveBeenCalledWith('/notices', {
-      query: undefined,
+      query: {},
     })
   })
 

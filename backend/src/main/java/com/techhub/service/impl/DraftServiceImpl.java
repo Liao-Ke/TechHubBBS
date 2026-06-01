@@ -4,7 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.techhub.common.BusinessException;
 import com.techhub.common.ResultCode;
 import com.techhub.dto.DraftSaveRequest;
+import com.techhub.entity.Category;
 import com.techhub.entity.PostDraft;
+import com.techhub.mapper.CategoryMapper;
 import com.techhub.mapper.PostDraftMapper;
 import com.techhub.security.SecurityUtils;
 import com.techhub.service.DraftService;
@@ -20,6 +22,7 @@ import java.util.List;
 public class DraftServiceImpl implements DraftService {
 
     private final PostDraftMapper postDraftMapper;
+    private final CategoryMapper categoryMapper;
 
     @Override
     @Transactional
@@ -70,7 +73,9 @@ public class DraftServiceImpl implements DraftService {
         LambdaQueryWrapper<PostDraft> wrapper = new LambdaQueryWrapper<PostDraft>()
                 .eq(PostDraft::getUserId, userId)
                 .orderByDesc(PostDraft::getUpdateTime);
-        return postDraftMapper.selectList(wrapper);
+        List<PostDraft> drafts = postDraftMapper.selectList(wrapper);
+        fillCategoryNames(drafts);
+        return drafts;
     }
 
     @Override
@@ -84,6 +89,16 @@ public class DraftServiceImpl implements DraftService {
                 .eq(PostDraft::getUserId, userId)
                 .eq(PostDraft::getPostId, postId);
         return postDraftMapper.selectOne(wrapper);
+    }
+
+    @Override
+    public PostDraft getById(Long id) {
+        PostDraft draft = postDraftMapper.selectById(id);
+        if (draft == null) {
+            throw new BusinessException(ResultCode.NOT_FOUND, "草稿不存在");
+        }
+        fillCategoryNames(List.of(draft));
+        return draft;
     }
 
     @Override
@@ -104,5 +119,16 @@ public class DraftServiceImpl implements DraftService {
         }
 
         postDraftMapper.deleteById(draftId);
+    }
+
+    private void fillCategoryNames(List<PostDraft> drafts) {
+        drafts.forEach(draft -> {
+            if (draft.getCategoryId() != null) {
+                Category category = categoryMapper.selectById(draft.getCategoryId());
+                if (category != null) {
+                    draft.setCategoryName(category.getName());
+                }
+            }
+        });
     }
 }

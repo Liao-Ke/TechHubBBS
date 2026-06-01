@@ -2,6 +2,7 @@ package com.techhub.service;
 
 import com.techhub.dto.category.CategoryNoticeCreateRequest;
 import com.techhub.dto.category.CategoryNoticeUpdateRequest;
+import com.techhub.common.PageResult;
 import com.techhub.dto.category.CategoryNoticeVO;
 
 import java.util.List;
@@ -9,6 +10,8 @@ import java.util.List;
 public interface CategoryNoticeService {
 
     List<CategoryNoticeVO> listByCategory(Long categoryId, Integer type);
+
+    PageResult<CategoryNoticeVO> getNoticePage(Integer type, int page, int size);
 
     CategoryNoticeVO create(Long categoryId, CategoryNoticeCreateRequest request, Long authorId);
 

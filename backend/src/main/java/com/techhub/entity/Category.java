@@ -18,6 +18,9 @@ public class Category {
 
     private Integer status;
 
+    @TableField(exist = false)
+    private Integer postCount;
+
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 }

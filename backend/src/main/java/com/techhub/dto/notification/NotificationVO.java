@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 public class NotificationVO {
     private String id;
     private String type;
+    private String sourceType;
     private String sourceId;
     private String content;
     private Boolean isRead;

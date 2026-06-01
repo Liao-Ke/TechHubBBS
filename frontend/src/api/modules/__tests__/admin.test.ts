@@ -27,19 +27,19 @@ describe('adminApi', () => {
     })
   })
 
-  it('banUser calls PATCH /admin/users/{id}/ban with body', () => {
+  it('banUser calls PATCH /admin/users/{id}/ban with query', () => {
     adminApi.banUser('user-1', true)
     expect(api).toHaveBeenCalledWith('/admin/users/user-1/ban', {
       method: 'PATCH',
-      body: { ban: true },
+      query: { ban: true },
     })
   })
 
-  it('setRole calls PATCH /admin/users/{id}/role with body', () => {
+  it('setRole calls PATCH /admin/users/{id}/role with query', () => {
     adminApi.setRole('user-1', 'MODERATOR')
     expect(api).toHaveBeenCalledWith('/admin/users/user-1/role', {
       method: 'PATCH',
-      body: { role: 'MODERATOR' },
+      query: { role: 'MODERATOR' },
     })
   })
 
@@ -52,11 +52,11 @@ describe('adminApi', () => {
     })
   })
 
-  it('setPostType calls PATCH /admin/posts/{id}/type with body', () => {
+  it('setPostType calls PATCH /admin/posts/{id}/type with query', () => {
     adminApi.setPostType('post-1', 1)
     expect(api).toHaveBeenCalledWith('/admin/posts/post-1/type', {
       method: 'PATCH',
-      body: { type: 1 },
+      query: { type: 1 },
     })
   })
 
@@ -99,11 +99,11 @@ describe('adminApi', () => {
     })
   })
 
-  it('setDivine calls PATCH /admin/comments/{id}/divine with body', () => {
+  it('setDivine calls PATCH /admin/comments/{id}/divine with query', () => {
     adminApi.setDivine('comment-1', true)
     expect(api).toHaveBeenCalledWith('/admin/comments/comment-1/divine', {
       method: 'PATCH',
-      body: { divine: true },
+      query: { divine: true },
     })
   })
 })

@@ -12,8 +12,13 @@ import type {
 
 export const noticeApi = {
   /** Get notice list (paginated, filterable by category / type) */
-  getList: (params?: { categoryId?: string; type?: string; page?: number; size?: number }) =>
-    api<R<PageResult<CategoryNoticeVO>>>('/notices', { query: params }),
+  getList: (params?: { categoryId?: string; type?: string; page?: number; size?: number }) => {
+    const { categoryId, ...rest } = params ?? {}
+    if (categoryId) {
+      return api<R<CategoryNoticeVO[]>>(`/categories/${categoryId}/notices`, { query: rest.type ? { type: rest.type } : undefined })
+    }
+    return api<R<PageResult<CategoryNoticeVO>>>('/notices', { query: rest })
+  },
 
   /** Get notice detail by ID */
   getDetail: (id: string) =>

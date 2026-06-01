@@ -38,16 +38,16 @@ describe('commentApi', () => {
     expect(mockApi).toHaveBeenCalledWith('/comments/c1', { method: 'DELETE' })
   })
 
-  it('like sends POST /comments/{id}/like', async () => {
+  it('like sends POST /comments/{id}/likes', async () => {
     mockApi.mockResolvedValue({} as R<null>)
     await commentApi.like('c1')
-    expect(mockApi).toHaveBeenCalledWith('/comments/c1/like', { method: 'POST' })
+    expect(mockApi).toHaveBeenCalledWith('/comments/c1/likes', { method: 'POST' })
   })
 
-  it('unlike sends DELETE /comments/{id}/like', async () => {
+  it('unlike sends DELETE /comments/{id}/likes', async () => {
     mockApi.mockResolvedValue({} as R<null>)
     await commentApi.unlike('c1')
-    expect(mockApi).toHaveBeenCalledWith('/comments/c1/like', { method: 'DELETE' })
+    expect(mockApi).toHaveBeenCalledWith('/comments/c1/likes', { method: 'DELETE' })
   })
 
   it('recommend sends POST /comments/{id}/recommend', async () => {

@@ -19,5 +19,5 @@ export const aiApi = {
 
   /** Get Q&A history for a post */
   getQaHistory: (postId: string, params?: { page?: number; size?: number }) =>
-    api<R<PageResult<AiQaResponse>>>(`/posts/${postId}/ai/qa`, { query: params }),
+    api<R<PageResult<AiQaResponse>>>(`/posts/${postId}/ai/qa/history`, { query: params }),
 }

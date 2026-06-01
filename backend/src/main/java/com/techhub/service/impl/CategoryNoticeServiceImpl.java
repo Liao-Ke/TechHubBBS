@@ -1,7 +1,9 @@
 package com.techhub.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.techhub.common.BusinessException;
+import com.techhub.common.PageResult;
 import com.techhub.common.ResultCode;
 import com.techhub.dto.category.CategoryNoticeCreateRequest;
 import com.techhub.dto.category.CategoryNoticeUpdateRequest;
@@ -40,6 +42,25 @@ public class CategoryNoticeServiceImpl implements CategoryNoticeService {
 
         List<CategoryNotice> notices = categoryNoticeMapper.selectList(wrapper);
         return notices.stream().map(this::toVO).collect(Collectors.toList());
+    }
+
+    @Override
+    public PageResult<CategoryNoticeVO> getNoticePage(Integer type, int page, int size) {
+        LambdaQueryWrapper<CategoryNotice> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(CategoryNotice::getStatus, 1);
+        if (type != null) {
+            wrapper.eq(CategoryNotice::getType, type);
+        }
+        wrapper.orderByDesc(CategoryNotice::getIsPinned)
+                .orderByDesc(CategoryNotice::getCreateTime);
+
+        Page<CategoryNotice> mpPage = new Page<>(page, size);
+        Page<CategoryNotice> result = categoryNoticeMapper.selectPage(mpPage, wrapper);
+
+        List<CategoryNoticeVO> vos = result.getRecords().stream()
+                .map(this::toVO)
+                .collect(Collectors.toList());
+        return new PageResult<>(vos, result.getTotal(), result.getSize(), result.getCurrent());
     }
 
     @Override

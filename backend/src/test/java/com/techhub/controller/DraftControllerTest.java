@@ -218,6 +218,35 @@ class DraftControllerTest {
                 .andExpect(jsonPath("$.data.postId").value("99"));
     }
 
+    // ==================== GET /api/v1/drafts/{id} ====================
+
+    @Test
+    @DisplayName("getDraft — 草稿存在时返回草稿")
+    void getDraft_Exists_ReturnsDraft() throws Exception {
+        when(draftService.getById(100L)).thenReturn(mockDraft);
+
+        mockMvc.perform(get("/api/v1/drafts/100")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.data.id").value("100"))
+                .andExpect(jsonPath("$.data.title").value("Test Draft Title"))
+                .andExpect(jsonPath("$.data.content").value("Test draft content"));
+    }
+
+    @Test
+    @DisplayName("getDraft — 草稿不存在时返回 404")
+    void getDraft_NotFound_Returns404() throws Exception {
+        when(draftService.getById(999L))
+                .thenThrow(new BusinessException(ResultCode.NOT_FOUND, "草稿不存在"));
+
+        mockMvc.perform(get("/api/v1/drafts/999")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value(404))
+                .andExpect(jsonPath("$.message").value("草稿不存在"));
+    }
+
     // ==================== DELETE /api/v1/drafts/{id} ====================
 
     @Test

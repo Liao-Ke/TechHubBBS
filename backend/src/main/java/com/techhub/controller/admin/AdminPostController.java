@@ -20,8 +20,9 @@ public class AdminPostController {
     public R<PageResult<PostVO>> listAllPosts(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(required = false) String keyword) {
-        return R.ok(adminPostService.listAllPosts(page, size, keyword));
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long categoryId) {
+        return R.ok(adminPostService.listAllPosts(page, size, keyword, categoryId));
     }
 
     @PatchMapping("/{id}/type")

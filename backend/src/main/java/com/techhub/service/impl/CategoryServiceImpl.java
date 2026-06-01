@@ -25,11 +25,20 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<Category> listEnabled() {
-        return categoryMapper.selectList(
+        List<Category> categories = categoryMapper.selectList(
                 new LambdaQueryWrapper<Category>()
                         .eq(Category::getStatus, 1)
                         .orderByAsc(Category::getSortOrder)
         );
+        categories.forEach(cat -> {
+            Long count = postMapper.selectCount(
+                    new LambdaQueryWrapper<Post>()
+                            .eq(Post::getCategoryId, cat.getId())
+                            .eq(Post::getDeleted, 0)
+            );
+            cat.setPostCount(count.intValue());
+        });
+        return categories;
     }
 
     @Override

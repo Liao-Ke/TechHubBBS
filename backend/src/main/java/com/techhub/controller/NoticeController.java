@@ -1,5 +1,6 @@
 package com.techhub.controller;
 
+import com.techhub.common.PageResult;
 import com.techhub.common.R;
 import com.techhub.dto.category.CategoryNoticeCreateRequest;
 import com.techhub.dto.category.CategoryNoticeUpdateRequest;
@@ -34,6 +35,13 @@ public class NoticeController {
                                        @Valid @RequestBody CategoryNoticeCreateRequest request) {
         Long authorId = SecurityUtils.getCurrentUserId();
         return R.ok(noticeService.create(categoryId, request, authorId));
+    }
+
+    @GetMapping("/notices")
+    public R<PageResult<CategoryNoticeVO>> list(@RequestParam(required = false) Integer type,
+                                                 @RequestParam(defaultValue = "1") int page,
+                                                 @RequestParam(defaultValue = "20") int size) {
+        return R.ok(noticeService.getNoticePage(type, page, size));
     }
 
     @GetMapping("/notices/{id}")

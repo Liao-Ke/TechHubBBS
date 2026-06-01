@@ -9,9 +9,9 @@ import com.techhub.dto.post.PostVO;
 public interface AdminPostService {
 
     /**
-     * 分页查询所有帖子（无可见性过滤），支持关键词搜索。
+     * 分页查询所有帖子（无可见性过滤），支持关键词搜索和版块筛选。
      */
-    PageResult<PostVO> listAllPosts(int page, int size, String keyword);
+    PageResult<PostVO> listAllPosts(int page, int size, String keyword, Long categoryId);
 
     /**
      * 设置帖子类型（加精/置顶）。
