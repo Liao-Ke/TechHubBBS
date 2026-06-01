@@ -1,15 +1,15 @@
-import type { UserProfileVO } from './user'
-
 /**
  * Recommendation item (personalised "for you")
  */
 export interface RecommendationVO {
-  id: string
   postId: string
   title: string
-  summary: string
-  author: UserProfileVO
-  score: number
+  authorName: string
+  authorAvatar?: string
+  likeCount?: number
+  commentCount?: number
+  viewCount?: number
+  similarityScore: number | null
   reason: string
 }
 
@@ -17,8 +17,8 @@ export interface RecommendationVO {
  * Related post item (similarity-based)
  */
 export interface RelatedPostVO {
-  id: string
   postId: string
   title: string
-  similarity: number
+  authorName: string
+  similarityScore: number | null
 }

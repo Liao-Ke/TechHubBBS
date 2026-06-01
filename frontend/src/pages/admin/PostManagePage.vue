@@ -63,7 +63,7 @@ async function fetchPosts() {
     if (selectedCategoryId.value !== '') params.categoryId = selectedCategoryId.value
 
     const res = await adminApi.getPosts(params)
-    const data: PageResult<PostVO> = (res as unknown as { data: PageResult<PostVO> }).data
+    const data = res.data
     posts.value = data.records
     total.value = data.total
   } catch (e: unknown) {
@@ -80,7 +80,7 @@ async function fetchPosts() {
 async function fetchCategories() {
   try {
     const res = await categoryApi.getList()
-    categories.value = (res as unknown as { data: Category[] }).data
+    categories.value = res.data ?? []
   } catch {
     // Non-critical, silently fail
   }
@@ -248,10 +248,10 @@ onMounted(() => {
         <el-table-column label="作者" width="120">
           <template #default="{ row }: { row: PostVO }">
             <router-link
-              :to="`/users/${row.author.id}`"
+              :to="`/users/${row.authorId}`"
               class="post-manage__author-link"
             >
-              {{ row.author.username }}
+              {{ row.authorName }}
             </router-link>
           </template>
         </el-table-column>

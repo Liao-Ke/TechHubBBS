@@ -8,16 +8,10 @@ function makePost(overrides: Partial<PostVO> = {}): PostVO {
     id: '1',
     title: '测试帖子标题',
     content: '# Markdown content',
-    summary: '这是摘要内容',
-    author: {
-      id: 'u1',
-      username: 'testuser',
-      avatarUrl: 'https://example.com/avatar.jpg',
-      role: 'user',
-      status: 1,
-      createTime: '2026-01-01T00:00:00Z',
-    },
-    categoryId: 1,
+    authorId: 'u1',
+    authorName: 'testuser',
+    authorAvatar: 'https://example.com/avatar.jpg',
+    categoryId: '1',
     categoryName: '技术讨论',
     visibility: 0,
     type: 0,
@@ -25,10 +19,9 @@ function makePost(overrides: Partial<PostVO> = {}): PostVO {
     viewCount: 128,
     likeCount: 32,
     commentCount: 15,
-    favoriteCount: 3,
     divineCommentCount: 0,
-    isLiked: false,
-    isFavorited: false,
+    liked: false,
+    favorited: false,
     createTime: '2026-05-28T10:00:00Z',
     updateTime: '2026-05-28T10:00:00Z',
     ...overrides,
@@ -79,18 +72,8 @@ describe('PostCard.vue', () => {
       expect(link.attributes('href')).toBe('/posts/42')
     })
 
-    it('renders summary text', () => {
-      const wrapper = mountCard(makePost({ summary: '一段摘要' }))
-      expect(wrapper.find('.post-card__summary').text()).toContain('一段摘要')
-    })
-
-    it('does not render summary when not provided', () => {
-      const wrapper = mountCard(makePost({ summary: undefined }))
-      expect(wrapper.find('.post-card__summary').exists()).toBe(false)
-    })
-
     it('renders category tag with link', () => {
-      const wrapper = mountCard(makePost({ categoryId: 5, categoryName: '前端开发' }))
+      const wrapper = mountCard(makePost({ categoryId: '5', categoryName: '前端开发' }))
       const cat = wrapper.find('.post-card__category')
       expect(cat.text()).toBe('前端开发')
       expect(cat.attributes('href')).toBe('/categories/5')

@@ -1,5 +1,3 @@
-import type { UserProfileVO } from './user'
-
 /**
  * Post visibility: 0=public, 1=login-only, 2=followers-only, 3=private
  */
@@ -22,20 +20,20 @@ export interface PostVO {
   id: string
   title: string
   content: string
-  summary?: string
-  author: UserProfileVO
-  categoryId: number
+  authorId: string
+  authorName: string
+  authorAvatar?: string
+  categoryId: string
   categoryName: string
   visibility: PostVisibility
   type: PostType
-  status: PostStatus
+  status: number
   viewCount: number
   likeCount: number
   commentCount: number
-  favoriteCount: number
   divineCommentCount: number
-  isLiked: boolean
-  isFavorited: boolean
+  liked: boolean
+  favorited: boolean
   createTime: string
   updateTime: string
 }

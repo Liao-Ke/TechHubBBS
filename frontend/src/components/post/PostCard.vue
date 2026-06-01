@@ -46,11 +46,11 @@ function stripMarkdown(md: string): string {
     <header class="post-card__header">
       <div class="post-card__author">
         <UserAvatar
-          :src="post.author.avatarUrl"
+          :src="post.authorAvatar"
           :size="32"
           class="post-card__avatar"
         />
-        <span class="post-card__username">{{ post.author.username }}</span>
+        <span class="post-card__username">{{ post.authorName }}</span>
         <span class="post-card__time">{{ formatRelativeTime(post.createTime) }}</span>
       </div>
       <div class="post-card__badges">
@@ -73,8 +73,6 @@ function stripMarkdown(md: string): string {
       </router-link>
     </h3>
 
-    <!-- Summary (optional) -->
-    <p v-if="post.summary" class="post-card__summary">{{ stripMarkdown(post.summary) }}</p>
 
     <!-- Footer: category + stats -->
     <footer class="post-card__footer">

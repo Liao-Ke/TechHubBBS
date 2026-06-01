@@ -8,6 +8,8 @@ const mockStore = {
   token: null as string | null,
   role: 'USER' as string,
   isLoggedIn: false,
+  userInfo: null as { id: string; username: string; role: string } | null,
+  fetchUserInfo: vi.fn(),
 }
 
 vi.mock('@/stores/user', () => ({
@@ -69,6 +71,8 @@ describe('Navigation guards', () => {
     mockStore.token = null
     mockStore.role = 'USER'
     mockStore.isLoggedIn = false
+    mockStore.userInfo = null
+    mockStore.fetchUserInfo = vi.fn().mockResolvedValue(undefined)
   })
 
   describe('unauthenticated users', () => {
@@ -106,6 +110,7 @@ describe('Navigation guards', () => {
     beforeEach(() => {
       mockStore.token = 'valid-token'
       mockStore.isLoggedIn = true
+      mockStore.userInfo = { id: '1', username: 'test', role: 'USER' }
     })
 
     it('redirects from /login to /', async () => {
@@ -135,6 +140,7 @@ describe('Navigation guards', () => {
       mockStore.token = 'valid-token'
       mockStore.isLoggedIn = true
       mockStore.role = 'USER'
+      mockStore.userInfo = { id: '1', username: 'test', role: 'USER' }
 
       const router = createTestRouter()
       await router.push('/admin')
@@ -146,6 +152,7 @@ describe('Navigation guards', () => {
       mockStore.token = 'valid-token'
       mockStore.isLoggedIn = true
       mockStore.role = 'MODERATOR'
+      mockStore.userInfo = { id: '2', username: 'mod', role: 'MODERATOR' }
 
       const router = createTestRouter()
       await router.push('/admin')
@@ -157,6 +164,7 @@ describe('Navigation guards', () => {
       mockStore.token = 'valid-token'
       mockStore.isLoggedIn = true
       mockStore.role = 'ADMIN'
+      mockStore.userInfo = { id: '3', username: 'admin', role: 'ADMIN' }
 
       const router = createTestRouter()
       await router.push('/admin')

@@ -1,5 +1,3 @@
-import type { UserProfileVO } from './user'
-
 /**
  * Comment item shape used in admin comment listing.
  * Backend returns flat username/avatarUrl/postTitle/divineTime fields.
@@ -25,14 +23,16 @@ export interface AdminCommentItem {
 export interface CommentVO {
   id: string
   postId: string
-  author: UserProfileVO
   content: string
-  parentId: string | null
-  replyTo: string | null
+  userId: string
+  username: string
+  avatarUrl?: string
+  parentId: number | null
+  replyToUserId: number | null
   likeCount: number
   recommendCount: number
   isDivine: boolean
-  isLiked: boolean
+  liked: boolean
   createTime: string
   divineTime?: string
   postTitle?: string

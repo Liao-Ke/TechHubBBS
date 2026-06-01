@@ -3,7 +3,7 @@ import { useUserStore } from '@/stores/user'
 import { usePermission } from '@/composables/usePermission'
 
 export function setupRouterGuards(router: Router) {
-  router.beforeEach((to, _from, next) => {
+  router.beforeEach(async (to, _from, next) => {
     // Set document title
     document.title = to.meta.title ? `${to.meta.title} - TechHub` : 'TechHub'
 
@@ -22,6 +22,16 @@ export function setupRouterGuards(router: Router) {
     // Check authentication
     if (to.meta.requiresAuth && !userStore.isLoggedIn) {
       return next({ path: '/login', query: { redirect: to.fullPath } })
+    }
+
+    // Fetch user info if logged in but info not loaded (page refresh scenario)
+    if (userStore.isLoggedIn && !userStore.userInfo) {
+      await userStore.fetchUserInfo()
+      // If fetchUserInfo fails, it calls logout() which clears token
+      // Re-check authentication after fetch
+      if (!userStore.isLoggedIn) {
+        return next({ path: '/login', query: { redirect: to.fullPath } })
+      }
     }
 
     // Check role requirements

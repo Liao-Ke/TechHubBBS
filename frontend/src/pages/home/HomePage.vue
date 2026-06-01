@@ -194,18 +194,18 @@ function reasonTheme(reason: string): '' | 'primary' | 'success' | 'warning' | '
           <TransitionGroup name="card-stagger">
             <article
               v-for="rec in recPosts"
-              :key="rec.id"
+              :key="rec.postId"
               class="rec-card"
             >
               <!-- Header: avatar + username + reason badge -->
               <header class="rec-card__header">
                 <div class="rec-card__author">
                   <UserAvatar
-                    :src="rec.author.avatarUrl"
+                    :src="rec.authorAvatar"
                     :size="28"
                     class="rec-card__avatar"
                   />
-                  <span class="rec-card__username">{{ rec.author.username }}</span>
+                  <span class="rec-card__username">{{ rec.authorName }}</span>
                   <el-tag
                     :type="reasonTheme(rec.reason)"
                     size="small"
@@ -224,8 +224,6 @@ function reasonTheme(reason: string): '' | 'primary' | 'success' | 'warning' | '
                 </router-link>
               </h3>
 
-              <!-- Summary -->
-              <p v-if="rec.summary" class="rec-card__summary">{{ rec.summary }}</p>
             </article>
           </TransitionGroup>
 

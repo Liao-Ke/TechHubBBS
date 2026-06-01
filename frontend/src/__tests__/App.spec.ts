@@ -1,17 +1,52 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeAll } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createRouter, createWebHistory } from 'vue-router'
 import { createPinia } from 'pinia'
+
+beforeAll(() => {
+  const store: Record<string, string> = {}
+  Object.defineProperty(globalThis, 'localStorage', {
+    value: {
+      getItem: (key: string) => store[key] ?? null,
+      setItem: (key: string, value: string) => { store[key] = value },
+      removeItem: (key: string) => { delete store[key] },
+      clear: () => { Object.keys(store).forEach((k) => delete store[k]) },
+    },
+    writable: true,
+  })
+})
+
+vi.mock('@/stores/user', () => ({
+  useUserStore: () => ({
+    isLoggedIn: false,
+    userInfo: null,
+    token: null,
+    role: 'USER',
+    fetchUserInfo: vi.fn(),
+    logout: vi.fn(),
+  }),
+}))
+
+vi.mock('@/stores/notification', () => ({
+  useNotificationStore: () => ({
+    fetchUnreadCount: vi.fn(),
+  }),
+}))
+
+vi.mock('@/layouts/DefaultLayout.vue', () => ({
+  default: {
+    name: 'DefaultLayout',
+    template: '<div class="default-layout"><slot /></div>',
+  },
+}))
+
 import App from '../App.vue'
 
-/**
- * Helper: create a test router with a catch-all route so RouterView renders content.
- */
 function createTestRouter() {
   return createRouter({
     history: createWebHistory(),
     routes: [
-      { path: '/:pathMatch(.*)*', name: 'fallback', component: { template: '<div>page-content</div>' } },
+      { path: '/:pathMatch(.*)*', name: 'fallback', meta: { layout: 'default' }, component: { template: '<div class="page-content">page-content</div>' } },
     ],
   })
 }
@@ -63,9 +98,9 @@ describe('App.vue', () => {
 
     await router.isReady()
 
-    const transition = wrapper.findComponent({ name: 'Transition' })
-    expect(transition.exists()).toBe(true)
-    expect(transition.attributes('name')).toBe('page-fade')
-    expect(transition.attributes('mode')).toBe('out-in')
+    const transitions = wrapper.findAllComponents({ name: 'Transition' })
+    const pageFade = transitions.find((t) => t.attributes('name') === 'page-fade')
+    expect(pageFade).toBeDefined()
+    expect(pageFade!.attributes('mode')).toBe('out-in')
   })
 })

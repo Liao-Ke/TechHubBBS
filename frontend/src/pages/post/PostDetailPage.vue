@@ -49,10 +49,9 @@ const errorCode = ref<number | null>(null)
 
 // Post
 const post = ref<PostVO | null>(null)
-const isLiked = ref(false)
-const isFavorited = ref(false)
+const liked = ref(false)
+const favorited = ref(false)
 const likeCount = ref(0)
-const favoriteCount = ref(0)
 
 // Divine comments
 const divineComments = ref<CommentVO[]>([])
@@ -86,7 +85,7 @@ const relatedLoading = ref(false)
 // ---------------------------------------------------------------------------
 const isAuthor = computed(() => {
   if (!post.value || !userStore.userInfo) return false
-  return post.value.author.id === userStore.userInfo.id
+  return post.value.authorId === userStore.userInfo.id
 })
 
 const contentLongEnough = computed(() => {
@@ -102,10 +101,9 @@ async function fetchPost() {
   try {
     const res = await postApi.getDetail(postId.value)
     post.value = res.data
-    isLiked.value = res.data.isLiked
-    isFavorited.value = res.data.isFavorited
+    liked.value = res.data.liked
+    favorited.value = res.data.favorited
     likeCount.value = res.data.likeCount
-    favoriteCount.value = res.data.favoriteCount
     document.title = res.data.title + ' - TechHub'
   } catch (err: unknown) {
     if (err instanceof ApiError) {
@@ -247,9 +245,9 @@ async function handleLike() {
     ElMessage.warning('请先登录')
     return
   }
-  const currentLiked = isLiked.value
+  const currentLiked = liked.value
   // Optimistic update
-  isLiked.value = !currentLiked
+  liked.value = !currentLiked
   likeCount.value += currentLiked ? -1 : 1
   try {
     if (currentLiked) {
@@ -259,7 +257,7 @@ async function handleLike() {
     }
   } catch {
     // Rollback on failure
-    isLiked.value = currentLiked
+    liked.value = currentLiked
     likeCount.value += currentLiked ? 1 : -1
   }
 }
@@ -269,9 +267,8 @@ async function handleFavorite() {
     ElMessage.warning('请先登录')
     return
   }
-  const currentFavorited = isFavorited.value
-  isFavorited.value = !currentFavorited
-  favoriteCount.value += currentFavorited ? -1 : 1
+  const currentFavorited = favorited.value
+  favorited.value = !currentFavorited
   try {
     if (currentFavorited) {
       await postApi.unfavorite(postId.value)
@@ -279,8 +276,8 @@ async function handleFavorite() {
       await postApi.favorite(postId.value)
     }
   } catch {
-    isFavorited.value = currentFavorited
-    favoriteCount.value += currentFavorited ? 1 : -1
+    // Rollback on failure
+    favorited.value = currentFavorited
   }
 }
 
@@ -390,12 +387,12 @@ onMounted(async () => {
 
         <div class="post-detail__meta">
           <div class="post-detail__author">
-            <router-link :to="`/users/${post.author.id}`" class="post-detail__author-link">
+            <router-link :to="`/users/${post.authorId}`" class="post-detail__author-link">
               <UserAvatar
-                :src="post.author.avatarUrl"
+                :src="post.authorAvatar"
                 :size="40"
               />
-              <span class="post-detail__username">{{ post.author.username }}</span>
+              <span class="post-detail__username">{{ post.authorName }}</span>
             </router-link>
             <span class="post-detail__time">{{ formatRelativeTime(post.createTime) }}</span>
           </div>
@@ -454,13 +451,13 @@ onMounted(async () => {
         <div class="post-detail__actions-left">
           <!-- Like -->
           <el-button
-            :type="isLiked ? 'danger' : 'default'"
-            :plain="!isLiked"
+            :type="liked ? 'danger' : 'default'"
+            :plain="!liked"
             :icon="Star"
             size="default"
             @click="handleLike"
           >
-            {{ isLiked ? '已赞' : '点赞' }}
+            {{ liked ? '已赞' : '点赞' }}
             <span v-if="likeCount > 0" class="post-detail__action-count">
               {{ formatNumber(likeCount) }}
             </span>
@@ -468,16 +465,13 @@ onMounted(async () => {
 
           <!-- Favorite -->
           <el-button
-            :type="isFavorited ? 'warning' : 'default'"
-            :plain="!isFavorited"
+            :type="favorited ? 'warning' : 'default'"
+            :plain="!favorited"
             :icon="Promotion"
             size="default"
             @click="handleFavorite"
           >
-            {{ isFavorited ? '已收藏' : '收藏' }}
-            <span v-if="favoriteCount > 0" class="post-detail__action-count">
-              {{ formatNumber(favoriteCount) }}
-            </span>
+            {{ favorited ? '已收藏' : '收藏' }}
           </el-button>
 
           <!-- Share -->
@@ -539,12 +533,12 @@ onMounted(async () => {
           >
             <div class="post-detail__divine-item-author">
               <router-link
-                :to="`/users/${comment.author.id}`"
+                :to="`/users/${comment.userId}`"
                 class="post-detail__divine-item-user"
               >
-                <UserAvatar :src="comment.author.avatarUrl" :size="28" />
+                <UserAvatar :src="comment.avatarUrl" :size="28" />
                 <span class="post-detail__divine-item-username">
-                  {{ comment.author.username }}
+                  {{ comment.username }}
                 </span>
               </router-link>
               <span class="post-detail__divine-item-time">
@@ -672,12 +666,12 @@ onMounted(async () => {
             <!-- Comment header -->
             <div class="post-detail__comment-header">
               <router-link
-                :to="`/users/${comment.author.id}`"
+                :to="`/users/${comment.userId}`"
                 class="post-detail__comment-user"
               >
-                <UserAvatar :src="comment.author.avatarUrl" :size="32" />
+                <UserAvatar :src="comment.avatarUrl" :size="32" />
                 <span class="post-detail__comment-username">
-                  {{ comment.author.username }}
+                  {{ comment.username }}
                 </span>
               </router-link>
               <div class="post-detail__comment-badges">
@@ -751,12 +745,12 @@ onMounted(async () => {
               >
                 <div class="post-detail__comment-child-header">
                   <router-link
-                    :to="`/users/${child.author.id}`"
+                    :to="`/users/${child.userId}`"
                     class="post-detail__comment-child-user"
                   >
-                    <UserAvatar :src="child.author.avatarUrl" :size="24" />
+                    <UserAvatar :src="child.avatarUrl" :size="24" />
                     <span class="post-detail__comment-child-username">
-                      {{ child.author.username }}
+                      {{ child.username }}
                     </span>
                   </router-link>
                   <span class="post-detail__comment-child-time">
@@ -808,7 +802,7 @@ onMounted(async () => {
         <div class="post-detail__related-scroll">
           <div
             v-for="related in relatedPosts"
-            :key="related.id"
+            :key="related.postId"
             class="post-detail__related-card"
           >
             <router-link
@@ -819,7 +813,7 @@ onMounted(async () => {
                 {{ related.title }}
               </h4>
               <span class="post-detail__related-similarity">
-                相似度 {{ (related.similarity * 100).toFixed(0) }}%
+                相似度 {{ (related.similarityScore * 100).toFixed(0) }}%
               </span>
             </router-link>
           </div>

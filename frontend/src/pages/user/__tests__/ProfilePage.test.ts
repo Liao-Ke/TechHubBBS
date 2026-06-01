@@ -61,6 +61,9 @@ function makeUser(overrides: Partial<UserProfileVO> = {}): UserProfileVO {
     role: overrides.role ?? 'user',
     status: overrides.status ?? 1,
     createTime: overrides.createTime ?? '2026-01-01T00:00:00Z',
+    postCount: overrides.postCount,
+    followerCount: overrides.followerCount,
+    followingCount: overrides.followingCount,
   }
 }
 
@@ -69,16 +72,10 @@ function makePostVO(overrides: Partial<PostVO> = {}): PostVO {
     id: overrides.id ?? 'post-1',
     title: overrides.title ?? '测试帖子',
     content: '帖子内容...',
-    author: {
-      id: 'user-1',
-      username: '测试用户',
-      avatarUrl: undefined,
-      bio: undefined,
-      role: 'user',
-      status: 1,
-      createTime: '2026-01-01T00:00:00Z',
-    },
-    categoryId: 1,
+    authorId: 'user-1',
+    authorName: '测试用户',
+    authorAvatar: undefined,
+    categoryId: '1',
     categoryName: 'Java',
     visibility: 0,
     type: 0,
@@ -86,10 +83,9 @@ function makePostVO(overrides: Partial<PostVO> = {}): PostVO {
     viewCount: 100,
     likeCount: 10,
     commentCount: 3,
-    favoriteCount: 2,
     divineCommentCount: 0,
-    isLiked: false,
-    isFavorited: false,
+    liked: false,
+    favorited: false,
     createTime: '2026-01-01T00:00:00Z',
     updateTime: '2026-01-01T00:00:00Z',
     ...overrides,
@@ -155,11 +151,9 @@ describe('ProfilePage', () => {
     })
 
     it('renders stats row (帖子 / 关注 / 粉丝)', async () => {
-      const user = makeUser({ username: '测试' })
-      ;(user as any).postCount = 42
-      ;(user as any).followerCount = 15
-      ;(user as any).followingCount = 8
-      mockGetById.mockResolvedValue({ data: user })
+      mockGetById.mockResolvedValue({
+        data: makeUser({ username: '测试', postCount: 42, followerCount: 15, followingCount: 8 }),
+      })
       mockGetUserPosts.mockResolvedValue({
         data: { records: [], total: 0, size: 10, current: 1, pages: 0 },
       })

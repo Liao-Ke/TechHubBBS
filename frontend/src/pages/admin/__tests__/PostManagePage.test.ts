@@ -56,17 +56,10 @@ function makePostVO(overrides: Partial<PostVO> = {}): PostVO {
     id: overrides.id ?? '1840000000000000001',
     title: overrides.title ?? '测试帖子标题',
     content: '帖子正文...',
-    summary: '摘要...',
-    author: {
-      id: '1840000000000000002',
-      username: 'testuser',
-      avatarUrl: undefined,
-      bio: undefined,
-      role: 'user',
-      status: 1,
-      createTime: '2026-01-01T00:00:00Z',
-    },
-    categoryId: 1,
+    authorId: '1840000000000000002',
+    authorName: 'testuser',
+    authorAvatar: undefined,
+    categoryId: '1',
     categoryName: 'Java',
     visibility: 0,
     type: 0,
@@ -74,10 +67,9 @@ function makePostVO(overrides: Partial<PostVO> = {}): PostVO {
     viewCount: 100,
     likeCount: 20,
     commentCount: 5,
-    favoriteCount: 3,
     divineCommentCount: 1,
-    isLiked: false,
-    isFavorited: false,
+    liked: false,
+    favorited: false,
     createTime: '2026-05-28T10:00:00Z',
     updateTime: '2026-05-28T10:00:00Z',
     ...overrides,
@@ -338,7 +330,8 @@ describe('PostManagePage', () => {
 
     it('renders author as link to user profile', async () => {
       mockGetPosts.mockResolvedValue(makePageResult([makePostVO({
-        author: { id: 'u1', username: 'author1', avatarUrl: undefined, bio: undefined, role: 'user', status: 1, createTime: '' },
+        authorId: 'u1',
+        authorName: 'author1',
       })]))
 
       const { wrapper } = await mountPage()
