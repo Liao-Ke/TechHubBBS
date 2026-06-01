@@ -14,6 +14,7 @@ import com.techhub.mapper.UserLikeMapper;
 import com.techhub.security.SecurityUtils;
 import com.techhub.service.DivineCommentService;
 import com.techhub.service.InteractionService;
+import com.techhub.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
@@ -30,6 +31,7 @@ public class InteractionServiceImpl implements InteractionService {
     private final PostMapper postMapper;
     private final CommentMapper commentMapper;
     private final DivineCommentService divineCommentService;
+    private final NotificationService notificationService;
 
     // ==================== 帖子点赞 ====================
 
@@ -58,6 +60,14 @@ public class InteractionServiceImpl implements InteractionService {
 
         post.setLikeCount(post.getLikeCount() + 1);
         postMapper.updateById(post);
+
+        try {
+            if (!userId.equals(post.getAuthorId())) {
+                notificationService.create(post.getAuthorId(), "LIKE", postId, "赞了你的帖子");
+            }
+        } catch (Exception e) {
+            log.warn("创建帖子点赞通知失败: postId={}, error={}", postId, e.getMessage());
+        }
     }
 
     @Override
@@ -152,6 +162,14 @@ public class InteractionServiceImpl implements InteractionService {
         comment.setLikeCount(comment.getLikeCount() + 1);
         divineCommentService.checkAndUpdateDivineStatus(comment);
         commentMapper.updateById(comment);
+
+        try {
+            if (!userId.equals(comment.getUserId())) {
+                notificationService.create(comment.getUserId(), "LIKE", commentId, "赞了你的评论");
+            }
+        } catch (Exception e) {
+            log.warn("创建评论点赞通知失败: commentId={}, error={}", commentId, e.getMessage());
+        }
     }
 
     @Override

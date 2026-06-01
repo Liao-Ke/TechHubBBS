@@ -18,14 +18,17 @@ import com.techhub.mapper.UserLikeMapper;
 import com.techhub.mapper.UserMapper;
 import com.techhub.security.SecurityUtils;
 import com.techhub.service.CommentService;
+import com.techhub.service.NotificationService;
 import com.techhub.service.PostVisibilityService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CommentServiceImpl implements CommentService {
@@ -35,6 +38,7 @@ public class CommentServiceImpl implements CommentService {
     private final UserMapper userMapper;
     private final UserLikeMapper userLikeMapper;
     private final PostVisibilityService postVisibilityService;
+    private final NotificationService notificationService;
 
     @Override
     public PageResult<CommentVO> listByPost(Long postId, int page, int size, Long currentUserId) {
@@ -101,6 +105,15 @@ public class CommentServiceImpl implements CommentService {
         // 帖子评论数 +1
         post.setCommentCount(post.getCommentCount() + 1);
         postMapper.updateById(post);
+
+        // 通知帖子作者（评论者不是帖子作者本人时）
+        try {
+            if (!userId.equals(post.getAuthorId())) {
+                notificationService.create(post.getAuthorId(), "REPLY", comment.getId(), "回复了你的帖子");
+            }
+        } catch (Exception e) {
+            log.warn("创建回复通知失败: postId={}, commentId={}, error={}", postId, comment.getId(), e.getMessage());
+        }
 
         return toCommentVO(comment, userId);
     }

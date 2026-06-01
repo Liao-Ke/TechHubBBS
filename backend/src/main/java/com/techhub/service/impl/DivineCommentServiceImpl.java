@@ -14,7 +14,9 @@ import com.techhub.mapper.PostMapper;
 import com.techhub.mapper.UserMapper;
 import com.techhub.security.SecurityUtils;
 import com.techhub.service.DivineCommentService;
+import com.techhub.service.NotificationService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DivineCommentServiceImpl implements DivineCommentService {
@@ -30,6 +33,7 @@ public class DivineCommentServiceImpl implements DivineCommentService {
     private final CommentRecommendMapper commentRecommendMapper;
     private final PostMapper postMapper;
     private final UserMapper userMapper;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -154,6 +158,12 @@ public class DivineCommentServiceImpl implements DivineCommentService {
         if (post != null) {
             post.setDivineCommentCount(post.getDivineCommentCount() == null ? 1 : post.getDivineCommentCount() + 1);
             postMapper.updateById(post);
+        }
+
+        try {
+            notificationService.create(comment.getUserId(), "DIVINE", comment.getId(), "你的评论被推荐为神评");
+        } catch (Exception e) {
+            log.warn("创建神评通知失败: commentId={}, error={}", comment.getId(), e.getMessage());
         }
     }
 

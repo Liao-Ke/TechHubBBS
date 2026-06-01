@@ -8,11 +8,14 @@ import com.techhub.common.ResultCode;
 import com.techhub.dto.user.FollowStatusVO;
 import com.techhub.dto.user.UserProfileVO;
 import com.techhub.entity.Follow;
+import com.techhub.entity.Notification;
 import com.techhub.entity.User;
 import com.techhub.mapper.FollowMapper;
+import com.techhub.mapper.NotificationMapper;
 import com.techhub.mapper.UserMapper;
 import com.techhub.security.SecurityUtils;
 import com.techhub.service.FollowService;
+import com.techhub.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
@@ -32,6 +35,8 @@ public class FollowServiceImpl implements FollowService {
 
     private final FollowMapper followMapper;
     private final UserMapper userMapper;
+    private final NotificationMapper notificationMapper;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -53,6 +58,19 @@ public class FollowServiceImpl implements FollowService {
         } catch (DuplicateKeyException e) {
             log.debug("用户 {} 已关注 {}", userId, followeeId);
             throw new BusinessException(ResultCode.CONFLICT, "已关注该用户");
+        }
+
+        try {
+            Long count = notificationMapper.selectCount(
+                    new LambdaQueryWrapper<Notification>()
+                            .eq(Notification::getUserId, followeeId)
+                            .eq(Notification::getType, "FOLLOW")
+                            .eq(Notification::getSourceId, userId));
+            if (count == null || count == 0) {
+                notificationService.create(followeeId, "FOLLOW", userId, "关注了你");
+            }
+        } catch (Exception e) {
+            log.warn("创建关注通知失败: followerId={}, followeeId={}, error={}", userId, followeeId, e.getMessage());
         }
     }
 

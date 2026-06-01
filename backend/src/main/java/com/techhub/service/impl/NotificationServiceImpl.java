@@ -11,11 +11,14 @@ import com.techhub.entity.Notification;
 import com.techhub.mapper.NotificationMapper;
 import com.techhub.service.NotificationService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
@@ -70,6 +73,18 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public int getUnreadCount(Long userId) {
         return notificationMapper.selectUnreadCount(userId);
+    }
+
+    @Override
+    public void create(Long userId, String type, Long sourceId, String content) {
+        Notification notification = new Notification();
+        notification.setUserId(userId);
+        notification.setType(type);
+        notification.setSourceId(sourceId);
+        notification.setContent(content);
+        notification.setIsRead(0);
+        notification.setCreateTime(LocalDateTime.now());
+        notificationMapper.insert(notification);
     }
 
     // --- 私有辅助方法 -------------------------------------------------------
