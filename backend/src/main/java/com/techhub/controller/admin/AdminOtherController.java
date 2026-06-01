@@ -3,6 +3,7 @@ package com.techhub.controller.admin;
 import com.techhub.common.PageResult;
 import com.techhub.common.R;
 import com.techhub.dto.category.CategoryNoticeVO;
+import com.techhub.dto.comment.CommentVO;
 import com.techhub.service.AdminOtherService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,6 +21,15 @@ public class AdminOtherController {
     public R<Void> forceSetDivine(@PathVariable Long id, @RequestParam boolean divine) {
         adminOtherService.forceSetDivine(id, divine);
         return R.ok(divine ? "已强制设置为神评" : "已取消神评");
+    }
+
+    @GetMapping("/comments")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR')")
+    public R<PageResult<CommentVO>> listComments(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String keyword) {
+        return R.ok(adminOtherService.listComments(page, size, keyword));
     }
 
     @GetMapping("/notices")

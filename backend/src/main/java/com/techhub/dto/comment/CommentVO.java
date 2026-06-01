@@ -11,6 +11,7 @@ public class CommentVO {
     private String userId;
     private String username;           // joined from user
     private String avatarUrl;          // joined from user
+    private String postTitle;          // joined from post (admin view)
     private Long parentId;
     private Long replyToUserId;
     private Integer likeCount;

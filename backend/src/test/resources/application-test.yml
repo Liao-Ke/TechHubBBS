@@ -1,7 +1,7 @@
 # Test profile — H2 embedded database, disabled Redis
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
+    url: jdbc:h2:mem:testdb;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1;NON_KEYWORDS=USER
     driver-class-name: org.h2.Driver
     username: sa
     password:
@@ -16,6 +16,16 @@ spring:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: Asia/Shanghai
     default-property-inclusion: non_null
+
+jwt:
+  secret: dGVzdC1zZWNyZXQta2V5LWZvci1qd3QtdG9rZW4tZ2VuZXJhdGlvbi1tdXN0LWJlLWF0LWxlYXN0LTI1Ni1iaXRzLWxvbmctZW5vdWdo
+  expiration: 3600000
+
+ai:
+  provider: mock
+  api-key: test-key
+  api-url: http://localhost:9999
+  model: test-model
 
 dromara:
   x-file-storage:

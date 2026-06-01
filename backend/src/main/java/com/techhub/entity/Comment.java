@@ -30,4 +30,16 @@ public class Comment {
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
+
+    /** Transient: joined from post table (admin comment listing) */
+    @TableField(exist = false)
+    private String postTitle;
+
+    /** Transient: joined from user table (admin comment listing) */
+    @TableField(exist = false)
+    private String username;
+
+    /** Transient: joined from user table (admin comment listing) */
+    @TableField(exist = false)
+    private String avatarUrl;
 }
