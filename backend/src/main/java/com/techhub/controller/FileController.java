@@ -9,6 +9,7 @@ import org.dromara.x.file.storage.core.FileStorageService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -24,7 +25,7 @@ public class FileController {
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024;
 
     @PostMapping("/upload")
-    public R<Map<String, String>> uploadFile(
+    public R<Map<String, Object>> uploadFile(
             @RequestParam("file") MultipartFile file,
             @RequestParam("objectType") String objectType) {
         if (!SecurityUtils.isAuthenticated()) {
@@ -61,6 +62,10 @@ public class FileController {
                 .setPath(objectType + "/")
                 .upload();
 
-        return R.ok(Map.of("url", fileInfo.getUrl()));
+        Map<String, Object> result = new HashMap<>();
+        result.put("url", fileInfo.getUrl());
+        result.put("filename", fileInfo.getFilename());
+        result.put("size", fileInfo.getSize());
+        return R.ok(result);
     }
 }

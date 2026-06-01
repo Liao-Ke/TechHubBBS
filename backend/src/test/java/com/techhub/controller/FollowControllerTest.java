@@ -1,8 +1,10 @@
 package com.techhub.controller;
 
 import com.techhub.common.BusinessException;
+import com.techhub.common.PageResult;
 import com.techhub.common.ResultCode;
 import com.techhub.dto.user.FollowStatusVO;
+import com.techhub.dto.user.UserProfileVO;
 import com.techhub.security.JwtTokenProvider;
 import com.techhub.service.FollowService;
 import org.junit.jupiter.api.AfterEach;
@@ -149,5 +151,79 @@ class FollowControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.data.following").value(false));
+    }
+
+    // ==================== GET /api/v1/users/{id}/followers ====================
+
+    @Test
+    @DisplayName("getFollowers — 返回粉丝列表")
+    void getFollowers() throws Exception {
+        UserProfileVO vo = new UserProfileVO();
+        vo.setId("2");
+        vo.setUsername("follower1");
+        vo.setAvatarUrl("https://example.com/avatar.png");
+        vo.setBio("bio");
+        vo.setRole("USER");
+        vo.setStatus(1);
+        when(followService.getFollowers(1L, 1, 20))
+                .thenReturn(new PageResult<>(List.of(vo), 1, 20, 1));
+
+        mockMvc.perform(get("/api/v1/users/1/followers")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.data.records[0].username").value("follower1"))
+                .andExpect(jsonPath("$.data.total").value(1))
+                .andExpect(jsonPath("$.data.current").value(1));
+    }
+
+    @Test
+    @DisplayName("getFollowers — 空粉丝列表")
+    void getFollowersEmpty() throws Exception {
+        when(followService.getFollowers(1L, 1, 20))
+                .thenReturn(new PageResult<>(List.of(), 0, 20, 1));
+
+        mockMvc.perform(get("/api/v1/users/1/followers")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.data.records").isEmpty())
+                .andExpect(jsonPath("$.data.total").value(0));
+    }
+
+    // ==================== GET /api/v1/users/{id}/followings ====================
+
+    @Test
+    @DisplayName("getFollowings — 返回关注列表")
+    void getFollowings() throws Exception {
+        UserProfileVO vo = new UserProfileVO();
+        vo.setId("3");
+        vo.setUsername("followee1");
+        vo.setRole("USER");
+        vo.setStatus(1);
+        when(followService.getFollowings(1L, 1, 20))
+                .thenReturn(new PageResult<>(List.of(vo), 1, 20, 1));
+
+        mockMvc.perform(get("/api/v1/users/1/followings")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.data.records[0].username").value("followee1"))
+                .andExpect(jsonPath("$.data.total").value(1))
+                .andExpect(jsonPath("$.data.current").value(1));
+    }
+
+    @Test
+    @DisplayName("getFollowings — 空关注列表")
+    void getFollowingsEmpty() throws Exception {
+        when(followService.getFollowings(99L, 1, 20))
+                .thenReturn(new PageResult<>(List.of(), 0, 20, 1));
+
+        mockMvc.perform(get("/api/v1/users/99/followings")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.data.records").isEmpty())
+                .andExpect(jsonPath("$.data.total").value(0));
     }
 }

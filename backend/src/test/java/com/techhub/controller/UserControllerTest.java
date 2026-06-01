@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.techhub.common.BusinessException;
 import com.techhub.common.PageResult;
 import com.techhub.common.ResultCode;
+import com.techhub.dto.auth.PasswordChangeRequest;
 import com.techhub.dto.post.PostListQuery;
 import com.techhub.dto.post.PostVO;
 import com.techhub.dto.user.UserDetailVO;
@@ -31,6 +32,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -180,5 +182,85 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.data.records").exists())
                 .andExpect(jsonPath("$.data.records[0].id").value("100"))
                 .andExpect(jsonPath("$.data.total").value(1));
+    }
+
+    // ==================== PATCH /users/me/password ====================
+
+    @Test
+    @DisplayName("changePassword — 修改密码成功")
+    void changePassword_Success() throws Exception {
+        PasswordChangeRequest request = new PasswordChangeRequest();
+        request.setOldPassword("oldPass123");
+        request.setNewPassword("newPass456");
+
+        doNothing().when(userService).changePassword(eq(1L), eq("oldPass123"), eq("newPass456"));
+
+        mockMvc.perform(patch("/api/v1/users/me/password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.message").value("密码修改成功"));
+    }
+
+    @Test
+    @DisplayName("changePassword — 原密码错误返回 400")
+    void changePassword_WrongOldPassword_Returns400() throws Exception {
+        PasswordChangeRequest request = new PasswordChangeRequest();
+        request.setOldPassword("wrongOld");
+        request.setNewPassword("newPass456");
+
+        doThrow(new BusinessException(ResultCode.BAD_REQUEST, "原密码不正确"))
+                .when(userService).changePassword(eq(1L), eq("wrongOld"), eq("newPass456"));
+
+        mockMvc.perform(patch("/api/v1/users/me/password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(400))
+                .andExpect(jsonPath("$.message").value("原密码不正确"));
+    }
+
+    // ==================== GET /users/me/favorites ====================
+
+    @Test
+    @DisplayName("getFavorites — 返回分页收藏列表")
+    void getFavorites_ReturnsPaginated() throws Exception {
+        PostVO post = new PostVO();
+        post.setId("200");
+        post.setTitle("Favorited Post");
+        post.setAuthorId("1");
+        post.setCreateTime(LocalDateTime.now());
+
+        PageResult<PostVO> pageResult = PageResult.of(List.of(post), 1, 10, 1);
+
+        when(userService.getFavorites(eq(1L), anyInt(), anyInt())).thenReturn(pageResult);
+
+        mockMvc.perform(get("/api/v1/users/me/favorites")
+                        .param("page", "1")
+                        .param("size", "10")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.data.records").exists())
+                .andExpect(jsonPath("$.data.records[0].id").value("200"))
+                .andExpect(jsonPath("$.data.total").value(1));
+    }
+
+    @Test
+    @DisplayName("getFavorites — 收藏为空时返回空列表")
+    void getFavorites_Empty_ReturnsEmptyList() throws Exception {
+        PageResult<PostVO> emptyResult = PageResult.of(List.of(), 0, 10, 1);
+
+        when(userService.getFavorites(eq(1L), anyInt(), anyInt())).thenReturn(emptyResult);
+
+        mockMvc.perform(get("/api/v1/users/me/favorites")
+                        .param("page", "1")
+                        .param("size", "10")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.data.records").isEmpty())
+                .andExpect(jsonPath("$.data.total").value(0));
     }
 }

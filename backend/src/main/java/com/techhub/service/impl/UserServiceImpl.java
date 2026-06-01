@@ -10,16 +10,20 @@ import com.techhub.dto.post.PostVO;
 import com.techhub.dto.user.UserDetailVO;
 import com.techhub.dto.user.UserProfileVO;
 import com.techhub.dto.user.UserUpdateRequest;
+import com.techhub.entity.Favorite;
 import com.techhub.entity.Post;
 import com.techhub.entity.User;
+import com.techhub.mapper.FavoriteMapper;
 import com.techhub.mapper.PostMapper;
 import com.techhub.mapper.UserMapper;
 import com.techhub.security.SecurityUtils;
 import com.techhub.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,6 +33,8 @@ public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;
     private final PostMapper postMapper;
+    private final FavoriteMapper favoriteMapper;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     @Override
     public UserDetailVO getCurrentUser() {
@@ -73,6 +79,52 @@ public class UserServiceImpl implements UserService {
                 .map(this::toPostVO)
                 .collect(Collectors.toList());
         return PageResult.of(records, resultPage.getTotal(), resultPage.getSize(), resultPage.getCurrent());
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(Long userId, String oldPwd, String newPwd) {
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new BusinessException(ResultCode.NOT_FOUND);
+        }
+        if (!passwordEncoder.matches(oldPwd, user.getPassword())) {
+            throw new BusinessException(ResultCode.BAD_REQUEST, "原密码不正确");
+        }
+        if (oldPwd.equals(newPwd)) {
+            throw new BusinessException(ResultCode.BAD_REQUEST, "新密码不能与原密码相同");
+        }
+        User update = new User();
+        update.setId(userId);
+        update.setPassword(passwordEncoder.encode(newPwd));
+        userMapper.updateById(update);
+    }
+
+    @Override
+    public PageResult<PostVO> getFavorites(Long userId, int page, int size) {
+        Page<Favorite> favPage = new Page<>(page, size);
+        Page<Favorite> favResult = favoriteMapper.selectPage(favPage,
+                new LambdaQueryWrapper<Favorite>()
+                        .eq(Favorite::getUserId, userId)
+                        .orderByDesc(Favorite::getCreateTime));
+
+        if (favResult.getRecords().isEmpty()) {
+            return PageResult.of(Collections.emptyList(), 0, size, page);
+        }
+
+        List<Long> postIds = favResult.getRecords().stream()
+                .map(Favorite::getPostId)
+                .collect(Collectors.toList());
+
+        List<Post> posts = postMapper.selectBatchIds(postIds).stream()
+                .filter(p -> p.getDeleted() == 0)
+                .collect(Collectors.toList());
+
+        List<PostVO> records = posts.stream()
+                .map(this::toPostVO)
+                .collect(Collectors.toList());
+
+        return PageResult.of(records, favResult.getTotal(), size, page);
     }
 
     // ---- mapping helpers ----

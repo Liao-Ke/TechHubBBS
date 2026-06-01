@@ -75,6 +75,8 @@ class FileControllerTest {
 
         org.dromara.x.file.storage.core.FileInfo fileInfo = new org.dromara.x.file.storage.core.FileInfo();
         fileInfo.setUrl("http://localhost:8080/file/user_avatar/abc123.jpg");
+        fileInfo.setFilename("abc123.jpg");
+        fileInfo.setSize(14L);
 
         UploadPretreatment pretreatment = mock(UploadPretreatment.class);
         when(fileStorageService.of(any())).thenReturn(pretreatment);
@@ -87,7 +89,9 @@ class FileControllerTest {
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
-                .andExpect(jsonPath("$.data.url").value("http://localhost:8080/file/user_avatar/abc123.jpg"));
+                .andExpect(jsonPath("$.data.url").value("http://localhost:8080/file/user_avatar/abc123.jpg"))
+                .andExpect(jsonPath("$.data.filename").value("abc123.jpg"))
+                .andExpect(jsonPath("$.data.size").value(14));
     }
 
     @Test

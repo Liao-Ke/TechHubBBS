@@ -12,4 +12,6 @@ public interface UserService {
     void updateProfile(UserUpdateRequest request);
     UserProfileVO getUserProfile(Long userId);
     PageResult<PostVO> getUserPosts(Long userId, PostListQuery query);
+    void changePassword(Long userId, String oldPwd, String newPwd);
+    PageResult<PostVO> getFavorites(Long userId, int page, int size);
 }
