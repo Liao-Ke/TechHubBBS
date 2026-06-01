@@ -97,6 +97,23 @@ public class NotificationServiceImpl implements NotificationService {
         vo.setContent(n.getContent());
         vo.setIsRead(n.getIsRead() != null && n.getIsRead() == 1);
         vo.setCreateTime(n.getCreateTime());
+        // 根据通知类型推导 sourceType
+        switch (n.getType()) {
+            case "REPLY":
+                vo.setSourceType("post");
+                break;
+            case "LIKE":
+                vo.setSourceType("post");
+                break;
+            case "FOLLOW":
+                vo.setSourceType("user");
+                break;
+            case "DIVINE":
+                vo.setSourceType("comment");
+                break;
+            default:
+                vo.setSourceType("unknown");
+        }
         return vo;
     }
 }
