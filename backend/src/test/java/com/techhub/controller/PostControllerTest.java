@@ -119,6 +119,42 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.data.current").value(1));
     }
 
+    @Test
+    @DisplayName("listPosts — page<1 返回 400")
+    void listPosts_PageLessThan1_Returns400() throws Exception {
+        mockMvc.perform(get("/api/v1/posts")
+                        .param("page", "0")
+                        .param("size", "5")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("listPosts — size>50 返回 400")
+    void listPosts_SizeExceedsMax_Returns400() throws Exception {
+        mockMvc.perform(get("/api/v1/posts")
+                        .param("page", "1")
+                        .param("size", "100")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("listPosts — 合法分页参数返回 200")
+    void listPosts_ValidPagination_Returns200() throws Exception {
+        PageResult<PostVO> pageResult = PageResult.of(List.of(mockPost), 1, 10, 1);
+
+        when(postService.listPosts(any(PostListQuery.class), eq(null)))
+                .thenReturn(pageResult);
+
+        mockMvc.perform(get("/api/v1/posts")
+                        .param("page", "1")
+                        .param("size", "10")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200));
+    }
+
     // ==================== POST /api/v1/posts ====================
 
     @Test

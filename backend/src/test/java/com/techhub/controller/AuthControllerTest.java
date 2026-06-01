@@ -106,6 +106,38 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.message").value("邮箱已被注册"));
     }
 
+    @Test
+    @DisplayName("register — 无效邮箱 notanemail 返回 400")
+    void register_InvalidEmail_Returns400() throws Exception {
+        RegisterRequest request = new RegisterRequest();
+        request.setUsername("testemail1");
+        request.setPassword("password123");
+        request.setEmail("notanemail");
+
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(400))
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("邮箱格式不正确")));
+    }
+
+    @Test
+    @DisplayName("register — 无 TLD 邮箱 a@b 返回 400")
+    void register_EmailWithoutTld_Returns400() throws Exception {
+        RegisterRequest request = new RegisterRequest();
+        request.setUsername("testemail2");
+        request.setPassword("password123");
+        request.setEmail("a@b");
+
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(400))
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("邮箱格式不正确")));
+    }
+
     // ==================== Login Tests ====================
 
     @Test

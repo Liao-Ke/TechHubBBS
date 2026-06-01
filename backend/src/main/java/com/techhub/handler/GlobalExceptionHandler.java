@@ -3,6 +3,7 @@ package com.techhub.handler;
 import com.techhub.common.BusinessException;
 import com.techhub.common.R;
 import com.techhub.common.ResultCode;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -25,21 +26,33 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public R<Void> handleValidationException(MethodArgumentNotValidException e) {
+    public ResponseEntity<R<Void>> handleValidationException(MethodArgumentNotValidException e) {
         String message = e.getBindingResult().getFieldErrors().stream()
                 .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
                 .collect(Collectors.joining(", "));
         log.warn("参数校验失败: {}", message);
-        return R.error(ResultCode.BAD_REQUEST, message);
+        return ResponseEntity.badRequest().body(R.error(ResultCode.BAD_REQUEST, message));
     }
 
     @ExceptionHandler(BindException.class)
-    public R<Void> handleBindException(BindException e) {
+    public ResponseEntity<R<Void>> handleBindException(BindException e) {
         String message = e.getBindingResult().getFieldErrors().stream()
                 .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
                 .collect(Collectors.joining(", "));
         log.warn("参数绑定失败: {}", message);
-        return R.error(ResultCode.BAD_REQUEST, message);
+        return ResponseEntity.badRequest().body(R.error(ResultCode.BAD_REQUEST, message));
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<R<Void>> handleConstraintViolation(ConstraintViolationException e) {
+        String msg = e.getConstraintViolations().stream()
+                .map(v -> v.getMessage())
+                .collect(Collectors.joining(", "));
+        if (msg.isEmpty()) {
+            msg = e.getMessage();
+        }
+        log.warn("参数约束校验失败: {}", msg);
+        return ResponseEntity.badRequest().body(R.error(ResultCode.BAD_REQUEST, msg));
     }
 
     @ExceptionHandler(AccessDeniedException.class)

@@ -1,6 +1,7 @@
 package com.techhub.config;
 
 import com.techhub.security.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,6 +33,22 @@ public class SecurityConfig {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((request, response, authException) -> {
+                    if ("OPTIONS".equals(request.getMethod())) {
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        return;
+                    }
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json;charset=utf-8");
+                    response.getWriter().write("{\"code\":401,\"message\":\"未登录或登录已过期\"}");
+                })
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.setContentType("application/json;charset=utf-8");
+                    response.getWriter().write("{\"code\":403,\"message\":\"没有访问权限\"}");
+                })
+            )
             .authorizeHttpRequests(auth -> auth
                 // Auth endpoints — public
                 .requestMatchers("/api/v1/auth/**").permitAll()
@@ -39,8 +56,8 @@ public class SecurityConfig {
                 .requestMatchers("GET", "/api/v1/posts/**").permitAll()
                 .requestMatchers("GET", "/api/v1/categories/**").permitAll()
                 .requestMatchers("GET", "/api/v1/notices/**").permitAll()
-                .requestMatchers("GET", "/api/v1/users/{id}").permitAll()
-                .requestMatchers("GET", "/api/v1/users/{id}/posts").permitAll()
+                .requestMatchers("GET", "/api/v1/users/{id:[0-9]+}").permitAll()
+                .requestMatchers("GET", "/api/v1/users/{id:[0-9]+}/posts").permitAll()
                 // Swagger / Knife4j — public
                 .requestMatchers("/doc.html", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll()
                 // File access — public
