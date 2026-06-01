@@ -9,9 +9,12 @@ import com.techhub.dto.ai.AiQaResponse;
 import com.techhub.dto.ai.AiSummaryResponse;
 import com.techhub.entity.AiQaHistory;
 import com.techhub.entity.AiSummary;
+import com.techhub.entity.Follow;
 import com.techhub.entity.Post;
+import com.techhub.enums.VisibilityEnum;
 import com.techhub.mapper.AiQaHistoryMapper;
 import com.techhub.mapper.AiSummaryMapper;
+import com.techhub.mapper.FollowMapper;
 import com.techhub.mapper.PostMapper;
 import com.techhub.service.AiService;
 import com.techhub.util.AiClient;
@@ -48,6 +51,7 @@ public class AiServiceImpl implements AiService {
     private final AiSummaryMapper aiSummaryMapper;
     private final AiQaHistoryMapper aiQaHistoryMapper;
     private final AiClient aiClient;
+    private final FollowMapper followMapper;
 
     @Override
     @Transactional
@@ -60,6 +64,22 @@ public class AiServiceImpl implements AiService {
         if (post.getContent() == null || post.getContent().trim().length() < MIN_CONTENT_LENGTH) {
             throw new BusinessException(ResultCode.UNPROCESSABLE,
                     "帖子内容不足" + MIN_CONTENT_LENGTH + "字，无法生成摘要");
+        }
+
+        if (post.getVisibility() != null && post.getVisibility() != VisibilityEnum.PUBLIC.getCode()) {
+            if (post.getVisibility() == VisibilityEnum.PRIVATE.getCode()) {
+                throw new BusinessException(ResultCode.FORBIDDEN, "私密帖子不支持AI摘要");
+            }
+            if (post.getVisibility() == VisibilityEnum.FOLLOWERS_ONLY.getCode()) {
+                boolean isFollowing = followMapper.selectCount(
+                        new LambdaQueryWrapper<Follow>()
+                                .eq(Follow::getFollowerId, userId)
+                                .eq(Follow::getFolloweeId, post.getAuthorId())
+                ) > 0;
+                if (!isFollowing) {
+                    throw new BusinessException(ResultCode.FORBIDDEN, "仅关注者可生成此帖子的AI摘要");
+                }
+            }
         }
 
         // 2. 查找或创建摘要记录，状态设为"生成中"
@@ -141,9 +161,17 @@ public class AiServiceImpl implements AiService {
                         .eq(AiSummary::getUserId, userId)
                         .eq(AiSummary::getPostId, postId)
         );
-        if (summary == null || summary.getStatus() != 1) {
-            throw new BusinessException(ResultCode.UNPROCESSABLE,
-                    summary == null ? "请先生成AI摘要" : "AI摘要尚未生成完成(status=" + summary.getStatus() + ")");
+        if (summary == null) {
+            throw new BusinessException(ResultCode.UNPROCESSABLE, "AI摘要暂未生成，请先生成摘要");
+        }
+        if (summary.getStatus() == 0) {
+            throw new BusinessException(ResultCode.UNPROCESSABLE, "AI摘要正在生成中，请稍后再试");
+        }
+        if (summary.getStatus() == 2) {
+            throw new BusinessException(ResultCode.UNPROCESSABLE, "AI摘要生成失败，请重新生成");
+        }
+        if (summary.getStatus() != 1) {
+            throw new BusinessException(ResultCode.UNPROCESSABLE, "AI摘要状态异常，请重新生成");
         }
 
         // 3. 获取帖子内容构建 prompt

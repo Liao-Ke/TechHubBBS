@@ -2298,6 +2298,18 @@ public class DraftController {
 }
 ```
 
+#### 8.5.5 管理员编辑权限说明
+
+系统设计中，**管理员可以编辑和删除任意用户的帖子**。这是内容管理的必要功能：
+
+- `PostServiceImpl.updatePost()` 和 `deletePost()` 方法中，管理员角色（`ADMIN`）豁免作者身份校验
+- 具体实现：`if (!userId.equals(post.getAuthorId()) && !isAdmin)` — 管理员通过短路求值绕过作者检查
+- `PostService.java` 接口 Javadoc 明确标注「仅作者或管理员可操作」
+- 管理员操作记录在 `update_time` 字段中（MyBatis-Plus 自动填充）
+
+> **安全说明**：此设计符合论坛内容管理需求，管理员需对全站内容质量负责。
+> 如需审计管理员操作记录，可在未来版本中添加操作日志表。
+
 ### 8.6 回复与神评模块
 
 #### 8.6.1 神评自动判定逻辑
