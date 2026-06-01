@@ -1,17 +1,25 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, nextTick } from 'vue'
+import { ref, watch, computed, onMounted, nextTick } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { postApi } from '@/api/modules/post'
 import { recommendationApi } from '@/api/modules/recommendation'
 import { useInfiniteScroll } from '@/composables/useInfiniteScroll'
-import type { RecommendationVO, PostVO } from '@/api/types'
+import type { RecommendationVO, PostVO, PostListParams } from '@/api/types'
 import PostCard from '@/components/post/PostCard.vue'
+import NoticeCarousel from '@/components/notice/NoticeCarousel.vue'
 import LoadingSkeleton from '@/components/common/LoadingSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import UserAvatar from '@/components/common/UserAvatar.vue'
-import { Loading, TrendCharts, UserFilled } from '@element-plus/icons-vue'
+import { Loading, TrendCharts, UserFilled, Search, CircleClose } from '@element-plus/icons-vue'
 
 const userStore = useUserStore()
+const route = useRoute()
+const router = useRouter()
+
+// ── Search state ──
+const searchKeyword = ref('')
+const searchResultCount = ref(0)
 
 // ── Tab state ──
 const activeTab = ref<'recommend' | 'hot'>('recommend')
@@ -49,12 +57,20 @@ const hotPosts = ref<PostVO[]>([])
 const hotPage = ref(1)
 
 async function loadHotFn(): Promise<void> {
-  const res = await postApi.getList({
+  const params: PostListParams = {
     sort: 'hot',
     page: hotPage.value,
     size: PAGE_SIZE,
-  })
+  }
+  if (searchKeyword.value) {
+    params.keyword = searchKeyword.value
+  }
+  const res = await postApi.getList(params)
   const pageResult = res.data
+  // Track search result total on first page
+  if (hotPage.value === 1 && searchKeyword.value) {
+    searchResultCount.value = pageResult?.total ?? 0
+  }
   if (!pageResult || pageResult.records.length === 0) {
     hotHasMore.value = false
     return
@@ -92,11 +108,72 @@ watch(activeTab, async (tab) => {
   }
 })
 
+// ── Watch keyword from URL ──
+watch(
+  () => route.query.keyword,
+  async (newKeyword) => {
+    const kw = (newKeyword as string)?.trim()
+    if (kw) {
+      searchKeyword.value = kw
+      searchResultCount.value = -1 // reset until first load returns total
+      if (activeTab.value !== 'hot') {
+        activeTab.value = 'hot'
+      } else {
+        // Already on hot tab — force reload with new keyword
+        hotReset()
+        hotPosts.value = []
+        hotPage.value = 1
+        await nextTick()
+        hotLoadMore()
+      }
+    } else if (!kw && searchKeyword.value) {
+      // Keyword was cleared from URL — reset to normal browsing
+      clearSearchState()
+    }
+  },
+  { immediate: true },
+)
+
+function clearSearchState() {
+  searchKeyword.value = ''
+  searchResultCount.value = 0
+  hotReset()
+  hotPosts.value = []
+  hotPage.value = 1
+  recReset()
+  recPosts.value = []
+  recPage.value = 1
+  if (activeTab.value !== 'recommend') {
+    activeTab.value = 'recommend'
+  } else {
+    nextTick(() => recLoadMore())
+  }
+}
+
+function clearSearch() {
+  router.push('/')
+}
+
 // ── Lifecycle ──
 onMounted(async () => {
   await nextTick()
-  recLoadMore()
+  if (!searchKeyword.value) {
+    recLoadMore()
+  }
 })
+
+// ── Computed ──
+const hotEmptyTitle = computed(() =>
+  searchKeyword.value
+    ? `未找到与 "${searchKeyword.value}" 相关的内容`
+    : '暂无热门帖子',
+)
+
+const hotEmptyDescription = computed(() =>
+  searchKeyword.value
+    ? '试试其他关键词，或者浏览热门帖子'
+    : '社区还没有足够的内容，快来发布第一篇帖子吧',
+)
 
 // ── Helpers ──
 function reasonLabel(reason: string): string {
@@ -128,6 +205,28 @@ function reasonTheme(reason: string): '' | 'primary' | 'success' | 'warning' | '
       <p class="home-page__subtitle">
         发现技术社区的精彩内容
       </p>
+    </div>
+
+    <!-- Site-wide Notice Carousel -->
+    <NoticeCarousel />
+
+    <!-- Search Result Banner -->
+    <div v-if="searchKeyword" class="home-page__search-banner">
+      <div class="home-page__search-banner-inner">
+        <el-icon :size="16" class="home-page__search-banner-icon"><Search /></el-icon>
+        <span class="home-page__search-banner-text">
+          搜索结果: <strong>{{ searchKeyword }}</strong>
+          <template v-if="searchResultCount >= 0">
+            — 共 <strong>{{ searchResultCount }}</strong> 篇帖子
+          </template>
+        </span>
+        <el-button
+          text
+          :icon="CircleClose"
+          class="home-page__search-banner-close"
+          @click="clearSearch"
+        />
+      </div>
     </div>
 
     <!-- Tabs -->
@@ -305,8 +404,8 @@ function reasonTheme(reason: string): '' | 'primary' | 'success' | 'warning' | '
         <!-- Empty -->
         <EmptyState
           v-else-if="!hotLoading && hotPosts.length === 0 && !hotError"
-          title="暂无热门帖子"
-          description="社区还没有足够的内容，快来发布第一篇帖子吧"
+          :title="hotEmptyTitle"
+          :description="hotEmptyDescription"
         />
 
         <!-- Hot post list -->
@@ -383,6 +482,47 @@ function reasonTheme(reason: string): '' | 'primary' | 'success' | 'warning' | '
     margin-top: var(--th-spacing-1);
     font-size: 14px;
     color: var(--el-text-color-secondary);
+  }
+
+  // ── Search Banner ──
+  &__search-banner {
+    margin-bottom: var(--th-spacing-3);
+    padding: var(--th-spacing-3) var(--th-spacing-4);
+    background-color: var(--el-color-primary-light-9);
+    border: 1px solid var(--el-color-primary-light-7);
+    border-radius: var(--th-radius-md);
+  }
+
+  &__search-banner-inner {
+    display: flex;
+    align-items: center;
+    gap: var(--th-spacing-2);
+  }
+
+  &__search-banner-icon {
+    color: var(--th-brand-primary);
+    flex-shrink: 0;
+  }
+
+  &__search-banner-text {
+    flex: 1;
+    font-size: 14px;
+    color: var(--el-text-color-regular);
+    min-width: 0;
+
+    strong {
+      color: var(--th-brand-primary);
+      font-weight: 600;
+    }
+  }
+
+  &__search-banner-close {
+    flex-shrink: 0;
+    color: var(--el-text-color-secondary);
+
+    &:hover {
+      color: var(--el-text-color-primary);
+    }
   }
 
   // ── Tabs ──

@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { Bell } from '@element-plus/icons-vue'
 import { categoryApi } from '@/api/modules/category'
 import { postApi } from '@/api/modules/post'
-import { noticeApi } from '@/api/modules/notice'
 import { useUserStore } from '@/stores/user'
 import LoadingSkeleton from '@/components/common/LoadingSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import PostCard from '@/components/post/PostCard.vue'
+import NoticeBanner from '@/components/notice/NoticeBanner.vue'
 import type { Category, PostVO } from '@/api/types'
 
 const route = useRoute()
@@ -20,9 +19,6 @@ const categoryId = computed(() => Number(route.params.categoryId))
 const category = ref<Category | null>(null)
 const categoryLoading = ref(true)
 const categoryError = ref(false)
-
-// ── Notices ──
-const noticeCount = ref(0)
 
 // ── Posts ──
 const sort = ref('new')
@@ -73,17 +69,6 @@ async function fetchPosts() {
   }
 }
 
-async function fetchNotices() {
-  try {
-    const res = await noticeApi.getList({ categoryId: String(categoryId.value), page: 1, size: 1 })
-    if (res.data) {
-      noticeCount.value = res.data.total
-    }
-  } catch {
-    // Silently ignore — notices are optional decoration
-  }
-}
-
 function onSortChange(val: string) {
   sort.value = val
   page.value = 1
@@ -101,13 +86,11 @@ watch(categoryId, () => {
   page.value = 1
   sort.value = 'new'
   fetchCategory()
-  fetchNotices()
   fetchPosts()
 })
 
 onMounted(() => {
   fetchCategory()
-  fetchNotices()
   fetchPosts()
 })
 </script>
@@ -163,18 +146,8 @@ onMounted(() => {
       class="category-page__alert"
     />
 
-    <!-- ══════════════════════════════════════════ -->
-    <!-- Notice Banner Placeholder                  -->
-    <!-- ══════════════════════════════════════════ -->
-    <div
-      v-if="noticeCount > 0"
-      class="notice-banner"
-    >
-      <el-icon :size="16" class="notice-banner__icon">
-        <Bell />
-      </el-icon>
-      <span class="notice-banner__text">本版块共有 {{ noticeCount }} 条公告</span>
-    </div>
+    <!-- Notice Banner -->
+    <NoticeBanner :category-id="String(categoryId)" />
 
     <!-- ══════════════════════════════════════════ -->
     <!-- Sort Bar                                   -->
@@ -319,28 +292,6 @@ onMounted(() => {
 
   &__skeleton {
     width: 100%;
-  }
-}
-
-/* ======== Notice Banner ======== */
-.notice-banner {
-  display: flex;
-  align-items: center;
-  gap: var(--th-spacing-2);
-  padding: var(--th-spacing-3) var(--th-spacing-4);
-  margin-bottom: var(--th-spacing-4);
-  background: var(--th-color-ai-panel-bg);
-  border: 1px solid var(--th-color-ai-panel-border);
-  border-radius: var(--th-radius-md);
-
-  &__icon {
-    color: var(--th-brand-primary);
-    flex-shrink: 0;
-  }
-
-  &__text {
-    font-size: 14px;
-    color: var(--el-text-color-regular);
   }
 }
 

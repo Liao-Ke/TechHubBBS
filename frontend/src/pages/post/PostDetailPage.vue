@@ -5,7 +5,7 @@
  *   2. Content (MdViewer)
  *   3. Actions (like, favorite, edit, delete, share)
  *   4. Divine Comments (gold section, shown when divineCommentCount > 0)
- *   5. AI Panel (placeholder)
+ *   5. AI Panel
  *   6. Comments (list + nested replies + comment form)
  *   7. Related Posts (horizontal scroll mini cards)
  */
@@ -27,6 +27,7 @@ import { canView } from '@/composables/useVisibility'
 import type { PostVO, CommentVO, RelatedPostVO } from '@/api/types'
 
 import MdViewer from '@/components/markdown/MdViewer.vue'
+import AiSummaryPanel from '@/components/ai/AiSummaryPanel.vue'
 import UserAvatar from '@/components/common/UserAvatar.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import DivineCommentBadge from '@/components/post/DivineCommentBadge.vue'
@@ -57,11 +58,6 @@ const likeCount = ref(0)
 const divineComments = ref<CommentVO[]>([])
 const divineLoading = ref(false)
 
-// AI
-const aiSummary = ref('')
-const aiLoading = ref(false)
-const aiError = ref('')
-
 // Comments
 const comments = ref<CommentVO[]>([])
 const commentTotal = ref(0)
@@ -86,10 +82,6 @@ const relatedLoading = ref(false)
 const isAuthor = computed(() => {
   if (!post.value || !userStore.userInfo) return false
   return post.value.authorId === userStore.userInfo.id
-})
-
-const contentLongEnough = computed(() => {
-  return (post.value?.content?.length ?? 0) >= 50
 })
 
 // ---------------------------------------------------------------------------
@@ -129,23 +121,6 @@ async function fetchDivineComments() {
     divineComments.value = []
   } finally {
     divineLoading.value = false
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Section 5: AI Summary (placeholder for now)
-// ---------------------------------------------------------------------------
-async function handleAiSummary() {
-  if (!contentLongEnough.value) return
-  aiLoading.value = true
-  aiError.value = ''
-  try {
-    // Placeholder — real AI integration in Task 25
-    aiSummary.value = 'AI 总结功能即将上线，敬请期待。'
-  } catch {
-    aiError.value = 'AI 总结暂时不可用'
-  } finally {
-    aiLoading.value = false
   }
 }
 
@@ -553,44 +528,13 @@ onMounted(async () => {
       </section>
 
       <!-- ======================================================== -->
-      <!-- SECTION 5 — AI PANEL (placeholder)                         -->
+      <!-- SECTION 5 — AI PANEL                                        -->
       <!-- ======================================================== -->
-      <section
-        v-if="userStore.isLoggedIn && contentLongEnough"
-        class="post-detail__ai"
-      >
-        <div class="post-detail__ai-header">
-          <h3 class="post-detail__ai-title">AI 智能总结</h3>
-        </div>
-
-        <div v-if="aiLoading" class="post-detail__ai-loading">
-          正在生成总结…
-        </div>
-
-        <div v-else-if="aiSummary" class="post-detail__ai-result">
-          {{ aiSummary }}
-        </div>
-
-        <div v-else class="post-detail__ai-placeholder">
-          <p>AI 总结功能即将上线</p>
-          <el-button
-            type="primary"
-            size="small"
-            :loading="aiLoading"
-            @click="handleAiSummary"
-          >
-            生成总结
-          </el-button>
-        </div>
-      </section>
-
-      <section
-        v-else-if="!userStore.isLoggedIn"
-        class="post-detail__ai post-detail__ai--login"
-      >
-        <router-link to="/login" class="post-detail__ai-login-link">
-          登录后使用 AI 智能总结
-        </router-link>
+      <section class="post-detail__ai">
+        <AiSummaryPanel
+          :post-id="postId"
+          :post-content="post.content"
+        />
       </section>
 
       <!-- ======================================================== -->
@@ -1156,60 +1100,6 @@ $max-content-width: 800px;
 .post-detail {
   &__ai {
     margin-bottom: var(--th-spacing-lg);
-    padding: var(--th-spacing-lg);
-    border-radius: var(--th-radius-md);
-    background: var(--th-color-ai-panel-bg);
-    border: 1px solid var(--th-color-ai-panel-border);
-
-    &--login {
-      text-align: center;
-      padding: var(--th-spacing-md);
-    }
-  }
-
-  &__ai-header {
-    margin-bottom: var(--th-spacing-sm);
-  }
-
-  &__ai-title {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--el-text-color-primary);
-  }
-
-  &__ai-placeholder {
-    text-align: center;
-    padding: var(--th-spacing-md) 0;
-
-    p {
-      margin: 0 0 var(--th-spacing-sm);
-      color: var(--el-text-color-secondary);
-      font-size: 14px;
-    }
-  }
-
-  &__ai-loading {
-    text-align: center;
-    color: var(--el-text-color-secondary);
-    padding: var(--th-spacing-md);
-  }
-
-  &__ai-result {
-    font-size: 14px;
-    line-height: 1.7;
-    color: var(--el-text-color-primary);
-    padding: var(--th-spacing-sm) 0;
-  }
-
-  &__ai-login-link {
-    color: var(--el-color-primary);
-    text-decoration: none;
-    font-size: 14px;
-
-    &:hover {
-      text-decoration: underline;
-    }
   }
 }
 

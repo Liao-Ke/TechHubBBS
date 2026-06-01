@@ -26,4 +26,12 @@ export const userApi = {
 
   /** Check follow status */
   checkFollow: (id: string) => api<R<FollowStatusVO>>(`/users/${id}/follow`),
+
+  /** Get paginated followers of a user */
+  getFollowers: (userId: string, params?: { page?: number; size?: number }) =>
+    api<R<PageResult<UserProfileVO>>>(`/users/${userId}/followers`, { query: params }),
+
+  /** Get paginated followings of a user */
+  getFollowings: (userId: string, params?: { page?: number; size?: number }) =>
+    api<R<PageResult<UserProfileVO>>>(`/users/${userId}/followings`, { query: params }),
 }

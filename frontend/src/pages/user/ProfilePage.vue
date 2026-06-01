@@ -172,13 +172,20 @@ async function loadFavorites() {
 }
 
 async function loadFollowing() {
+  if (followingLoading.value) return
   followingError.value = null
   followingLoading.value = true
   try {
-    // Placeholder: API endpoint pending. Show empty state.
-    followingUsers.value = []
-    followingTotal.value = 0
-    followingTotalPages.value = 0
+    const res = await userApi.getFollowings(userId.value, {
+      page: followingPage.value,
+      size: PAGE_SIZE,
+    })
+    const data = res.data
+    if (data) {
+      followingUsers.value = data.records
+      followingTotal.value = data.total
+      followingTotalPages.value = data.pages
+    }
   } catch (e: any) {
     followingError.value = e
   } finally {
@@ -187,13 +194,20 @@ async function loadFollowing() {
 }
 
 async function loadFollowers() {
+  if (followersLoading.value) return
   followersError.value = null
   followersLoading.value = true
   try {
-    // Placeholder: API endpoint pending. Show empty state.
-    followerUsers.value = []
-    followersTotal.value = 0
-    followersTotalPages.value = 0
+    const res = await userApi.getFollowers(userId.value, {
+      page: followersPage.value,
+      size: PAGE_SIZE,
+    })
+    const data = res.data
+    if (data) {
+      followerUsers.value = data.records
+      followersTotal.value = data.total
+      followersTotalPages.value = data.pages
+    }
   } catch (e: any) {
     followersError.value = e
   } finally {
@@ -419,14 +433,28 @@ onMounted(async () => {
           </div>
           <EmptyState v-else-if="!followingLoading && followingUsers.length === 0" title="暂无关注" description="该用户还没有关注其他人" />
           <div v-else class="profile-page__user-list">
-            <div
+            <router-link
               v-for="fu in followingUsers"
               :key="fu.id"
+              :to="`/users/${fu.id}`"
               class="profile-page__user-row"
             >
               <UserAvatar :src="fu.avatarUrl" :size="40" />
-              <span class="profile-page__user-row-name">{{ fu.username }}</span>
-            </div>
+              <div class="profile-page__user-row-info">
+                <span class="profile-page__user-row-name">{{ fu.username }}</span>
+                <span v-if="fu.bio" class="profile-page__user-row-bio">{{ fu.bio }}</span>
+              </div>
+            </router-link>
+          </div>
+          <div v-if="followingTotalPages > 1" class="profile-page__pagination">
+            <el-pagination
+              :current-page="followingPage"
+              :total="followingTotal"
+              :page-size="PAGE_SIZE"
+              layout="prev, pager, next"
+              :disabled="followingLoading"
+              @current-change="(p: number) => onPageChange('following', p)"
+            />
           </div>
         </el-tab-pane>
 
@@ -446,14 +474,28 @@ onMounted(async () => {
           </div>
           <EmptyState v-else-if="!followersLoading && followerUsers.length === 0" title="暂无粉丝" description="该用户还没有粉丝" />
           <div v-else class="profile-page__user-list">
-            <div
+            <router-link
               v-for="fr in followerUsers"
               :key="fr.id"
+              :to="`/users/${fr.id}`"
               class="profile-page__user-row"
             >
               <UserAvatar :src="fr.avatarUrl" :size="40" />
-              <span class="profile-page__user-row-name">{{ fr.username }}</span>
-            </div>
+              <div class="profile-page__user-row-info">
+                <span class="profile-page__user-row-name">{{ fr.username }}</span>
+                <span v-if="fr.bio" class="profile-page__user-row-bio">{{ fr.bio }}</span>
+              </div>
+            </router-link>
+          </div>
+          <div v-if="followersTotalPages > 1" class="profile-page__pagination">
+            <el-pagination
+              :current-page="followersPage"
+              :total="followersTotal"
+              :page-size="PAGE_SIZE"
+              layout="prev, pager, next"
+              :disabled="followersLoading"
+              @current-change="(p: number) => onPageChange('followers', p)"
+            />
           </div>
         </el-tab-pane>
       </el-tabs>
@@ -610,9 +652,18 @@ onMounted(async () => {
     padding: var(--th-spacing-3) var(--th-spacing-4);
     border-radius: var(--th-radius-md);
     transition: background-color var(--th-transition-fast);
+    color: inherit;
+    text-decoration: none;
 
     &:hover {
       background-color: var(--el-fill-color-light);
+    }
+
+    &-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
     }
 
     &-name {
@@ -620,6 +671,21 @@ onMounted(async () => {
       font-weight: 500;
       color: var(--el-text-color-primary);
     }
+
+    &-bio {
+      font-size: 12px;
+      color: var(--el-text-color-secondary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  // ── Pagination ──
+  &__pagination {
+    display: flex;
+    justify-content: center;
+    padding-top: var(--th-spacing-4);
   }
 }
 </style>

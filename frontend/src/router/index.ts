@@ -32,6 +32,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '帖子详情', layout: 'default' },
   },
   {
+    path: '/notices/:id',
+    name: 'notice-detail',
+    component: () => import('@/pages/notice/NoticeDetailPage.vue'),
+    meta: { title: '公告详情', layout: 'default' },
+  },
+  {
     path: '/posts/new',
     name: 'post-create',
     component: () => import('@/pages/post/PostCreatePage.vue'),
