@@ -11,11 +11,11 @@ export const notificationApi = {
 
   /** Mark a single notification as read */
   markRead: (id: string) =>
-    api<R<null>>(`/notifications/${id}/read`, { method: 'POST' }),
+    api<R<null>>(`/notifications/${id}/read`, { method: 'PATCH' }),
 
   /** Mark all notifications as read */
   markAllRead: () =>
-    api<R<null>>('/notifications/read-all', { method: 'POST' }),
+    api<R<null>>('/notifications/read-all', { method: 'PATCH' }),
 
   /** Get unread notification count */
   getUnreadCount: () =>

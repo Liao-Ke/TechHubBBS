@@ -22,14 +22,14 @@ export const postApi = {
   remove: (id: string) => api<R<null>>(`/posts/${id}`, { method: 'DELETE' }),
 
   /** Like a post */
-  like: (id: string) => api<R<null>>(`/posts/${id}/like`, { method: 'POST' }),
+  like: (id: string) => api<R<null>>(`/posts/${id}/likes`, { method: 'POST' }),
 
   /** Unlike a post */
-  unlike: (id: string) => api<R<null>>(`/posts/${id}/like`, { method: 'DELETE' }),
+  unlike: (id: string) => api<R<null>>(`/posts/${id}/likes`, { method: 'DELETE' }),
 
   /** Favorite (bookmark) a post */
-  favorite: (id: string) => api<R<null>>(`/posts/${id}/favorite`, { method: 'POST' }),
+  favorite: (id: string) => api<R<null>>(`/posts/${id}/favorites`, { method: 'POST' }),
 
   /** Unfavorite a post */
-  unfavorite: (id: string) => api<R<null>>(`/posts/${id}/favorite`, { method: 'DELETE' }),
+  unfavorite: (id: string) => api<R<null>>(`/posts/${id}/favorites`, { method: 'DELETE' }),
 }
