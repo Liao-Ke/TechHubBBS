@@ -1,0 +1,69 @@
+:root {
+  /* ======== 品牌色 ======== */
+  --th-brand-primary: #58a6ff;
+  --th-brand-primary-hover: #79b8ff;
+  --th-brand-primary-active: #1f6feb;
+
+  /* ======== 语义色 ======== */
+  --th-color-divine: #d29922;
+  --th-color-divine-bg: rgba(210, 153, 34, 0.12);
+  --th-color-elite: #a371f7;
+  --th-color-elite-bg: rgba(163, 113, 247, 0.12);
+  --th-color-pinned: #f85149;
+  --th-color-pinned-bg: rgba(248, 81, 73, 0.10);
+  --th-color-ai-panel-bg: rgba(88, 166, 255, 0.08);
+  --th-color-ai-panel-border: rgba(88, 166, 255, 0.18);
+
+  /* ======== 可见权限指示色 ======== */
+  --th-visibility-public: #3fb950;
+  --th-visibility-login: #58a6ff;
+  --th-visibility-followers: #d29922;
+  --th-visibility-private: #f85149;
+
+  /* ======== 字体家族 ======== */
+  --th-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', sans-serif;
+  --th-font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+  --th-font-heading: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* ======== 间距 (4px 基准) ======== */
+  --th-spacing-1: 4px;
+  --th-spacing-2: 8px;
+  --th-spacing-3: 12px;
+  --th-spacing-4: 16px;
+  --th-spacing-5: 20px;
+  --th-spacing-6: 24px;
+  --th-spacing-8: 32px;
+  --th-spacing-10: 40px;
+  --th-spacing-12: 48px;
+  --th-spacing-16: 64px;
+
+  /* ======== 圆角 ======== */
+  --th-radius-sm: 4px;
+  --th-radius-md: 6px;
+  --th-radius-lg: 8px;
+  --th-radius-xl: 12px;
+
+  /* ======== 阴影（暗色模式） ======== */
+  --th-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --th-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --th-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+  /* ======== 响应式断点 ======== */
+  --th-bp-xs: 0px;
+  --th-bp-sm: 640px;
+  --th-bp-md: 768px;
+  --th-bp-lg: 1024px;
+  --th-bp-xl: 1280px;
+
+  /* ======== 过渡 ======== */
+  --th-transition-fast: 150ms ease;
+  --th-transition-normal: 250ms ease;
+  --th-transition-slow: 400ms ease;
+
+  /* ======== 布局 ======== */
+  --th-header-height: 56px;
+  --th-sidebar-width: 220px;
+  --th-sidebar-collapsed-width: 64px;
+  --th-content-max-width: 800px;
+  --th-page-max-width: 1200px;
+}

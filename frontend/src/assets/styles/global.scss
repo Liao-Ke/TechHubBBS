@@ -1,0 +1,190 @@
+@use './variables';
+// Note: element-plus styles are imported via unplugin-element-plus in vite.config.ts
+
+// ======== 暗色模式根 (默认) ========
+:root {
+  --el-bg-color: #0d1117;
+  --el-bg-color-overlay: #161b22;
+  --el-bg-color-page: #0d1117;
+  --el-text-color-primary: #e6edf3;
+  --el-text-color-regular: #c9d1d9;
+  --el-text-color-secondary: #8b949e;
+  --el-text-color-placeholder: #484f58;
+  --el-text-color-disabled: #484f58;
+  --el-border-color: #30363d;
+  --el-border-color-light: #21262d;
+  --el-border-color-lighter: #161b22;
+  --el-border-color-dark: #484f58;
+  --el-fill-color: #161b22;
+  --el-fill-color-light: #0d1117;
+  --el-fill-color-blank: #0d1117;
+}
+
+// ======== 亮色模式 ========
+html.light {
+  --el-bg-color: #ffffff;
+  --el-bg-color-overlay: #ffffff;
+  --el-bg-color-page: #f6f8fa;
+  --el-text-color-primary: #1f2328;
+  --el-text-color-regular: #24292f;
+  --el-text-color-secondary: #656d76;
+  --el-text-color-placeholder: #8c959f;
+  --el-text-color-disabled: #8c959f;
+  --el-border-color: #d0d7de;
+  --el-border-color-light: #d8dee4;
+  --el-border-color-lighter: #eaeef2;
+  --el-border-color-dark: #afb8c1;
+  --el-fill-color: #f6f8fa;
+  --el-fill-color-light: #ffffff;
+  --el-fill-color-blank: #ffffff;
+}
+
+// ======== CSS Reset / Normalize ========
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--th-font-sans);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--el-text-color-primary);
+  background-color: var(--el-bg-color);
+  min-height: 100vh;
+}
+
+a {
+  color: var(--el-color-primary);
+  text-decoration: none;
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// ======== 自定义滚动条 ========
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--el-bg-color);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--el-border-color-dark);
+  border-radius: 4px;
+  &:hover {
+    background: var(--el-text-color-secondary);
+  }
+}
+
+// ======== 文字选中样式 ========
+::selection {
+  background: rgba(88, 166, 255, 0.3);
+  color: var(--el-text-color-primary);
+}
+
+// ======== 页面淡入淡出过渡 ========
+.page-fade-enter-active,
+.page-fade-leave-active {
+  transition: opacity 0.25s ease;
+}
+.page-fade-enter-from,
+.page-fade-leave-to {
+  opacity: 0;
+}
+
+// ======== 减少动画偏好 ========
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+// ======== 全局响应式防护 ========
+html {
+  overflow-x: hidden;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+// ======== 工具类 ========
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// ======== 响应式可见性工具类 ========
+// 5-breakpoint system: xs(<640) sm(640-767) md(768-1023) lg(1024-1279) xl(≥1280)
+.hide-xs {
+  @media (max-width: 639px) { display: none !important; }
+}
+.hide-sm {
+  @media (min-width: 640px) and (max-width: 767px) { display: none !important; }
+}
+.hide-md {
+  @media (min-width: 768px) and (max-width: 1023px) { display: none !important; }
+}
+.hide-lg {
+  @media (min-width: 1024px) and (max-width: 1279px) { display: none !important; }
+}
+.hide-xl {
+  @media (min-width: 1280px) { display: none !important; }
+}
+
+// Show only on specific breakpoint
+.show-xs-only {
+  @media (min-width: 640px) { display: none !important; }
+}
+.show-sm-only {
+  display: none !important;
+  @media (min-width: 640px) and (max-width: 767px) { display: flex !important; }
+}
+.show-md-only {
+  display: none !important;
+  @media (min-width: 768px) and (max-width: 1023px) { display: flex !important; }
+}
+
+// Hide below a breakpoint (mobile-first)
+.hide-below-sm {
+  @media (max-width: 639px) { display: none !important; }
+}
+.hide-below-md {
+  @media (max-width: 767px) { display: none !important; }
+}
+.hide-below-lg {
+  @media (max-width: 1023px) { display: none !important; }
+}
+
+// Show below a breakpoint
+.show-below-md {
+  display: none !important;
+  @media (max-width: 767px) { display: block !important; }
+}
+.show-below-md-flex {
+  display: none !important;
+  @media (max-width: 767px) { display: flex !important; }
+}
