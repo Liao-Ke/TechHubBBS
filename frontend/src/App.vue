@@ -16,20 +16,29 @@ const layoutComponent = computed(() => {
     case 'auth':
       return AuthLayout
     default:
-      // Admin routes use AdminLayout directly as route component (no meta.layout)
-      return null
+      // Routes that provide their own layout wrapper as a route component
+      // (e.g., /admin → AdminLayout.vue). Do NOT return null —
+      // Vue 3 <component :is="null"> does not render slot children.
+      return undefined
   }
 })
 </script>
 
 <template>
-  <component :is="layoutComponent" :key="(route.meta.layout as string) ?? 'none'">
-    <router-view v-slot="{ Component, route: childRoute }">
-      <transition name="page-fade" mode="out-in">
-        <component :is="Component" :key="childRoute.path" />
-      </transition>
-    </router-view>
-  </component>
+  <!-- Default / Auth layouts: wrap page components with layout + transition -->
+  <template v-if="layoutComponent">
+    <component :is="layoutComponent" :key="route.meta.layout as string">
+      <router-view v-slot="{ Component, route: childRoute }">
+        <transition name="page-fade" mode="out-in">
+          <component :is="Component" :key="childRoute.path" />
+        </transition>
+      </router-view>
+    </component>
+  </template>
+
+  <!-- Admin routes: AdminLayout is the route component itself with its own <router-view>.
+       Render directly without wrapping — let Vue Router handle nested depth tracking. -->
+  <router-view v-else />
 </template>
 
 <style lang="scss">

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
+import { storeToRefs } from 'pinia'
 import { useAppStore } from '@/stores/app'
 import { useUserStore } from '@/stores/user'
 import {
@@ -17,9 +18,10 @@ const route = useRoute()
 const appStore = useAppStore()
 const userStore = useUserStore()
 
-const collapsed = appStore.sidebarCollapsed
-const isAdmin = userStore.isAdmin
-const isModerator = userStore.isModerator
+// Use storeToRefs to preserve reactivity — plain destructuring
+// copies the current value and breaks :collapse / v-if bindings.
+const { sidebarCollapsed: collapsed } = storeToRefs(appStore)
+const { isAdmin, isModerator } = storeToRefs(userStore)
 </script>
 
 <template>
@@ -72,6 +74,7 @@ const isModerator = userStore.isModerator
   display: flex;
   flex-direction: column;
   height: 100%;
+  overflow: hidden;
 
   &__header {
     display: flex;
