@@ -39,7 +39,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
      * 优先级最高，确保在 Security Filter Chain 之前生效
      */
     @Bean
-    public FilterRegistrationBean<CharacterEncodingFilter> characterEncodingFilter() {
+    public FilterRegistrationBean<CharacterEncodingFilter> customCharacterEncodingFilter() {
         CharacterEncodingFilter filter = new CharacterEncodingFilter();
         filter.setEncoding("UTF-8");
         filter.setForceEncoding(true);
