@@ -43,6 +43,8 @@ public class AuthServiceImpl implements AuthService {
         user.setEmail(request.getEmail());
         user.setRole("USER");
         user.setStatus(1);
+        // 设置默认头像（DiceBear initials SVG，免费无需 API Key）
+        user.setAvatarUrl("https://api.dicebear.com/9.x/initials/svg?seed=" + request.getUsername());
         userMapper.insert(user);
     }
 
