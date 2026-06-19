@@ -18,6 +18,9 @@ async function fetchNotices() {
     const res = await noticeApi.getList()
     // Only show pinned notices in the global carousel
     notices.value = (res.data.records || []).filter((n) => n.isPinned === 1)
+  } catch {
+    // Silently suppress errors — notices are non-critical UI
+    notices.value = []
   } finally {
     loading.value = false
   }

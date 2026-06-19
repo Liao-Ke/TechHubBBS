@@ -157,7 +157,7 @@ function clearSearch() {
 // ── Lifecycle ──
 onMounted(async () => {
   await nextTick()
-  if (!searchKeyword.value) {
+  if (!searchKeyword.value && userStore.isLoggedIn) {
     recLoadMore()
   }
 })

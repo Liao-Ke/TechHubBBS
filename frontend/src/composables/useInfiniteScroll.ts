@@ -1,4 +1,4 @@
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, watch, onUnmounted } from 'vue'
 
 export interface InfiniteScrollOptions {
   /** IntersectionObserver threshold (0-1) */
@@ -11,6 +11,10 @@ export interface InfiniteScrollOptions {
  * Composable for infinite scrolling using IntersectionObserver.
  * Observes a sentinel element at the bottom of a list.
  * When visible and hasMore + not loading → calls loadFn.
+ *
+ * Uses `watch` on sentinelRef (flush: 'sync') instead of `onMounted`,
+ * so the observer is created reactively when the sentinel element
+ * finally appears in the DOM (e.g. after v-if/v-else conditions resolve).
  */
 export function useInfiniteScroll(
   loadFn: () => Promise<void>,
@@ -45,25 +49,37 @@ export function useInfiniteScroll(
     loading.value = false
   }
 
-  onMounted(() => {
-    if (!sentinelRef.value) return
+  // Reactively create/destroy IntersectionObserver when sentinelRef
+  // appears/disappears from the DOM (fixes issue where sentinel is
+  // inside v-if/v-else and doesn't exist at onMounted time).
+  const stopWatch = watch(
+    () => sentinelRef.value,
+    (el) => {
+      // Disconnect previous observer
+      observer?.disconnect()
+      observer = null
 
-    observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting && hasMore.value && !loading.value) {
-          loadMore()
-        }
-      },
-      {
-        threshold: options.threshold ?? 0.1,
-        rootMargin: options.rootMargin ?? '100px',
-      },
-    )
+      if (!el) return
 
-    observer.observe(sentinelRef.value)
-  })
+      observer = new IntersectionObserver(
+        (entries) => {
+          if (entries[0]?.isIntersecting && hasMore.value && !loading.value) {
+            loadMore()
+          }
+        },
+        {
+          threshold: options.threshold ?? 0.1,
+          rootMargin: options.rootMargin ?? '100px',
+        },
+      )
+
+      observer.observe(el)
+    },
+    { flush: 'sync' },
+  )
 
   onUnmounted(() => {
+    stopWatch()
     observer?.disconnect()
     observer = null
   })
