@@ -6,6 +6,7 @@ import { useAppStore } from '@/stores/app'
 import { categoryApi } from '@/api/modules/category'
 import type { Category } from '@/api/types'
 import NotificationBell from '@/components/notification/NotificationBell.vue'
+import UserAvatar from '@/components/common/UserAvatar.vue'
 import {
   Search,
   ArrowDown,
@@ -124,13 +125,11 @@ function navigateTo(path: string) {
 
         <el-dropdown v-else trigger="hover" class="app-header__user-dropdown">
           <span class="app-header__user-trigger">
-            <el-avatar
+            <UserAvatar
               :src="userStore.userInfo?.avatarUrl"
               :size="32"
               class="app-header__avatar"
-            >
-              <el-icon size="18"><UserFilled /></el-icon>
-            </el-avatar>
+            />
             <span class="app-header__username">
               {{ userStore.userInfo?.username }}
             </span>
