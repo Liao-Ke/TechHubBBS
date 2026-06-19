@@ -46,3 +46,7 @@ Desktop.ini
 # ==================== Uploads / Data ====================
 /data/uploads/
 uploads/
+
+# ==================== Reasonix ====================
+.reasonix
+reasonix.toml
