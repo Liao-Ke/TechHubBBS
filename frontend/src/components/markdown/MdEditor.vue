@@ -87,6 +87,7 @@ function handleInsert(syntax: string) {
 $bp-md: 768px;
 
 .md-editor {
+  width: 100%;
   border: 1px solid var(--el-border-color);
   border-radius: var(--th-radius-md, 6px);
   overflow: hidden;
@@ -94,6 +95,7 @@ $bp-md: 768px;
 
 .md-editor__panes {
   display: flex;
+  overflow: hidden;
   min-height: 300px;
 
   @media (min-width: $bp-md) {
@@ -109,6 +111,7 @@ $bp-md: 768px;
 .md-editor__edit {
   flex: 1;
   min-width: 0;
+  overflow-x: auto;
   border-right: 1px solid var(--el-border-color);
 
   @media (max-width: #{$bp-md - 1}) {
@@ -133,6 +136,9 @@ $bp-md: 768px;
     padding: var(--th-spacing-4, 16px);
     background: var(--el-bg-color);
     color: var(--el-text-color-primary);
+    word-break: break-all;
+    overflow-wrap: break-word;
+    overflow-x: hidden;
 
     &:focus {
       box-shadow: none;
@@ -148,7 +154,7 @@ $bp-md: 768px;
   flex: 1;
   min-width: 0;
   padding: var(--th-spacing-4, 16px);
-  overflow-y: auto;
+  overflow: auto;
   background: var(--el-bg-color-overlay);
 
   @media (min-width: $bp-md) {
