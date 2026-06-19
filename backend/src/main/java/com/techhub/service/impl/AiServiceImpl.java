@@ -20,7 +20,6 @@ import com.techhub.service.AiService;
 import com.techhub.util.AiClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,10 +38,6 @@ public class AiServiceImpl implements AiService {
     private static final int MAX_QUESTION_LENGTH = 500;
     private static final int MAX_QA_PAGE_SIZE = 20;
 
-    private static final String SUMMARY_SYSTEM_PROMPT =
-            "你是一个专业的技术内容摘要助手。请用简洁的中文总结以下技术帖子内容，"
-                    + "提取核心观点和关键信息。摘要应控制在200字以内。";
-
     private static final String QA_SYSTEM_PROMPT =
             "你是一个技术问答助手。请基于下面提供的帖子原文内容回答用户的问题。"
                     + "只能根据原文内容回答，不要编造信息。如果原文中没有相关信息，请明确告知用户。";
@@ -52,6 +47,7 @@ public class AiServiceImpl implements AiService {
     private final AiQaHistoryMapper aiQaHistoryMapper;
     private final AiClient aiClient;
     private final FollowMapper followMapper;
+    private final AiSummaryAsyncExecutor asyncExecutor;
 
     @Override
     @Transactional
@@ -105,35 +101,8 @@ public class AiServiceImpl implements AiService {
             summaryId = newSummary.getId();
         }
 
-        // 3. 异步调用 LLM
-        executeSummaryGeneration(summaryId, userId, postId, post.getContent());
-    }
-
-    @Async
-    public void executeSummaryGeneration(Long summaryId, Long userId, Long postId, String postContent) {
-        log.info("开始异步生成摘要: summaryId={}, userId={}, postId={}", summaryId, userId, postId);
-        try {
-            String result = aiClient.callLlm(SUMMARY_SYSTEM_PROMPT, truncateContent(postContent, 4000));
-            AiSummary summary = new AiSummary();
-            summary.setId(summaryId);
-            if (result != null && !result.isBlank()) {
-                summary.setStatus(1);
-                summary.setContent(result);
-                log.info("摘要生成成功: summaryId={}", summaryId);
-            } else {
-                summary.setStatus(2);
-                summary.setErrorMessage("LLM 返回为空");
-                log.warn("摘要生成失败(空响应): summaryId={}", summaryId);
-            }
-            aiSummaryMapper.updateById(summary);
-        } catch (Exception e) {
-            log.error("摘要生成异常: summaryId={}", summaryId, e);
-            AiSummary summary = new AiSummary();
-            summary.setId(summaryId);
-            summary.setStatus(2);
-            summary.setErrorMessage("生成失败: " + e.getMessage());
-            aiSummaryMapper.updateById(summary);
-        }
+        // 3. 异步调用 LLM（通过独立组件避免 @Async 自调用失效）
+        asyncExecutor.execute(summaryId, userId, postId, post.getContent());
     }
 
     @Override
@@ -230,6 +199,7 @@ public class AiServiceImpl implements AiService {
         }
         AiSummaryResponse resp = new AiSummaryResponse();
         resp.setId(summary.getId().toString());
+        resp.setPostId(summary.getPostId() != null ? summary.getPostId().toString() : null);
         resp.setContent(summary.getContent());
         resp.setStatus(summary.getStatus());
         resp.setErrorMessage(summary.getErrorMessage());
