@@ -1,4 +1,4 @@
-import { ref, watch, onUnmounted } from 'vue'
+import { ref, watch, onUnmounted, type Ref } from 'vue'
 import { draftApi } from '@/api/modules/draft'
 import type { PostDraft } from '@/api/types/draft'
 
@@ -17,7 +17,7 @@ interface DraftData {
  *
  * Auto-cleans timers on unmount and performs a final save.
  */
-export function useDraft(postId?: string) {
+export function useDraft(postId?: string, disabled?: Ref<boolean>) {
   const currentDraftId = ref<string | null>(null)
   const isDirty = ref(false)
   const lastSavedAt = ref<string | null>(null)
@@ -104,16 +104,20 @@ export function useDraft(postId?: string) {
     watch(
       draftData,
       () => {
+        if (disabled?.value) return
         isDirty.value = true
         if (debounceTimer) clearTimeout(debounceTimer)
-        debounceTimer = setTimeout(() => saveDraft(), 2000)
+        debounceTimer = setTimeout(() => {
+          if (disabled?.value) return
+          saveDraft()
+        }, 2000)
       },
       { deep: true },
     )
 
     // Interval: every 30s regardless
     intervalTimer = setInterval(() => {
-      if (isDirty.value) saveDraft()
+      if (isDirty.value && !disabled?.value) saveDraft()
     }, 30_000)
   }
 
@@ -127,7 +131,7 @@ export function useDraft(postId?: string) {
       clearInterval(intervalTimer)
       intervalTimer = null
     }
-    if (isDirty.value) {
+    if (isDirty.value && !disabled?.value) {
       saveDraft()
     }
   }

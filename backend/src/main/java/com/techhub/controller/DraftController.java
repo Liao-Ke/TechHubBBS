@@ -28,7 +28,7 @@ public class DraftController {
     }
 
     @GetMapping("/check")
-    public R<PostDraft> checkDraft(@RequestParam Long postId) {
+    public R<PostDraft> checkDraft(@RequestParam(required = false) Long postId) {
         return R.ok(draftService.checkDraft(postId));
     }
 

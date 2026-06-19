@@ -43,12 +43,13 @@ const rules: FormRules = {
 const {
   currentDraftId,
   draftData,
+  isDirty,
   checkDraft,
   restoreDraft,
   discardDraft,
   startAutoSave,
   stopAutoSave,
-} = useDraft()
+} = useDraft(undefined, submitting)
 
 // Sync form values → draftData so auto-save picks up changes
 watch(
@@ -73,11 +74,7 @@ async function loadCategories() {
 
 // ---- Draft check & restore ----
 async function checkExistingDraft() {
-  const res = await checkDraft()
-  if (!res) return
-
-  // checkDraft returns the raw API response (R<PostDraft | null>)
-  const draft = (res as unknown as Record<string, unknown>).data as { id?: string } | null
+  const draft = await checkDraft()
   if (!draft?.id) return
 
   try {
@@ -126,6 +123,9 @@ async function handleSubmit() {
     if (currentDraftId.value) {
       await discardDraft()
     }
+    // Prevent stopAutoSave() from re-creating a draft during unmount
+    isDirty.value = false
+    draftData.value = {}
     ElMessage.success('发布成功')
     router.push(`/posts/${res.data.id}`)
   } catch (e: unknown) {
