@@ -128,6 +128,12 @@
             <version>4.0.0</version>
         </dependency>
 
+        <!-- Commons Pool2 — required by Lettuce Redis (data-redis) -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-pool2</artifactId>
+        </dependency>
+
         <!-- Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
