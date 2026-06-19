@@ -9,9 +9,9 @@ export const aiApi = {
   getSummary: (postId: string) =>
     api<R<AiSummaryResponse>>(`/posts/${postId}/ai/summary`),
 
-  /** Generate (or regenerate) AI summary for a post */
+  /** Trigger (or retrigger) AI summary generation. Summary is async; poll GET /summary for result. */
   generateSummary: (postId: string) =>
-    api<R<AiSummaryResponse>>(`/posts/${postId}/ai/summary`, { method: 'POST' }),
+    api<R<null>>(`/posts/${postId}/ai/summary`, { method: 'POST' }),
 
   /** Ask a question about a post's content */
   askQuestion: (postId: string, data: AiQaRequest) =>

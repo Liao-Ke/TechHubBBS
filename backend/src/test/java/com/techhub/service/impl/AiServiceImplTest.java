@@ -40,6 +40,8 @@ class AiServiceImplTest {
     private AiClient aiClient;
     @Mock
     private FollowMapper followMapper;
+    @Mock
+    private AiSummaryAsyncExecutor asyncExecutor;
 
     @InjectMocks
     private AiServiceImpl aiService;

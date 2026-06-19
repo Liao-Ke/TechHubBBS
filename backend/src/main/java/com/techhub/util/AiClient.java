@@ -37,6 +37,16 @@ public class AiClient {
      * @return LLM 返回文本，失败返回 null
      */
     public String callLlm(String systemPrompt, String userPrompt) {
+        // 入口前置校验：apiKey / apiUrl 为空时直接返回 null，避免浪费 HTTP 请求
+        if (aiConfig.getApiKey() == null || aiConfig.getApiKey().isBlank()) {
+            log.error("AI_API_KEY 未配置，无法调用 LLM");
+            return null;
+        }
+        if (aiConfig.getApiUrl() == null || aiConfig.getApiUrl().isBlank()) {
+            log.error("AI_API_URL 未配置，无法调用 LLM");
+            return null;
+        }
+
         int maxAttempts = aiConfig.getMaxRetries() + 1;
         for (int attempt = 1; attempt <= maxAttempts; attempt++) {
             try {

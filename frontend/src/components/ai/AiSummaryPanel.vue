@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { Loading } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { aiApi } from '@/api/modules/ai'
@@ -23,12 +23,19 @@ const State = {
 
 type S = (typeof State)[keyof typeof State]
 
+// 轮询配置
+const POLL_INTERVAL_MS = 2000
+const POLL_MAX_ATTEMPTS = 30 // 最多轮询 60 秒
+
 const userStore = useUserStore()
 const state = ref<S>(State.Idle)
 const summaryContent = ref('')
 const errorMessage = ref('')
 const loadingExisting = ref(false)
 const hasExistingSummary = ref(false)
+
+let pollTimer: ReturnType<typeof setInterval> | null = null
+let currentPostId = ''
 
 const canGenerate = computed(() => {
   return props.postContent.length >= 50 && userStore.isLoggedIn
@@ -55,7 +62,11 @@ async function checkExistingSummary() {
   loadingExisting.value = true
   try {
     const res = await aiApi.getSummary(props.postId)
-    handleSummaryResponse(res.data)
+    if (res.data) {
+      handleSummaryResponse(res.data)
+    } else {
+      state.value = State.Idle
+    }
   } catch {
     // No existing summary or error — show generate button
     state.value = State.Idle
@@ -65,7 +76,7 @@ async function checkExistingSummary() {
 }
 
 function handleSummaryResponse(data: AiSummaryResponse) {
-  // status 0 = no summary exists → show generate button
+  // status 0 = 生成中或没有摘要 → 显示"生成"按钮
   if (data.status === 0) {
     state.value = State.Idle
     return
@@ -84,6 +95,7 @@ function handleSummaryResponse(data: AiSummaryResponse) {
 
   if (data.status === 2) {
     if (data.content) {
+      // 即使 status=2，如果有旧内容仍展示
       summaryContent.value = data.content
       state.value = State.Generated
       hasExistingSummary.value = true
@@ -100,32 +112,90 @@ function handleSummaryResponse(data: AiSummaryResponse) {
   state.value = State.Idle
 }
 
+function stopPolling() {
+  if (pollTimer) {
+    clearInterval(pollTimer)
+    pollTimer = null
+  }
+}
+
 async function generateSummary() {
   state.value = State.Generating
   errorMessage.value = ''
+  stopPolling()
 
   try {
-    const res = await aiApi.generateSummary(props.postId)
-    if (res.data.content) {
-      summaryContent.value = res.data.content
-      state.value = State.Generated
-      hasExistingSummary.value = true
-    } else if (res.data.errorMessage) {
-      errorMessage.value = res.data.errorMessage
-      state.value = State.Error
-    } else {
-      errorMessage.value = 'AI 总结生成失败，请稍后再试'
-      state.value = State.Error
-    }
+    // 1. POST 触发异步生成（后端返回 R<Void>，不直接返回摘要内容）
+    await aiApi.generateSummary(props.postId)
+
+    // 2. 开始轮询 GET /summary 查询生成结果
+    let pollCount = 0
+    currentPostId = props.postId
+
+    pollTimer = setInterval(async () => {
+      pollCount++
+
+      try {
+        const res = await aiApi.getSummary(props.postId)
+        const data = res.data
+
+        if (!data) {
+          // 还未创建摘要记录，继续等待
+          if (pollCount >= POLL_MAX_ATTEMPTS) {
+            stopPolling()
+            errorMessage.value = '生成超时，请重试'
+            state.value = State.Error
+          }
+          return
+        }
+
+        if (data.status === 1) {
+          // 生成成功
+          stopPolling()
+          if (data.content) {
+            summaryContent.value = data.content
+            state.value = State.Generated
+            hasExistingSummary.value = true
+          } else {
+            // 内容为空但状态成功，视为异常
+            errorMessage.value = '摘要内容为空'
+            state.value = State.Error
+          }
+        } else if (data.status === 2) {
+          // 生成失败
+          stopPolling()
+          errorMessage.value = data.errorMessage || '生成失败'
+          state.value = State.Error
+        } else if (data.status === 0) {
+          // 仍在生成中
+          if (pollCount >= POLL_MAX_ATTEMPTS) {
+            stopPolling()
+            errorMessage.value = '生成超时，请重试'
+            state.value = State.Error
+          }
+        }
+      } catch {
+        // GET 查询出错不停止轮询，继续重试
+        if (pollCount >= POLL_MAX_ATTEMPTS) {
+          stopPolling()
+          errorMessage.value = '查询摘要超时，请重试'
+          state.value = State.Error
+        }
+      }
+    }, POLL_INTERVAL_MS)
   } catch (e: unknown) {
     const err = e as { message?: string }
-    errorMessage.value = err.message || 'AI 总结生成失败，请稍后再试'
+    errorMessage.value = err.message || '触发摘要生成失败'
     state.value = State.Error
   }
 }
 
 onMounted(() => {
   checkExistingSummary()
+})
+
+onBeforeUnmount(() => {
+  stopPolling()
 })
 </script>
 
