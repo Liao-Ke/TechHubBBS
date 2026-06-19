@@ -14,6 +14,17 @@ export function setupRouterGuards(router: Router) {
       return next({ path: '/' })
     }
 
+    // Fetch user info if logged in but info not loaded (page refresh scenario)
+    // Must run before public route early return to restore userInfo on refresh
+    if (userStore.isLoggedIn && !userStore.userInfo) {
+      await userStore.fetchUserInfo()
+      // If fetchUserInfo fails, it calls logout() which clears token
+      // Re-check authentication after fetch
+      if (!userStore.isLoggedIn) {
+        return next({ path: '/login', query: { redirect: to.fullPath } })
+      }
+    }
+
     // Public routes — always allow
     if (!to.meta.requiresAuth && !to.meta.roles) {
       return next()
@@ -22,16 +33,6 @@ export function setupRouterGuards(router: Router) {
     // Check authentication
     if (to.meta.requiresAuth && !userStore.isLoggedIn) {
       return next({ path: '/login', query: { redirect: to.fullPath } })
-    }
-
-    // Fetch user info if logged in but info not loaded (page refresh scenario)
-    if (userStore.isLoggedIn && !userStore.userInfo) {
-      await userStore.fetchUserInfo()
-      // If fetchUserInfo fails, it calls logout() which clears token
-      // Re-check authentication after fetch
-      if (!userStore.isLoggedIn) {
-        return next({ path: '/login', query: { redirect: to.fullPath } })
-      }
     }
 
     // Check role requirements
