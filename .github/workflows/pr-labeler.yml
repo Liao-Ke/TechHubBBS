@@ -1,0 +1,86 @@
+name: PR Labeler
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  pull-requests: write
+  issues: write
+  contents: read
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # --- Bootstrap: auto-create all labels on first run ---
+      - name: Ensure labels exist
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = [
+              {name: 'backend',       color: '0366d6', description: '后端代码变更'},
+              {name: 'frontend',      color: '2b7489', description: '前端代码变更'},
+              {name: 'docs',          color: '0075ca', description: '文档变更'},
+              {name: 'documentation', color: '0075ca', description: 'Markdown 文档变更'},
+              {name: 'feature',       color: '0e8a16', description: '新功能'},
+              {name: 'fix',           color: 'd73a4a', description: 'Bug 修复'},
+              {name: 'refactor',      color: 'fbca04', description: '代码重构'},
+              {name: 'bug',           color: 'd73a4a', description: 'Bug 报告'},
+              {name: 'enhancement',   color: 'a2eeef', description: '功能建议'},
+              {name: 'security',      color: 'd73a4a', description: '安全问题'},
+              {name: 'needs-triage',  color: 'ededed', description: '待分类'},
+              {name: 'ci-passed',     color: '0e8a16', description: 'CI 检查通过'},
+              {name: 'ci-failed',     color: 'd73a4a', description: 'CI 检查失败'},
+            ];
+            for (const label of labels) {
+              try {
+                await github.rest.issues.getLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: label.name,
+                });
+              } catch (e) {
+                if (e.status === 404) {
+                  await github.rest.issues.createLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    name: label.name,
+                    color: label.color,
+                    description: label.description,
+                  });
+                  core.notice(`Created label: ${label.name}`);
+                }
+              }
+            }
+
+      # --- Label by changed file paths ---
+      - uses: actions/labeler@v5
+
+      # --- Label by branch name prefix ---
+      - name: Label by branch prefix
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branch = context.payload.pull_request.head.ref;
+            const prefixMap = {
+              'feature/':  'feature',
+              'fix/':       'fix',
+              'refactor/':  'refactor',
+              'docs/':      'docs',
+              'security/':  'security',
+            };
+            for (const [prefix, label] of Object.entries(prefixMap)) {
+              if (branch.startsWith(prefix)) {
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  labels: [label],
+                });
+                break;
+              }
+            }
