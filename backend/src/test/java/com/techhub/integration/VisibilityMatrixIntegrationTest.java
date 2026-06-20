@@ -343,4 +343,77 @@ class VisibilityMatrixIntegrationTest extends BaseIntegrationTest {
                         .header("Authorization", bearerToken(adminToken)))
                 .andExpect(status().isOk());
     }
+
+    // ==================== 用户帖子列表可见性验证 ====================
+
+    @Nested
+    @DisplayName("用户帖子列表 GET /users/{id}/posts")
+    class UserPostsListVisibility {
+
+        private String authorId;
+
+        @BeforeEach
+        void setUpPosts() throws Exception {
+            authorId = getUserId(authorToken);
+            createPost(0); // PUBLIC
+            createPost(1); // LOGIN_ONLY
+            createPost(2); // FOLLOWERS_ONLY
+            createPost(3); // PRIVATE
+        }
+
+        @Test
+        @DisplayName("游客 → 只能看到公开帖(1条)")
+        void guestOnlySeesPublic() throws Exception {
+            mockMvc.perform(get("/api/v1/users/{id}/posts", authorId)
+                            .param("page", "1")
+                            .param("size", "20"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.records", hasSize(1)))
+                    .andExpect(jsonPath("$.data.records[0].title").value("Visibility=0 Post"));
+        }
+
+        @Test
+        @DisplayName("陌生人 → 看到公开+登录可见(2条)")
+        void strangerSeesPublicAndLoginOnly() throws Exception {
+            mockMvc.perform(get("/api/v1/users/{id}/posts", authorId)
+                            .header("Authorization", bearerToken(strangerToken))
+                            .param("page", "1")
+                            .param("size", "20"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.records", hasSize(2)));
+        }
+
+        @Test
+        @DisplayName("粉丝 → 看到公开+登录可见+粉丝可见(3条)")
+        void followerSeesPublicLoginAndFollowersOnly() throws Exception {
+            mockMvc.perform(get("/api/v1/users/{id}/posts", authorId)
+                            .header("Authorization", bearerToken(followerToken))
+                            .param("page", "1")
+                            .param("size", "20"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.records", hasSize(3)));
+        }
+
+        @Test
+        @DisplayName("作者 → 看到自己所有帖子含私密(4条)")
+        void authorSeesAllOwnPosts() throws Exception {
+            mockMvc.perform(get("/api/v1/users/{id}/posts", authorId)
+                            .header("Authorization", bearerToken(authorToken))
+                            .param("page", "1")
+                            .param("size", "20"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.records", hasSize(4)));
+        }
+
+        @Test
+        @DisplayName("管理员 → 通过权限看到所有帖子(4条)")
+        void adminSeesAllPosts() throws Exception {
+            mockMvc.perform(get("/api/v1/users/{id}/posts", authorId)
+                            .header("Authorization", bearerToken(adminToken))
+                            .param("page", "1")
+                            .param("size", "20"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.records", hasSize(4)));
+        }
+    }
 }

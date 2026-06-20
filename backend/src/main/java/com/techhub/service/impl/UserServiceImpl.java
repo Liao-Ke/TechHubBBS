@@ -17,12 +17,14 @@ import com.techhub.mapper.FavoriteMapper;
 import com.techhub.mapper.PostMapper;
 import com.techhub.mapper.UserMapper;
 import com.techhub.security.SecurityUtils;
+import com.techhub.service.PostVisibilityService;
 import com.techhub.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,6 +37,7 @@ public class UserServiceImpl implements UserService {
     private final PostMapper postMapper;
     private final FavoriteMapper favoriteMapper;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final PostVisibilityService postVisibilityService;
 
     @Override
     public UserDetailVO getCurrentUser() {
@@ -68,16 +71,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public PageResult<PostVO> getUserPosts(Long userId, PostListQuery query) {
+    public PageResult<PostVO> getUserPosts(Long userId, PostListQuery query, Long currentUserId) {
         Page<Post> page = new Page<>(query.getPage(), query.getSize());
         Page<Post> resultPage = postMapper.selectPage(page,
                 new LambdaQueryWrapper<Post>()
                         .eq(Post::getAuthorId, userId)
                         .eq(Post::getDeleted, 0)
                         .orderByDesc(Post::getCreateTime));
-        List<PostVO> records = resultPage.getRecords().stream()
-                .map(this::toPostVO)
-                .collect(Collectors.toList());
+
+        boolean isLoggedIn = currentUserId != null;
+        boolean isAdmin = isAdmin();
+
+        List<PostVO> records = new ArrayList<>();
+        for (Post post : resultPage.getRecords()) {
+            if (postVisibilityService.isVisible(post, currentUserId, isLoggedIn, isAdmin)) {
+                records.add(toPostVO(post));
+            }
+        }
         return PageResult.of(records, resultPage.getTotal(), resultPage.getSize(), resultPage.getCurrent());
     }
 
@@ -125,6 +135,11 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
 
         return PageResult.of(records, favResult.getTotal(), size, page);
+    }
+
+    private boolean isAdmin() {
+        String role = SecurityUtils.getCurrentRole();
+        return "ADMIN".equals(role);
     }
 
     // ---- mapping helpers ----
