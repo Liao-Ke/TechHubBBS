@@ -266,7 +266,7 @@ describe('PostCreatePage', () => {
     })
     vi.mocked(ElMessageBox.confirm).mockResolvedValueOnce('confirm' as never)
 
-    const wrapper = await mountPage()
+    await mountPage()
     await flushPromises()
 
     expect(mockDraft.restoreDraft).toHaveBeenCalledWith('draft-1')
@@ -276,7 +276,7 @@ describe('PostCreatePage', () => {
     mockDraft.checkDraft.mockResolvedValueOnce({ id: 'draft-1' })
     vi.mocked(ElMessageBox.confirm).mockRejectedValueOnce('cancel' as never)
 
-    const wrapper = await mountPage()
+    await mountPage()
     await flushPromises()
 
     expect(mockDraft.discardDraft).toHaveBeenCalledWith('draft-1')
@@ -381,7 +381,7 @@ describe('PostEditPage', () => {
   })
 
   it('fetches post on mount by route param id', async () => {
-    const wrapper = await mountPage()
+    await mountPage()
     await flushPromises()
 
     expect(mockPostApi.getDetail).toHaveBeenCalledWith('123')
@@ -390,7 +390,7 @@ describe('PostEditPage', () => {
   it('shows error and redirects home on post fetch failure', async () => {
     mockPostApi.getDetail.mockRejectedValueOnce(new Error('Not found'))
 
-    const wrapper = await mountPage()
+    await mountPage()
     await flushPromises()
 
     expect(ElMessage.error).toHaveBeenCalledWith('加载帖子失败')
@@ -398,7 +398,7 @@ describe('PostEditPage', () => {
   })
 
   it('checks for existing draft on mount', async () => {
-    const wrapper = await mountPage()
+    await mountPage()
     await flushPromises()
 
     expect(mockDraft.checkDraft).toHaveBeenCalledOnce()
@@ -415,7 +415,7 @@ describe('PostEditPage', () => {
     })
     vi.mocked(ElMessageBox.confirm).mockResolvedValueOnce('confirm' as never)
 
-    const wrapper = await mountPage()
+    await mountPage()
     await flushPromises()
 
     expect(mockDraft.restoreDraft).toHaveBeenCalledWith('draft-edit-1')

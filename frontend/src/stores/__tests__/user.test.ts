@@ -58,11 +58,6 @@ const mockAdminDetail: UserDetailVO = {
   role: 'ADMIN',
 }
 
-const mockModeratorDetail: UserDetailVO = {
-  ...mockUserDetail,
-  role: 'MODERATOR',
-}
-
 const mockAdminProfile: UserProfileVO = {
   ...mockUserProfile,
   role: 'ADMIN',
