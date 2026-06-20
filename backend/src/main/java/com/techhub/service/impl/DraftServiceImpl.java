@@ -93,10 +93,20 @@ public class DraftServiceImpl implements DraftService {
 
     @Override
     public PostDraft getById(Long id) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null) {
+            throw new BusinessException(ResultCode.UNAUTHORIZED, "需要登录");
+        }
+
         PostDraft draft = postDraftMapper.selectById(id);
         if (draft == null) {
             throw new BusinessException(ResultCode.NOT_FOUND, "草稿不存在");
         }
+
+        if (!draft.getUserId().equals(userId)) {
+            throw new BusinessException(ResultCode.FORBIDDEN, "无权查看他人草稿");
+        }
+
         fillCategoryNames(List.of(draft));
         return draft;
     }
