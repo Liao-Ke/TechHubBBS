@@ -25,20 +25,16 @@ jobs:
             const headBranch = run.head_branch;
             const htmlUrl = run.html_url;
 
-            // Find PR number from workflow_run payload or search by head branch
+            // Find PR number via head_sha (works for same-repo and fork PRs)
             let prNumber = null;
-            if (run.pull_requests && run.pull_requests.length > 0) {
-              prNumber = run.pull_requests[0].number;
-            } else {
-              const prs = await github.rest.pulls.list({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                head: `${context.repo.owner}:${headBranch}`,
-                state: 'open',
-              });
-              if (prs.data.length > 0) {
-                prNumber = prs.data[0].number;
-              }
+            const { data: associated } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: run.head_sha,
+            });
+            const openPr = associated.find(pr => pr.state === 'open');
+            if (openPr) {
+              prNumber = openPr.number;
             }
 
             if (!prNumber) {
