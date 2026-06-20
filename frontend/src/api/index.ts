@@ -27,6 +27,7 @@ export class ApiError extends Error {
 // Interceptor functions (exported for unit-testability)
 // ---------------------------------------------------------------------------
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function onRequestInterceptor(context: any): Promise<void> {
   // Dynamic import to avoid circular dependency with stores / utils
   const { getToken } = await import('@/utils/token')
@@ -49,6 +50,7 @@ export async function onRequestInterceptor(context: any): Promise<void> {
   context.options.headers = headers
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function onResponseInterceptor(context: any): Promise<void> {
   const body = context.response._data as ApiResponse<unknown> | null
   // If the HTTP status is 2xx but the API returned a business-error code
@@ -57,6 +59,7 @@ export async function onResponseInterceptor(context: any): Promise<void> {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function onResponseErrorInterceptor(context: any): Promise<never> {
   const response = context.response
   const status = response.status

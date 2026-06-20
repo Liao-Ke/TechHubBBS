@@ -3,25 +3,25 @@ import { mount, flushPromises, type VueWrapper } from '@vue/test-utils'
 import { createRouter, createWebHistory } from 'vue-router'
 import { createPinia, setActivePinia } from 'pinia'
 import { nextTick, type ComponentPublicInstance } from 'vue'
-import type { UserProfileVO, PostVO, FollowStatusVO } from '@/api/types'
+import type { UserProfileVO, PostVO } from '@/api/types'
 
 // ── Mock IntersectionObserver ──
 vi.stubGlobal(
   'IntersectionObserver',
   vi.fn(() => ({
-    observe: vi.fn(),
-    unobserve: vi.fn(),
-    disconnect: vi.fn(),
+    observe: vi.fn<(...args: unknown[]) => unknown>(),
+    unobserve: vi.fn<(...args: unknown[]) => unknown>(),
+    disconnect: vi.fn<(...args: unknown[]) => unknown>(),
   })),
 )
 
 // ── Mock API modules ──
-const mockGetById = vi.fn()
-const mockGetUserPosts = vi.fn()
-const mockFollow = vi.fn()
-const mockUnfollow = vi.fn()
-const mockCheckFollow = vi.fn()
-const mockGetList = vi.fn() // postApi.getList
+const mockGetById = vi.fn<(...args: unknown[]) => unknown>()
+const mockGetUserPosts = vi.fn<(...args: unknown[]) => unknown>()
+const mockFollow = vi.fn<(...args: unknown[]) => unknown>()
+const mockUnfollow = vi.fn<(...args: unknown[]) => unknown>()
+const mockCheckFollow = vi.fn<(...args: unknown[]) => unknown>()
+const mockGetList = vi.fn<(...args: unknown[]) => unknown>() // postApi.getList
 
 vi.mock('@/api/modules/user', () => ({
   userApi: {

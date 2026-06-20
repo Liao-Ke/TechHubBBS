@@ -23,7 +23,7 @@ describe('AdminLayout', () => {
       setItem: vi.fn((key: string, value: string) => { store[key] = value }),
       removeItem: vi.fn((key: string) => { delete store[key] }),
       clear: vi.fn(() => { Object.keys(store).forEach(k => delete store[k]) }),
-      key: vi.fn(),
+      key: vi.fn<(...args: unknown[]) => unknown>(),
       length: 0,
     })
     // Don't mock document — jsdom provides it, and vue-router needs document.querySelector

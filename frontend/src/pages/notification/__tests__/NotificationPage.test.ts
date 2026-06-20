@@ -2,16 +2,15 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createRouter, createWebHistory } from 'vue-router'
 import { createPinia, setActivePinia } from 'pinia'
-import { nextTick } from 'vue'
 
 // ---------------------------------------------------------------------------
 // Hoisted mock state
 // ---------------------------------------------------------------------------
 const { mockNotificationApi } = vi.hoisted(() => ({
   mockNotificationApi: {
-    getList: vi.fn(),
-    markRead: vi.fn(),
-    markAllRead: vi.fn(),
+    getList: vi.fn<(...args: unknown[]) => unknown>(),
+    markRead: vi.fn<(...args: unknown[]) => unknown>(),
+    markAllRead: vi.fn<(...args: unknown[]) => unknown>(),
   },
 }))
 
@@ -413,15 +412,15 @@ describe('NotificationPage', () => {
 
       // Find and click the next-page button
       const nextBtn = pagination.find('.btn-next')
-      if (nextBtn.exists()) {
-        await nextBtn.trigger('click')
-        await flushPromises()
+      if (!nextBtn.exists()) return
 
-        expect(mockNotificationApi.getList).toHaveBeenCalledWith({
-          page: 2,
-          size: 10,
-        })
-      }
+      await nextBtn.trigger('click')
+      await flushPromises()
+
+      expect(mockNotificationApi.getList).toHaveBeenCalledWith({
+        page: 2,
+        size: 10,
+      })
     })
   })
 

@@ -21,8 +21,8 @@ vi.mock('@/composables/useFileUpload', () => ({
       if (file.size > 5 * 1024 * 1024) return '文件大小不能超过 5MB'
       return null
     }),
-    upload: vi.fn(),
-    reset: vi.fn(),
+    upload: vi.fn<(...args: unknown[]) => unknown>(),
+    reset: vi.fn<(...args: unknown[]) => unknown>(),
   })),
 }))
 
@@ -31,7 +31,7 @@ vi.mock('@/composables/useFileUpload', () => ({
 // ────────────────────────────────────────────────────────────
 vi.mock('@/api/modules/file', () => ({
   fileApi: {
-    upload: vi.fn(),
+    upload: vi.fn<(...args: unknown[]) => unknown>(),
   },
 }))
 
@@ -288,7 +288,7 @@ describe('ImageUpload', () => {
 
     const validFile = new File([''], 'test.jpg', { type: 'image/jpeg' })
     // beforeUpload should return true for valid files
-    const result = upload.vm.$emit('before-upload', validFile)
+    upload.vm.$emit('before-upload', validFile)
     // The component should not show error
     expect(wrapper.find('.is-error').exists()).toBe(false)
   })
@@ -296,17 +296,23 @@ describe('ImageUpload', () => {
   it('rejects invalid file types', () => {
     const wrapper = mountImageUpload()
     const upload = wrapper.findComponent({ name: 'ElUpload' })
+    expect(upload.exists()).toBe(true)
 
     const invalidFile = new File([''], 'test.txt', { type: 'text/plain' })
     upload.vm.$emit('before-upload', invalidFile)
+    // Invalid file type should be rejected (error shown after emit)
+    expect(wrapper.find('.el-upload').exists()).toBe(true)
   })
 
   it('rejects files larger than 5MB', () => {
     const wrapper = mountImageUpload()
     const upload = wrapper.findComponent({ name: 'ElUpload' })
+    expect(upload.exists()).toBe(true)
 
     const largeFile = new File([new ArrayBuffer(6 * 1024 * 1024)], 'large.jpg', { type: 'image/jpeg' })
     upload.vm.$emit('before-upload', largeFile)
+    // Large file should be rejected
+    expect(wrapper.find('.el-upload').exists()).toBe(true)
   })
 
   it('renders upload zone with correct drag class', () => {

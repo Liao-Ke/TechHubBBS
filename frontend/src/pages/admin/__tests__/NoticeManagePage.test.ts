@@ -5,11 +5,11 @@ import { createPinia, setActivePinia } from 'pinia'
 import { nextTick } from 'vue'
 import type { CategoryNoticeVO, Category, PageResult } from '@/api/types'
 
-const mockGetNotices = vi.fn()
-const mockNoticeCreate = vi.fn()
-const mockNoticeUpdate = vi.fn()
-const mockNoticeDelete = vi.fn()
-const mockGetCategories = vi.fn()
+const mockGetNotices = vi.fn<(...args: unknown[]) => unknown>()
+const mockNoticeCreate = vi.fn<(...args: unknown[]) => unknown>()
+const mockNoticeUpdate = vi.fn<(...args: unknown[]) => unknown>()
+const mockNoticeDelete = vi.fn<(...args: unknown[]) => unknown>()
+const mockGetCategories = vi.fn<(...args: unknown[]) => unknown>()
 
 vi.mock('@/api/modules/admin', () => ({
   adminApi: {
@@ -40,12 +40,12 @@ vi.mock('@element-plus/icons-vue', async (importOriginal) => {
   return { ...actual, Plus: { render: () => null } }
 })
 
-const mockMessageBoxConfirm = vi.fn()
+const mockMessageBoxConfirm = vi.fn<(...args: unknown[]) => unknown>()
 vi.mock('element-plus', async (importOriginal) => {
   const actual = await importOriginal<typeof import('element-plus')>()
   return {
     ...actual,
-    ElMessage: { success: vi.fn(), error: vi.fn(), warning: vi.fn() },
+    ElMessage: { success: vi.fn<(...args: unknown[]) => unknown>(), error: vi.fn<(...args: unknown[]) => unknown>(), warning: vi.fn<(...args: unknown[]) => unknown>() },
     ElMessageBox: { confirm: (...args: unknown[]) => mockMessageBoxConfirm(...args) },
   }
 })
@@ -403,13 +403,13 @@ describe('NoticeManagePage', () => {
       await nextTick()
 
       const switchComp = wrapper.findComponent({ name: 'ElSwitch' })
-      if (switchComp.exists()) {
-        await switchComp.vm.$emit('change', true)
-        await flushPromises()
-        await nextTick()
+      if (!switchComp.exists()) return
 
-        expect(mockNoticeUpdate).toHaveBeenCalledWith('1', { isPinned: 1 })
-      }
+      await switchComp.vm.$emit('change', true)
+      await flushPromises()
+      await nextTick()
+
+      expect(mockNoticeUpdate).toHaveBeenCalledWith('1', { isPinned: 1 })
     })
   })
 })

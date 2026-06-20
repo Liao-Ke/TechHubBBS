@@ -39,7 +39,8 @@ async function fetchNotices() {
   loading.value = true
   try {
     const res = await noticeApi.getList({ categoryId: props.categoryId })
-    notices.value = res.data.records || []
+    const data = res.data
+    notices.value = Array.isArray(data) ? data : []
   } finally {
     loading.value = false
   }

@@ -5,10 +5,10 @@ import { useDraft } from '@/composables/useDraft'
 // Mock the draft API module
 vi.mock('@/api/modules/draft', () => ({
   draftApi: {
-    check: vi.fn(),
-    save: vi.fn(),
-    remove: vi.fn(),
-    getDetail: vi.fn(),
+    check: vi.fn<(...args: unknown[]) => unknown>(),
+    save: vi.fn<(...args: unknown[]) => unknown>(),
+    remove: vi.fn<(...args: unknown[]) => unknown>(),
+    getDetail: vi.fn<(...args: unknown[]) => unknown>(),
   },
 }))
 
@@ -26,6 +26,7 @@ describe('useDraft', () => {
 
   describe('saveDraft', () => {
     it('calls draftApi.save when isDirty is true', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.mocked(draftApi.save).mockResolvedValue({ data: { id: 'draft-1', lastSavedAt: '2025-01-01', createTime: '2025-01-01', updateTime: '2025-01-01' } } as any)
 
       const { draftData, saveDraft, isDirty, currentDraftId, lastSavedAt } = useDraft()
@@ -53,6 +54,7 @@ describe('useDraft', () => {
     })
 
     it('does NOT call save if already saving', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ;(draftApi.save as any).mockResolvedValue({ data: { id: 'draft-1', lastSavedAt: '', createTime: '', updateTime: '' } })
       const { draftData, saveDraft, isDirty } = useDraft()
       draftData.value = { title: 'Test' }
@@ -68,6 +70,7 @@ describe('useDraft', () => {
 
   describe('auto-save debounce', () => {
     it('triggers save 2s after data change via watch', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.mocked(draftApi.save).mockResolvedValue({ data: { id: 'draft-1', lastSavedAt: '', createTime: '', updateTime: '' } } as any)
 
       const { draftData, startAutoSave } = useDraft()
@@ -83,6 +86,7 @@ describe('useDraft', () => {
     })
 
     it('resets debounce timer when data changes twice rapidly', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.mocked(draftApi.save).mockResolvedValue({ data: { id: 'draft-1', lastSavedAt: '', createTime: '', updateTime: '' } } as any)
 
       const { draftData, startAutoSave } = useDraft()
@@ -116,6 +120,7 @@ describe('useDraft', () => {
 
   describe('auto-save interval', () => {
     it('30s interval triggers save if dirty', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.mocked(draftApi.save).mockResolvedValue({ data: { id: 'draft-int', lastSavedAt: '', createTime: '', updateTime: '' } } as any)
 
       const { draftData, startAutoSave } = useDraft()
@@ -139,6 +144,7 @@ describe('useDraft', () => {
 
   describe('cleanup on unmount', () => {
     it('stops timers and saves final draft via stopAutoSave', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.mocked(draftApi.save).mockResolvedValue({ data: { id: 'draft-final', lastSavedAt: '', createTime: '', updateTime: '' } } as any)
 
       const { draftData, startAutoSave, stopAutoSave } = useDraft()
@@ -167,6 +173,7 @@ describe('useDraft', () => {
   describe('discardDraft', () => {
     it('calls draftApi.remove with current draft ID', async () => {
       vi.mocked(draftApi.remove).mockResolvedValue({ code: 200, message: 'ok', data: null })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.mocked(draftApi.save).mockResolvedValue({ data: { id: 'draft-discard', lastSavedAt: '', createTime: '', updateTime: '' } } as any)
 
       const { draftData, currentDraftId, discardDraft, startAutoSave } = useDraft()
@@ -200,6 +207,7 @@ describe('useDraft', () => {
   describe('checkDraft', () => {
     it('calls draftApi.check with postId', async () => {
       const mockDraft = { data: { id: 'existing-draft', lastSavedAt: '', createTime: '', updateTime: '' } }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.mocked(draftApi.check).mockResolvedValue(mockDraft as any)
 
       const { checkDraft, currentDraftId } = useDraft('post-123')
@@ -236,6 +244,7 @@ describe('useDraft', () => {
           updateTime: '',
         },
       }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.mocked(draftApi.getDetail).mockResolvedValue(mockDraft as any)
 
       const { restoreDraft, draftData, currentDraftId } = useDraft()

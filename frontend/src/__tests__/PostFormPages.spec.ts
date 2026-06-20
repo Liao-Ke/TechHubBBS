@@ -4,8 +4,8 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 
 // ---- Mocks ----
 
-const mockRouterPush = vi.fn()
-const mockRouterReplace = vi.fn()
+const mockRouterPush = vi.fn<(...args: unknown[]) => unknown>()
+const mockRouterReplace = vi.fn<(...args: unknown[]) => unknown>()
 const mockRouteParams = { id: '123' }
 
 vi.mock('vue-router', () => ({
@@ -14,13 +14,13 @@ vi.mock('vue-router', () => ({
 }))
 
 const mockPostApi = {
-  create: vi.fn(),
-  update: vi.fn(),
-  getDetail: vi.fn(),
+  create: vi.fn<(...args: unknown[]) => unknown>(),
+  update: vi.fn<(...args: unknown[]) => unknown>(),
+  getDetail: vi.fn<(...args: unknown[]) => unknown>(),
 }
 
 const mockCategoryApi = {
-  getList: vi.fn(),
+  getList: vi.fn<(...args: unknown[]) => unknown>(),
 }
 
 vi.mock('@/api/modules/post', () => ({
@@ -36,12 +36,12 @@ const mockDraft = {
   draftData: { value: {} as Record<string, unknown> },
   isDirty: { value: false },
   saving: { value: false },
-  checkDraft: vi.fn(),
-  restoreDraft: vi.fn(),
-  discardDraft: vi.fn(),
-  saveDraft: vi.fn(),
-  startAutoSave: vi.fn(),
-  stopAutoSave: vi.fn(),
+  checkDraft: vi.fn<(...args: unknown[]) => unknown>(),
+  restoreDraft: vi.fn<(...args: unknown[]) => unknown>(),
+  discardDraft: vi.fn<(...args: unknown[]) => unknown>(),
+  saveDraft: vi.fn<(...args: unknown[]) => unknown>(),
+  startAutoSave: vi.fn<(...args: unknown[]) => unknown>(),
+  stopAutoSave: vi.fn<(...args: unknown[]) => unknown>(),
 }
 
 vi.mock('@/composables/useDraft', () => ({
@@ -54,13 +54,13 @@ vi.mock('element-plus', async () => {
   return {
     ...(actual as object),
     ElMessage: {
-      success: vi.fn(),
-      error: vi.fn(),
-      warning: vi.fn(),
-      info: vi.fn(),
+      success: vi.fn<(...args: unknown[]) => unknown>(),
+      error: vi.fn<(...args: unknown[]) => unknown>(),
+      warning: vi.fn<(...args: unknown[]) => unknown>(),
+      info: vi.fn<(...args: unknown[]) => unknown>(),
     },
     ElMessageBox: {
-      confirm: vi.fn(),
+      confirm: vi.fn<(...args: unknown[]) => unknown>(),
     },
   }
 })
@@ -72,6 +72,7 @@ const MdEditorStub = {
   props: ['modelValue'],
   emits: ['update:modelValue'],
   methods: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onInput(this: any, event: Event) {
       const target = event.target as HTMLTextAreaElement
       this.$emit('update:modelValue', target.value)
@@ -85,6 +86,7 @@ const VisibilitySelectorStub = {
   props: ['modelValue'],
   emits: ['update:modelValue'],
   methods: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onChange(this: any, event: Event) {
       const target = event.target as HTMLSelectElement
       this.$emit('update:modelValue', Number(target.value))
@@ -97,7 +99,9 @@ const ElFormStub = {
   template: '<form @submit.prevent="handleFormSubmit"><slot /></form>',
   emits: ['submit'],
   methods: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     validate(this: any) { return Promise.resolve(true) },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     handleFormSubmit(this: any, event: Event) {
       this.$emit('submit', event)
     },
@@ -116,6 +120,7 @@ const ElInputStub = {
   props: ['modelValue', 'placeholder', 'maxlength', 'showWordLimit'],
   emits: ['update:modelValue'],
   methods: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onInput(this: any, event: Event) {
       const target = event.target as HTMLInputElement
       this.$emit('update:modelValue', target.value)
@@ -129,6 +134,7 @@ const ElSelectStub = {
   props: ['modelValue', 'placeholder'],
   emits: ['update:modelValue'],
   methods: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onChange(this: any, event: Event) {
       const target = event.target as HTMLSelectElement
       this.$emit('update:modelValue', Number(target.value))
@@ -229,25 +235,23 @@ describe('PostCreatePage', () => {
 
   it('shows error when categories fail to load', async () => {
     mockCategoryApi.getList.mockRejectedValueOnce(new Error('Network error'))
-    const wrapper = await mountPage()
+    await mountPage()
     await flushPromises()
 
     expect(ElMessage.error).toHaveBeenCalledWith('加载版块列表失败')
   })
 
   it('calls checkDraft on mount', async () => {
-    const wrapper = await mountPage()
+    await mountPage()
     await flushPromises()
 
     expect(mockDraft.checkDraft).toHaveBeenCalledOnce()
   })
 
   it('shows draft restore dialog when draft exists on mount', async () => {
-    mockDraft.checkDraft.mockResolvedValueOnce({
-      data: { id: 'draft-1', title: '草稿标题', content: '草稿内容' },
-    })
+    mockDraft.checkDraft.mockResolvedValueOnce({ id: 'draft-1', title: '草稿标题', content: '草稿内容' })
 
-    const wrapper = await mountPage()
+    await mountPage()
     await flushPromises()
 
     expect(ElMessageBox.confirm).toHaveBeenCalledWith(
@@ -258,9 +262,7 @@ describe('PostCreatePage', () => {
   })
 
   it('restores draft content into form when user confirms', async () => {
-    mockDraft.checkDraft.mockResolvedValueOnce({
-      data: { id: 'draft-1' },
-    })
+    mockDraft.checkDraft.mockResolvedValueOnce({ id: 'draft-1' })
     mockDraft.restoreDraft.mockResolvedValueOnce({
       id: 'draft-1',
       title: '草稿标题',
@@ -270,19 +272,17 @@ describe('PostCreatePage', () => {
     })
     vi.mocked(ElMessageBox.confirm).mockResolvedValueOnce('confirm' as never)
 
-    const wrapper = await mountPage()
+    await mountPage()
     await flushPromises()
 
     expect(mockDraft.restoreDraft).toHaveBeenCalledWith('draft-1')
   })
 
   it('discards draft when user cancels restore dialog', async () => {
-    mockDraft.checkDraft.mockResolvedValueOnce({
-      data: { id: 'draft-1' },
-    })
+    mockDraft.checkDraft.mockResolvedValueOnce({ id: 'draft-1' })
     vi.mocked(ElMessageBox.confirm).mockRejectedValueOnce('cancel' as never)
 
-    const wrapper = await mountPage()
+    await mountPage()
     await flushPromises()
 
     expect(mockDraft.discardDraft).toHaveBeenCalledWith('draft-1')
@@ -387,7 +387,7 @@ describe('PostEditPage', () => {
   })
 
   it('fetches post on mount by route param id', async () => {
-    const wrapper = await mountPage()
+    await mountPage()
     await flushPromises()
 
     expect(mockPostApi.getDetail).toHaveBeenCalledWith('123')
@@ -396,7 +396,7 @@ describe('PostEditPage', () => {
   it('shows error and redirects home on post fetch failure', async () => {
     mockPostApi.getDetail.mockRejectedValueOnce(new Error('Not found'))
 
-    const wrapper = await mountPage()
+    await mountPage()
     await flushPromises()
 
     expect(ElMessage.error).toHaveBeenCalledWith('加载帖子失败')
@@ -404,16 +404,14 @@ describe('PostEditPage', () => {
   })
 
   it('checks for existing draft on mount', async () => {
-    const wrapper = await mountPage()
+    await mountPage()
     await flushPromises()
 
     expect(mockDraft.checkDraft).toHaveBeenCalledOnce()
   })
 
   it('restores draft when editing and draft exists', async () => {
-    mockDraft.checkDraft.mockResolvedValueOnce({
-      data: { id: 'draft-edit-1' },
-    })
+    mockDraft.checkDraft.mockResolvedValueOnce({ data: { id: 'draft-edit-1' } })
     mockDraft.restoreDraft.mockResolvedValueOnce({
       id: 'draft-edit-1',
       title: '草稿修改后的标题',
@@ -423,7 +421,7 @@ describe('PostEditPage', () => {
     })
     vi.mocked(ElMessageBox.confirm).mockResolvedValueOnce('confirm' as never)
 
-    const wrapper = await mountPage()
+    await mountPage()
     await flushPromises()
 
     expect(mockDraft.restoreDraft).toHaveBeenCalledWith('draft-edit-1')

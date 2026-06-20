@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { authApi } from '@/api/modules/auth'
 import { userApi } from '@/api/modules/user'
 import { getToken, setToken, removeToken } from '@/utils/token'
-import type { UserProfileVO, LoginRequest, RegisterRequest } from '@/api/types'
+import type { UserProfileVO, RegisterRequest } from '@/api/types'
 
 export const useUserStore = defineStore('user', () => {
   const token = ref<string | null>(getToken())

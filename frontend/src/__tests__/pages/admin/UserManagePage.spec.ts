@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { nextTick } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
 import UserManagePage from '@/pages/admin/UserManagePage.vue'
 
 // ── Mock data ──
@@ -22,9 +21,9 @@ const mockPageResult = {
 // ── Mocks (hoisted so vi.mock can access them) ──
 const mocks = vi.hoisted(() => ({
   adminApi: {
-    getUsers: vi.fn(),
-    banUser: vi.fn(),
-    setRole: vi.fn(),
+    getUsers: vi.fn<(...args: unknown[]) => unknown>(),
+    banUser: vi.fn<(...args: unknown[]) => unknown>(),
+    setRole: vi.fn<(...args: unknown[]) => unknown>(),
   },
 }))
 
@@ -33,7 +32,7 @@ vi.mock('@/api/modules/admin', () => ({
 }))
 
 vi.mock('@/stores/user', () => ({
-  useUserStore: vi.fn(),
+  useUserStore: vi.fn<(...args: unknown[]) => unknown>(),
 }))
 
 vi.mock('element-plus', async () => {
@@ -41,13 +40,13 @@ vi.mock('element-plus', async () => {
   return {
     ...(actual as object),
     ElMessage: {
-      success: vi.fn(),
-      error: vi.fn(),
-      warning: vi.fn(),
-      info: vi.fn(),
+      success: vi.fn<(...args: unknown[]) => unknown>(),
+      error: vi.fn<(...args: unknown[]) => unknown>(),
+      warning: vi.fn<(...args: unknown[]) => unknown>(),
+      info: vi.fn<(...args: unknown[]) => unknown>(),
     },
     ElMessageBox: {
-      confirm: vi.fn(),
+      confirm: vi.fn<(...args: unknown[]) => unknown>(),
     },
   }
 })

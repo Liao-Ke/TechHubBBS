@@ -4,7 +4,7 @@ import NoticeBanner from '../NoticeBanner.vue'
 import type { CategoryNoticeVO } from '@/api/types'
 
 // ── Mock noticeApi ──
-const mockGetList = vi.fn()
+const mockGetList = vi.fn<(...args: unknown[]) => unknown>()
 vi.mock('@/api/modules/notice', () => ({
   noticeApi: {
     getList: (...args: unknown[]) => mockGetList(...args),
@@ -56,7 +56,7 @@ describe('NoticeBanner.vue', () => {
   // ── Empty state ──
   describe('empty state', () => {
     it('renders nothing when no notices returned', async () => {
-      mockGetList.mockResolvedValue({ data: { records: [] } })
+      mockGetList.mockResolvedValue({ data: [] })
       const wrapper = mountBanner()
       await flushPromises()
       // The root element should be a comment node or empty div
@@ -64,7 +64,7 @@ describe('NoticeBanner.vue', () => {
     })
 
     it('calls noticeApi.getList with correct categoryId', async () => {
-      mockGetList.mockResolvedValue({ data: { records: [] } })
+      mockGetList.mockResolvedValue({ data: [] })
       mountBanner('cat-42')
       await flushPromises()
       expect(mockGetList).toHaveBeenCalledWith({ categoryId: 'cat-42' })
@@ -75,11 +75,9 @@ describe('NoticeBanner.vue', () => {
   describe('single notice (static display)', () => {
     it('renders static display for a single notice', async () => {
       mockGetList.mockResolvedValue({
-        data: {
-          records: [
-            makeNotice({ id: 'n1', title: '唯一公告', isPinned: 1, type: 0 }),
-          ],
-        },
+        data: [
+          makeNotice({ id: 'n1', title: '唯一公告', isPinned: 1, type: 0 }),
+        ],
       })
       const wrapper = mountBanner()
       await flushPromises()
@@ -92,7 +90,7 @@ describe('NoticeBanner.vue', () => {
 
     it('shows 须知 tag for type=0', async () => {
       mockGetList.mockResolvedValue({
-        data: { records: [makeNotice({ type: 0, isPinned: 1 })] },
+        data: [makeNotice({ type: 0, isPinned: 1 })],
       })
       const wrapper = mountBanner()
       await flushPromises()
@@ -103,7 +101,7 @@ describe('NoticeBanner.vue', () => {
 
     it('shows 活动 tag for type=1', async () => {
       mockGetList.mockResolvedValue({
-        data: { records: [makeNotice({ type: 1, isPinned: 1 })] },
+        data: [makeNotice({ type: 1, isPinned: 1 })],
       })
       const wrapper = mountBanner()
       await flushPromises()
@@ -113,7 +111,7 @@ describe('NoticeBanner.vue', () => {
 
     it('renders title as link', async () => {
       mockGetList.mockResolvedValue({
-        data: { records: [makeNotice({ id: 'n42', title: '公告标题', isPinned: 1 })] },
+        data: [makeNotice({ id: 'n42', title: '公告标题', isPinned: 1 })],
       })
       const wrapper = mountBanner()
       await flushPromises()
@@ -128,12 +126,10 @@ describe('NoticeBanner.vue', () => {
   describe('multiple pinned notices (carousel)', () => {
     it('renders carousel when >1 pinned notice', async () => {
       mockGetList.mockResolvedValue({
-        data: {
-          records: [
-            makeNotice({ id: 'n1', title: '公告1', isPinned: 1 }),
-            makeNotice({ id: 'n2', title: '公告2', isPinned: 1 }),
-          ],
-        },
+        data: [
+          makeNotice({ id: 'n1', title: '公告1', isPinned: 1 }),
+          makeNotice({ id: 'n2', title: '公告2', isPinned: 1 }),
+        ],
       })
       const wrapper = mountBanner()
       await flushPromises()
@@ -144,12 +140,10 @@ describe('NoticeBanner.vue', () => {
 
     it('renders each pinned notice as a carousel slide', async () => {
       mockGetList.mockResolvedValue({
-        data: {
-          records: [
-            makeNotice({ id: 'n1', title: '公告1', isPinned: 1 }),
-            makeNotice({ id: 'n2', title: '公告2', isPinned: 1 }),
-          ],
-        },
+        data: [
+          makeNotice({ id: 'n1', title: '公告1', isPinned: 1 }),
+          makeNotice({ id: 'n2', title: '公告2', isPinned: 1 }),
+        ],
       })
       const wrapper = mountBanner()
       await flushPromises()
@@ -165,13 +159,11 @@ describe('NoticeBanner.vue', () => {
   describe('non-pinned notices list', () => {
     it('renders non-pinned notices in a list', async () => {
       mockGetList.mockResolvedValue({
-        data: {
-          records: [
-            makeNotice({ id: 'n1', title: '置顶公告', isPinned: 1 }),
-            makeNotice({ id: 'n2', title: '普通公告', isPinned: 0 }),
-            makeNotice({ id: 'n3', title: '普通公告2', isPinned: 0 }),
-          ],
-        },
+        data: [
+          makeNotice({ id: 'n1', title: '置顶公告', isPinned: 1 }),
+          makeNotice({ id: 'n2', title: '普通公告', isPinned: 0 }),
+          makeNotice({ id: 'n3', title: '普通公告2', isPinned: 0 }),
+        ],
       })
       const wrapper = mountBanner()
       await flushPromises()
@@ -185,7 +177,7 @@ describe('NoticeBanner.vue', () => {
       const nonPinned = Array.from({ length: 5 }, (_, i) =>
         makeNotice({ id: `n${i + 1}`, title: `公告${i + 1}`, isPinned: 0 })
       )
-      mockGetList.mockResolvedValue({ data: { records: nonPinned } })
+      mockGetList.mockResolvedValue({ data: nonPinned })
       const wrapper = mountBanner()
       await flushPromises()
 
@@ -197,7 +189,7 @@ describe('NoticeBanner.vue', () => {
       const nonPinned = Array.from({ length: 5 }, (_, i) =>
         makeNotice({ id: `n${i + 1}`, title: `公告${i + 1}`, isPinned: 0 })
       )
-      mockGetList.mockResolvedValue({ data: { records: nonPinned } })
+      mockGetList.mockResolvedValue({ data: nonPinned })
       const wrapper = mountBanner()
       await flushPromises()
 
@@ -210,7 +202,7 @@ describe('NoticeBanner.vue', () => {
       const nonPinned = Array.from({ length: 5 }, (_, i) =>
         makeNotice({ id: `n${i + 1}`, title: `公告${i + 1}`, isPinned: 0 })
       )
-      mockGetList.mockResolvedValue({ data: { records: nonPinned } })
+      mockGetList.mockResolvedValue({ data: nonPinned })
       const wrapper = mountBanner()
       await flushPromises()
 
@@ -224,7 +216,7 @@ describe('NoticeBanner.vue', () => {
       const nonPinned = Array.from({ length: 5 }, (_, i) =>
         makeNotice({ id: `n${i + 1}`, title: `公告${i + 1}`, isPinned: 0 })
       )
-      mockGetList.mockResolvedValue({ data: { records: nonPinned } })
+      mockGetList.mockResolvedValue({ data: nonPinned })
       const wrapper = mountBanner()
       await flushPromises()
 
@@ -241,7 +233,7 @@ describe('NoticeBanner.vue', () => {
         makeNotice({ id: 'n2', title: 'B', isPinned: 0 }),
         makeNotice({ id: 'n3', title: 'C', isPinned: 0 }),
       ]
-      mockGetList.mockResolvedValue({ data: { records: nonPinned } })
+      mockGetList.mockResolvedValue({ data: nonPinned })
       const wrapper = mountBanner()
       await flushPromises()
 
@@ -253,12 +245,10 @@ describe('NoticeBanner.vue', () => {
   describe('single pinned with non-pinned', () => {
     it('uses static display for 1 pinned + non-pinned', async () => {
       mockGetList.mockResolvedValue({
-        data: {
-          records: [
-            makeNotice({ id: 'n1', title: '唯一置顶', isPinned: 1 }),
-            makeNotice({ id: 'n2', title: '普通', isPinned: 0 }),
-          ],
-        },
+        data: [
+          makeNotice({ id: 'n1', title: '唯一置顶', isPinned: 1 }),
+          makeNotice({ id: 'n2', title: '普通', isPinned: 0 }),
+        ],
       })
       const wrapper = mountBanner()
       await flushPromises()
@@ -272,7 +262,7 @@ describe('NoticeBanner.vue', () => {
   // ── Reactivity: categoryId change ──
   describe('categoryId reactivity', () => {
     it('re-fetches when categoryId changes', async () => {
-      mockGetList.mockResolvedValue({ data: { records: [] } })
+      mockGetList.mockResolvedValue({ data: [] })
       const wrapper = mountBanner('cat-1')
       await flushPromises()
 

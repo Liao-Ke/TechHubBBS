@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Document } from '@element-plus/icons-vue'
 import { adminApi } from '@/api/modules/admin'
@@ -9,7 +9,7 @@ import { useVisibility } from '@/composables/useVisibility'
 import { formatDate } from '@/utils/format'
 import LoadingSkeleton from '@/components/common/LoadingSkeleton.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
-import type { PostVO, Category, PageResult } from '@/api/types'
+import type { PostVO, Category } from '@/api/types'
 
 const { visibilityLabel } = useVisibility()
 const userStore = useUserStore()
@@ -33,11 +33,6 @@ const error = ref<string | null>(null)
 const initialState = ref(true)
 
 // ── Type options ──
-const postTypeOptions = [
-  { label: '普通', value: 0 },
-  { label: '精华', value: 1 },
-  { label: '置顶', value: 2 },
-]
 
 const postTypeLabel: Record<number, string> = { 0: '普通', 1: '精华', 2: '置顶' }
 const postTypeTagType: Record<number, '' | 'danger'> = { 0: '', 1: '', 2: 'danger' }
@@ -261,7 +256,7 @@ onMounted(() => {
         <el-table-column label="类型" width="90" align="center">
           <template #default="{ row }: { row: PostVO }">
             <el-tag
-              :type="postTypeTagType[row.type] as '' | 'danger'"
+              :type="postTypeTagType[row.type]"
               :effect="row.type === 0 ? 'plain' : 'dark'"
               size="small"
               :class="{ 'post-manage__tag-featured': row.type === 1 }"

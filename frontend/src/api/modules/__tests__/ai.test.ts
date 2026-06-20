@@ -3,7 +3,7 @@ import { api } from '@/api'
 import { aiApi } from '@/api/modules/ai'
 
 vi.mock('@/api', () => ({
-  api: vi.fn(),
+  api: vi.fn<(...args: unknown[]) => unknown>(),
 }))
 
 describe('aiApi', () => {
@@ -33,14 +33,14 @@ describe('aiApi', () => {
 
   it('getQaHistory calls GET /posts/{postId}/ai/qa with query', () => {
     aiApi.getQaHistory('post-1', { page: 1, size: 10 })
-    expect(api).toHaveBeenCalledWith('/posts/post-1/ai/qa', {
+    expect(api).toHaveBeenCalledWith('/posts/post-1/ai/qa/history', {
       query: { page: 1, size: 10 },
     })
   })
 
   it('getQaHistory works without params', () => {
     aiApi.getQaHistory('post-1')
-    expect(api).toHaveBeenCalledWith('/posts/post-1/ai/qa', {
+    expect(api).toHaveBeenCalledWith('/posts/post-1/ai/qa/history', {
       query: undefined,
     })
   })

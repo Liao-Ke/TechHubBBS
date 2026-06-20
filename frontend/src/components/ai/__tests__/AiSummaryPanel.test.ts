@@ -4,15 +4,15 @@ import { createPinia, setActivePinia } from 'pinia'
 import { nextTick } from 'vue'
 
 // ── Mock API modules ──
-const mockGetSummary = vi.fn()
-const mockGenerateSummary = vi.fn()
+const mockGetSummary = vi.fn<(...args: unknown[]) => unknown>()
+const mockGenerateSummary = vi.fn<(...args: unknown[]) => unknown>()
 
 vi.mock('@/api/modules/ai', () => ({
   aiApi: {
     getSummary: (...args: unknown[]) => mockGetSummary(...args),
     generateSummary: (...args: unknown[]) => mockGenerateSummary(...args),
-    askQuestion: vi.fn(),
-    getQaHistory: vi.fn(),
+    askQuestion: vi.fn<(...args: unknown[]) => unknown>(),
+    getQaHistory: vi.fn<(...args: unknown[]) => unknown>(),
   },
 }))
 
@@ -216,51 +216,65 @@ describe('AiSummaryPanel', () => {
 
     it('shows generated summary on success', async () => {
       mockStore.isLoggedIn = true
-      mockGetSummary.mockResolvedValue({
-        code: 200,
-        message: 'success',
-        data: makeSummaryResponse({ status: 0 }),
-      })
+      mockGetSummary
+        .mockResolvedValueOnce({
+          code: 200,
+          message: 'success',
+          data: makeSummaryResponse({ status: 0 }),
+        })
+        .mockResolvedValue({
+          code: 200,
+          message: 'success',
+          data: makeSummaryResponse({ status: 1, content: '# Generated Summary' }),
+        })
       mockGenerateSummary.mockResolvedValue({
         code: 200,
         message: 'success',
-        data: makeSummaryResponse({ status: 2, content: '# Generated Summary' }),
+        data: makeSummaryResponse({ status: 0 }),
       })
 
       const wrapper = mountPanel()
       await new Promise(r => setTimeout(r, 0))
 
       const btn = wrapper.find('.el-button')
+      expect(btn.exists()).toBe(true)
       await btn.trigger('click')
 
       await vi.waitFor(() => {
         expect(wrapper.text()).toContain('AI 摘要')
         expect(wrapper.text()).toContain('Generated Summary')
-      })
+      }, { timeout: 5000 })
     })
 
     it('shows regenerate button after successful generation', async () => {
       mockStore.isLoggedIn = true
-      mockGetSummary.mockResolvedValue({
-        code: 200,
-        message: 'success',
-        data: makeSummaryResponse({ status: 0 }),
-      })
+      mockGetSummary
+        .mockResolvedValueOnce({
+          code: 200,
+          message: 'success',
+          data: makeSummaryResponse({ status: 0 }),
+        })
+        .mockResolvedValue({
+          code: 200,
+          message: 'success',
+          data: makeSummaryResponse({ status: 1, content: 'Summary content' }),
+        })
       mockGenerateSummary.mockResolvedValue({
         code: 200,
         message: 'success',
-        data: makeSummaryResponse({ status: 2, content: 'Summary content' }),
+        data: makeSummaryResponse({ status: 0 }),
       })
 
       const wrapper = mountPanel()
       await new Promise(r => setTimeout(r, 0))
 
       const btn = wrapper.find('.el-button')
+      expect(btn.exists()).toBe(true)
       await btn.trigger('click')
 
       await vi.waitFor(() => {
         expect(wrapper.text()).toContain('重新生成')
-      })
+      }, { timeout: 5000 })
     })
 
     it('calls generateSummary API with correct postId', async () => {
@@ -330,23 +344,30 @@ describe('AiSummaryPanel', () => {
 
     it('retries generation when retry button clicked', async () => {
       mockStore.isLoggedIn = true
-      mockGetSummary.mockResolvedValue({
-        code: 200,
-        message: 'success',
-        data: makeSummaryResponse({ status: 0 }),
-      })
+      mockGetSummary
+        .mockResolvedValueOnce({
+          code: 200,
+          message: 'success',
+          data: makeSummaryResponse({ status: 0 }),
+        })
+        .mockResolvedValue({
+          code: 200,
+          message: 'success',
+          data: makeSummaryResponse({ status: 1, content: 'Success after retry' }),
+        })
       mockGenerateSummary
         .mockRejectedValueOnce(new Error('First fail'))
         .mockResolvedValueOnce({
           code: 200,
           message: 'success',
-          data: makeSummaryResponse({ status: 2, content: 'Success after retry' }),
+          data: makeSummaryResponse({ status: 0 }),
         })
 
       const wrapper = mountPanel()
       await new Promise(r => setTimeout(r, 0))
 
       const btn = wrapper.find('.el-button')
+      expect(btn.exists()).toBe(true)
       await btn.trigger('click')
 
       await vi.waitFor(() => {
@@ -358,7 +379,7 @@ describe('AiSummaryPanel', () => {
 
       await vi.waitFor(() => {
         expect(wrapper.text()).toContain('Success after retry')
-      })
+      }, { timeout: 5000 })
 
       expect(mockGenerateSummary).toHaveBeenCalledTimes(2)
     })

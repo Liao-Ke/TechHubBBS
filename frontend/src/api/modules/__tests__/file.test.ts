@@ -3,7 +3,7 @@ import { api } from '@/api'
 import { fileApi } from '@/api/modules/file'
 
 vi.mock('@/api', () => ({
-  api: vi.fn(),
+  api: vi.fn<(...args: unknown[]) => unknown>(),
 }))
 
 function createMockFile(name: string, type: string): File {
@@ -21,6 +21,7 @@ describe('fileApi', () => {
     expect(api).toHaveBeenCalledTimes(1)
     const mockCalls = vi.mocked(api).mock.calls
     const url = mockCalls[0]![0]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const options = mockCalls[0]![1] as any
     expect(url).toBe('/files/upload')
     expect(options.method).toBe('POST')
@@ -31,10 +32,11 @@ describe('fileApi', () => {
 
   it('upload passes onUploadProgress when callback provided', () => {
     const file = createMockFile('avatar.jpg', 'image/jpeg')
-    const onProgress = vi.fn()
+    const onProgress = vi.fn<(...args: unknown[]) => unknown>()
     fileApi.upload(file, 'user_avatar', onProgress)
     expect(api).toHaveBeenCalledTimes(1)
     const mockCalls = vi.mocked(api).mock.calls
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const options = mockCalls[0]![1] as any
     expect(options.onUploadProgress).toBeDefined()
   })
@@ -43,16 +45,18 @@ describe('fileApi', () => {
     const file = createMockFile('pic.png', 'image/png')
     fileApi.upload(file, 'post_image')
     const mockCalls = vi.mocked(api).mock.calls
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const options = mockCalls[0]![1] as any
     expect(options.onUploadProgress).toBeUndefined()
   })
 
   it('upload progress callback converts 0-1 ratio to 0-100 percent', () => {
     const file = createMockFile('test.png', 'image/png')
-    const onProgress = vi.fn()
+    const onProgress = vi.fn<(...args: unknown[]) => unknown>()
     fileApi.upload(file, 'post_image', onProgress)
 
     const mockCalls = vi.mocked(api).mock.calls
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const options = mockCalls[0]![1] as any
     const progressFn = options.onUploadProgress
 

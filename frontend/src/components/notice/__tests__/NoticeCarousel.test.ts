@@ -4,7 +4,7 @@ import NoticeCarousel from '../NoticeCarousel.vue'
 import type { CategoryNoticeVO } from '@/api/types'
 
 // ── Mock noticeApi ──
-const mockGetList = vi.fn()
+const mockGetList = vi.fn<(...args: unknown[]) => unknown>()
 vi.mock('@/api/modules/notice', () => ({
   noticeApi: {
     getList: (...args: unknown[]) => mockGetList(...args),

@@ -1,8 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { getToken, setToken, removeToken } from '../token'
 
-const TOKEN_KEY = 'techhub_token'
-
 describe('token', () => {
   beforeEach(() => {
     const store: Record<string, string> = {}

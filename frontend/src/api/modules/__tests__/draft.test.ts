@@ -3,7 +3,7 @@ import { api } from '@/api'
 import { draftApi } from '@/api/modules/draft'
 
 vi.mock('@/api', () => ({
-  api: vi.fn(),
+  api: vi.fn<(...args: unknown[]) => unknown>(),
 }))
 
 describe('draftApi', () => {

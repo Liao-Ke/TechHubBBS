@@ -59,39 +59,39 @@ describe('Toolbar', () => {
     expect(wrapper.emitted('insert')![0]).toEqual(['[text](url)'])
   })
 
-  it('emits insert with image syntax', async () => {
-    const wrapper = mount(Toolbar)
-    const btn = wrapper.findAll('.md-toolbar__btn')[7]!
-    await btn.trigger('click')
-    expect(wrapper.emitted('insert')![0]).toEqual(['![alt](url)'])
-  })
-
   it('emits insert with inline code syntax', async () => {
     const wrapper = mount(Toolbar)
-    const btn = wrapper.findAll('.md-toolbar__btn')[8]!
+    const btn = wrapper.findAll('.md-toolbar__btn')[7]!
     await btn.trigger('click')
     expect(wrapper.emitted('insert')![0]).toEqual(['`code`'])
   })
 
   it('emits insert with code block syntax', async () => {
     const wrapper = mount(Toolbar)
-    const btn = wrapper.findAll('.md-toolbar__btn')[9]!
+    const btn = wrapper.findAll('.md-toolbar__btn')[8]!
     await btn.trigger('click')
     expect(wrapper.emitted('insert')![0]).toEqual(['```\n\n```'])
   })
 
   it('emits insert with blockquote syntax', async () => {
     const wrapper = mount(Toolbar)
-    const btn = wrapper.findAll('.md-toolbar__btn')[10]!
+    const btn = wrapper.findAll('.md-toolbar__btn')[9]!
     await btn.trigger('click')
     expect(wrapper.emitted('insert')![0]).toEqual(['> '])
   })
 
   it('emits insert with unordered list syntax', async () => {
     const wrapper = mount(Toolbar)
-    const btn = wrapper.findAll('.md-toolbar__btn')[11]!
+    const btn = wrapper.findAll('.md-toolbar__btn')[10]!
     await btn.trigger('click')
     expect(wrapper.emitted('insert')![0]).toEqual(['- '])
+  })
+
+  it('renders image upload button at last position', () => {
+    const wrapper = mount(Toolbar)
+    const imgBtn = wrapper.findAll('.md-toolbar__btn')[11]!
+    expect(imgBtn.exists()).toBe(true)
+    expect(imgBtn.attributes('title')).toBe('上传图片')
   })
 
   it('has correct button titles for accessibility', () => {
@@ -100,8 +100,8 @@ describe('Toolbar', () => {
     expect(titles).toEqual([
       '粗体', '斜体', '删除线',
       '一级标题', '二级标题', '三级标题',
-      '链接', '图片', '行内代码', '代码块',
-      '引用', '无序列表',
+      '链接', '行内代码', '代码块',
+      '引用', '无序列表', '上传图片',
     ])
   })
 })

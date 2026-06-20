@@ -6,8 +6,8 @@ import { nextTick } from 'vue'
 import type { AdminCommentItem } from '@/api/types'
 
 // ── Mock adminApi ──
-const mockGetComments = vi.fn()
-const mockSetDivine = vi.fn()
+const mockGetComments = vi.fn<(...args: unknown[]) => unknown>()
+const mockSetDivine = vi.fn<(...args: unknown[]) => unknown>()
 
 vi.mock('@/api/modules/admin', () => ({
   adminApi: {
@@ -21,8 +21,8 @@ vi.mock('element-plus', async () => {
   const actual = await vi.importActual('element-plus')
   return {
     ...actual,
-    ElMessage: { success: vi.fn(), error: vi.fn(), warning: vi.fn() },
-    ElMessageBox: { confirm: vi.fn() },
+    ElMessage: { success: vi.fn<(...args: unknown[]) => unknown>(), error: vi.fn<(...args: unknown[]) => unknown>(), warning: vi.fn<(...args: unknown[]) => unknown>() },
+    ElMessageBox: { confirm: vi.fn<(...args: unknown[]) => unknown>() },
   }
 })
 
@@ -51,7 +51,7 @@ vi.mock('@/utils/format', () => ({
 }))
 
 import DivineManagePage from '@/pages/admin/DivineManagePage.vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessageBox } from 'element-plus'
 
 // ── Test Data ──
 function makeComment(overrides: Partial<AdminCommentItem> = {}): AdminCommentItem {
@@ -245,6 +245,7 @@ describe('DivineManagePage', () => {
   // ── Divine Actions ──
   describe('divine actions', () => {
     it('calls setDivine with true when 设为神评 clicked and confirmed', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.mocked(ElMessageBox.confirm).mockResolvedValue('confirm' as any)
       const { wrapper } = await mountPage()
 

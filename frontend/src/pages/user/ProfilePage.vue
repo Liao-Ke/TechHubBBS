@@ -4,7 +4,7 @@ import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { userApi } from '@/api/modules/user'
 import { postApi } from '@/api/modules/post'
-import type { UserProfileVO, PostVO, FollowStatusVO } from '@/api/types'
+import type { UserProfileVO, PostVO } from '@/api/types'
 import UserAvatar from '@/components/common/UserAvatar.vue'
 import PostList from '@/components/post/PostList.vue'
 import LoadingSkeleton from '@/components/common/LoadingSkeleton.vue'
@@ -89,8 +89,8 @@ async function loadUser() {
     // Load initial tab
     await nextTick()
     loadActiveTab()
-  } catch (e: any) {
-    userError.value = e
+  } catch (e: unknown) {
+    userError.value = e instanceof Error ? e : new Error(String(e))
   } finally {
     loadingUser.value = false
   }
@@ -142,8 +142,8 @@ async function loadPosts() {
       postsTotal.value = data.total
       postsTotalPages.value = data.pages
     }
-  } catch (e: any) {
-    postsError.value = e
+  } catch (e: unknown) {
+    postsError.value = e instanceof Error ? e : new Error(String(e))
   } finally {
     postsLoading.value = false
   }
@@ -164,8 +164,8 @@ async function loadFavorites() {
       favTotal.value = data.total
       favTotalPages.value = data.pages
     }
-  } catch (e: any) {
-    favError.value = e
+  } catch (e: unknown) {
+    favError.value = e instanceof Error ? e : new Error(String(e))
   } finally {
     favLoading.value = false
   }
@@ -186,8 +186,8 @@ async function loadFollowing() {
       followingTotal.value = data.total
       followingTotalPages.value = data.pages
     }
-  } catch (e: any) {
-    followingError.value = e
+  } catch (e: unknown) {
+    followingError.value = e instanceof Error ? e : new Error(String(e))
   } finally {
     followingLoading.value = false
   }
@@ -208,8 +208,8 @@ async function loadFollowers() {
       followersTotal.value = data.total
       followersTotalPages.value = data.pages
     }
-  } catch (e: any) {
-    followersError.value = e
+  } catch (e: unknown) {
+    followersError.value = e instanceof Error ? e : new Error(String(e))
   } finally {
     followersLoading.value = false
   }

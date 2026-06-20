@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
-import { nextTick } from 'vue'
 
 // ── Mock ECharts / vue-echarts (jsdom has no canvas) ──
 vi.mock('vue-echarts', () => ({
@@ -13,7 +12,7 @@ vi.mock('vue-echarts', () => ({
 }))
 
 vi.mock('echarts/core', () => ({
-  use: vi.fn(),
+  use: vi.fn<(...args: unknown[]) => unknown>(),
 }))
 
 vi.mock('echarts/renderers', () => ({

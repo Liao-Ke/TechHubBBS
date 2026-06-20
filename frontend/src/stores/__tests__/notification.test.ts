@@ -4,10 +4,10 @@ import { setActivePinia, createPinia } from 'pinia'
 // Mock notification API module
 vi.mock('@/api/modules/notification', () => ({
   notificationApi: {
-    getUnreadCount: vi.fn(),
-    getList: vi.fn(),
-    markRead: vi.fn(),
-    markAllRead: vi.fn(),
+    getUnreadCount: vi.fn<(...args: unknown[]) => unknown>(),
+    getList: vi.fn<(...args: unknown[]) => unknown>(),
+    markRead: vi.fn<(...args: unknown[]) => unknown>(),
+    markAllRead: vi.fn<(...args: unknown[]) => unknown>(),
   },
 }))
 

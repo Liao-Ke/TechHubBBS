@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createRouter, createWebHistory } from 'vue-router'
 import { createPinia, setActivePinia } from 'pinia'
-import { nextTick } from 'vue'
 
 // ---------------------------------------------------------------------------
 // Hoisted mock state (vi.mock is hoisted, so these must be hoisted too)
@@ -11,8 +10,8 @@ const {
   mockDraftApi,
 } = vi.hoisted(() => ({
   mockDraftApi: {
-    getList: vi.fn(),
-    remove: vi.fn(),
+    getList: vi.fn<(...args: unknown[]) => unknown>(),
+    remove: vi.fn<(...args: unknown[]) => unknown>(),
   },
 }))
 
@@ -24,12 +23,12 @@ vi.mock('element-plus', async () => {
   return {
     ...actual,
     ElMessage: {
-      success: vi.fn(),
-      error: vi.fn(),
-      warning: vi.fn(),
+      success: vi.fn<(...args: unknown[]) => unknown>(),
+      error: vi.fn<(...args: unknown[]) => unknown>(),
+      warning: vi.fn<(...args: unknown[]) => unknown>(),
     },
     ElMessageBox: {
-      confirm: vi.fn(),
+      confirm: vi.fn<(...args: unknown[]) => unknown>(),
     },
   }
 })
@@ -75,8 +74,8 @@ vi.mock('@/composables/useVisibility', () => ({
     }
   }),
   visibilityIcon: vi.fn(() => 'View'),
-  canView: vi.fn(),
-  useVisibility: vi.fn(),
+  canView: vi.fn<(...args: unknown[]) => unknown>(),
+  useVisibility: vi.fn<(...args: unknown[]) => unknown>(),
 }))
 
 import DraftPage from '@/pages/draft/DraftPage.vue'

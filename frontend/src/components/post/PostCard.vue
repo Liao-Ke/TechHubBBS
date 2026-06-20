@@ -9,13 +9,6 @@ defineProps<{
   post: PostVO | null
 }>()
 
-/** Strip basic markdown syntax for plain-text display */
-function stripMarkdown(md: string): string {
-  return md
-    .replace(/[#*`~>_[\]()!|-]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
-}
 </script>
 
 <template>

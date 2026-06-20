@@ -103,6 +103,7 @@ describe('v-permission directive', () => {
   })
 
   it('removes element when user role is unknown', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockRole = 'SOME_UNKNOWN_ROLE' as any
     const wrapper = mountWithPermission('USER')
     await new Promise((resolve) => setTimeout(resolve, 0))

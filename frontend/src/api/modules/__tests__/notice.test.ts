@@ -3,7 +3,7 @@ import { api } from '@/api'
 import { noticeApi } from '@/api/modules/notice'
 
 vi.mock('@/api', () => ({
-  api: vi.fn(),
+  api: vi.fn<(...args: unknown[]) => unknown>(),
 }))
 
 const makeCreateReq = () => ({ title: '标题', content: '内容', type: 0, isPinned: 0 })

@@ -3,7 +3,7 @@ import { api } from '@/api'
 import { notificationApi } from '@/api/modules/notification'
 
 vi.mock('@/api', () => ({
-  api: vi.fn(),
+  api: vi.fn<(...args: unknown[]) => unknown>(),
 }))
 
 describe('notificationApi', () => {
@@ -28,14 +28,14 @@ describe('notificationApi', () => {
   it('markRead calls POST /notifications/{id}/read', () => {
     notificationApi.markRead('notif-1')
     expect(api).toHaveBeenCalledWith('/notifications/notif-1/read', {
-      method: 'POST',
+      method: 'PATCH',
     })
   })
 
   it('markAllRead calls POST /notifications/read-all', () => {
     notificationApi.markAllRead()
     expect(api).toHaveBeenCalledWith('/notifications/read-all', {
-      method: 'POST',
+      method: 'PATCH',
     })
   })
 

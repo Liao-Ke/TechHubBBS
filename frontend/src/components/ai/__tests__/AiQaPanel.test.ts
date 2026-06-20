@@ -4,10 +4,10 @@ import { nextTick } from 'vue'
 
 const { mockAiApi } = vi.hoisted(() => ({
   mockAiApi: {
-    getSummary: vi.fn(),
-    generateSummary: vi.fn(),
-    askQuestion: vi.fn(),
-    getQaHistory: vi.fn(),
+    getSummary: vi.fn<(...args: unknown[]) => unknown>(),
+    generateSummary: vi.fn<(...args: unknown[]) => unknown>(),
+    askQuestion: vi.fn<(...args: unknown[]) => unknown>(),
+    getQaHistory: vi.fn<(...args: unknown[]) => unknown>(),
   },
 }))
 
