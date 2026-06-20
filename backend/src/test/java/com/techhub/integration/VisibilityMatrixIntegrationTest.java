@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -18,6 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * 验证四级可见权限 + 三级角色权限的交叉校验逻辑。
  */
 @Sql(scripts = {"classpath:sql/h2-schema.sql", "classpath:sql/h2-integration-data.sql"})
+@Transactional
 @DisplayName("可见权限矩阵集成测试")
 class VisibilityMatrixIntegrationTest extends BaseIntegrationTest {
 
@@ -66,10 +68,7 @@ class VisibilityMatrixIntegrationTest extends BaseIntegrationTest {
     }
 
     private String getUserId(String token) throws Exception {
-        // Login returns userId — reuse stored info or extract from API
-        // We'll just use a known pattern: register+login returns it.
-        // For simplicity, extract from post creation which includes authorId
-        return "1"; // placeholder — actual userId extracted at runtime
+        return jwtTokenProvider.getUserIdFromToken(token).toString();
     }
 
     private String createPost(int visibility) throws Exception {
@@ -83,7 +82,7 @@ class VisibilityMatrixIntegrationTest extends BaseIntegrationTest {
                                     "categoryId": 1000,
                                     "visibility": %d
                                 }
-                                """, visibility, visibility, visibility)))
+                                """, visibility, visibility, visibility, visibility, visibility)))
                 .andReturn().getResponse().getContentAsString();
         return objectMapper.readTree(resp).get("data").get("id").asText();
     }
