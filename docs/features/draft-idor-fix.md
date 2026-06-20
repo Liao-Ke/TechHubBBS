@@ -6,7 +6,7 @@
 | 日期 | 2026-06-20 |
 | 类型 | 安全修复 |
 | Issue | [#15](https://github.com/my123m/TechHubBBS/issues/15) |
-| 影响范围 | 后端 DraftServiceImpl.java + VisibilityMatrixIntegrationTest.java |
+| 影响范围 | 后端 DraftServiceImpl.java, VisibilityMatrixIntegrationTest, DraftIntegrationTest, DivineCommentIntegrationTest, PostLifecycleIntegrationTest |
 
 ## 根因分析
 
@@ -42,6 +42,9 @@
 | 格式参数不足 | `VisibilityMatrixIntegrationTest.java` | `String.format()` 传参从 3 个补齐到 5 个 |
 | FK 约束冲突 | `VisibilityMatrixIntegrationTest.java` | `getUserId()` 改用 `jwtTokenProvider.getUserIdFromToken()` 从 JWT 提取实际 ID |
 | 数据跨方法累积 | `VisibilityMatrixIntegrationTest.java` | 类级别加 `@Transactional`，每个测试方法结束后自动回滚 |
+| 数据跨方法累积 | `DraftIntegrationTest.java` | 类级别加 `@Transactional` |
+| 数据跨方法累积 | `DivineCommentIntegrationTest.java` | 类级别加 `@Transactional` |
+| 数据跨方法累积 | `PostLifecycleIntegrationTest.java` | 类级别加 `@Transactional` |
 
 ## 文件变更
 
@@ -50,6 +53,9 @@
 | 修改 | `backend/.../service/impl/DraftServiceImpl.java` — `getById()` 增加 userId 获取和所有权校验 |
 | 修改 | `backend/.../controller/DraftControllerTest.java` — 新增 `getDraft_NotOwner_Forbidden` 测试 |
 | 修改 | `backend/.../integration/VisibilityMatrixIntegrationTest.java` — 修复 3 个预存 Bug |
+| 修改 | `backend/.../integration/DraftIntegrationTest.java` — 加 `@Transactional` |
+| 修改 | `backend/.../integration/DivineCommentIntegrationTest.java` — 加 `@Transactional` |
+| 修改 | `backend/.../integration/PostLifecycleIntegrationTest.java` — 加 `@Transactional` |
 
 ## 验证方式
 
