@@ -13,6 +13,7 @@ import {
   UserFilled,
   Setting,
   Document,
+  EditPen,
   SwitchButton,
   Grid,
   Moon,
@@ -106,6 +107,17 @@ function navigateTo(path: string) {
           clearable
           @keyup.enter="handleSearch"
         />
+
+        <!-- Create post button -->
+        <el-button
+          v-if="userStore.isLoggedIn"
+          type="primary"
+          :icon="EditPen"
+          class="app-header__create-btn"
+          @click="navigateTo('/posts/new')"
+        >
+          发帖
+        </el-button>
       </div>
 
       <!-- Spacer -->
@@ -214,6 +226,13 @@ function navigateTo(path: string) {
           <router-link to="/" class="app-header__drawer-item" @click="mobileDrawerVisible = false">
             首页
           </router-link>
+          <div
+            v-if="userStore.isLoggedIn"
+            class="app-header__drawer-item"
+            @click="navigateTo('/posts/new')"
+          >
+            发帖
+          </div>
           <router-link
             v-if="!userStore.isLoggedIn"
             to="/login"
@@ -350,6 +369,16 @@ $bp-md: 768px;
   &__search {
     width: 240px;
     flex-shrink: 0;
+  }
+
+  // Create post button
+  &__create-btn {
+    flex-shrink: 0;
+    font-weight: 600;
+
+    @media (max-width: #{$bp-md - 1}) {
+      display: none;
+    }
   }
 
   // Spacer
