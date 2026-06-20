@@ -144,6 +144,7 @@ describe('onResponseErrorInterceptor', () => {
     // Override the currentRoute mock for this test by re-mocking
     // We need currentRoute.fullPath to return '/login'
     const routerMock = (await import('@/router')).default
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.spyOn(routerMock.currentRoute.value, 'fullPath' as any, 'get').mockReturnValue('/login')
 
     const resp = mockResponse(401, {})
@@ -156,6 +157,7 @@ describe('onResponseErrorInterceptor', () => {
 
   it('handles 401 on register page: does NOT redirect', async () => {
     const routerMock = (await import('@/router')).default
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.spyOn(routerMock.currentRoute.value, 'fullPath' as any, 'get').mockReturnValue('/register')
 
     const resp = mockResponse(401, {})

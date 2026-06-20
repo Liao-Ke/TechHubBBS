@@ -101,6 +101,7 @@ describe('useFileUpload', () => {
         (_file, _objectType, onProgress) => {
           if (onProgress) onProgress(50)
           if (onProgress) onProgress(100)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
           return Promise.resolve({ data: mockData }) as any
         },
       )
@@ -125,6 +126,7 @@ describe('useFileUpload', () => {
             onProgress(75)
             onProgress(100)
           }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
           return Promise.resolve({ data: { url: 'url', filename: 'f', size: 0 } }) as any
         },
       )
@@ -188,6 +190,7 @@ describe('useFileUpload', () => {
       const uploadPromise = new Promise((resolve) => {
         resolveUpload = resolve
       })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.mocked(fileApi.upload).mockReturnValue(uploadPromise as Promise<any>)
 
       const { upload, uploading } = useFileUpload()
@@ -204,6 +207,7 @@ describe('useFileUpload', () => {
     })
 
     it('passes objectType and progress callback to fileApi.upload', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.mocked(fileApi.upload).mockResolvedValue({ data: { url: 'x', filename: 'x', size: 0 } } as any)
 
       const { upload } = useFileUpload()
@@ -219,6 +223,7 @@ describe('useFileUpload', () => {
     })
 
     it('passes post_image as objectType', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.mocked(fileApi.upload).mockResolvedValue({ data: { url: 'x', filename: 'x', size: 0 } } as any)
 
       const { upload } = useFileUpload()

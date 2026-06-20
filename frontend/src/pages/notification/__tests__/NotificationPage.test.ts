@@ -412,15 +412,15 @@ describe('NotificationPage', () => {
 
       // Find and click the next-page button
       const nextBtn = pagination.find('.btn-next')
-      if (nextBtn.exists()) {
-        await nextBtn.trigger('click')
-        await flushPromises()
+      if (!nextBtn.exists()) return
 
-        expect(mockNotificationApi.getList).toHaveBeenCalledWith({
-          page: 2,
-          size: 10,
-        })
-      }
+      await nextBtn.trigger('click')
+      await flushPromises()
+
+      expect(mockNotificationApi.getList).toHaveBeenCalledWith({
+        page: 2,
+        size: 10,
+      })
     })
   })
 

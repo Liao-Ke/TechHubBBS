@@ -72,6 +72,7 @@ const MdEditorStub = {
   props: ['modelValue'],
   emits: ['update:modelValue'],
   methods: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onInput(this: any, event: Event) {
       const target = event.target as HTMLTextAreaElement
       this.$emit('update:modelValue', target.value)
@@ -85,6 +86,7 @@ const VisibilitySelectorStub = {
   props: ['modelValue'],
   emits: ['update:modelValue'],
   methods: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onChange(this: any, event: Event) {
       const target = event.target as HTMLSelectElement
       this.$emit('update:modelValue', Number(target.value))
@@ -97,7 +99,9 @@ const ElFormStub = {
   template: '<form @submit.prevent="handleFormSubmit"><slot /></form>',
   emits: ['submit'],
   methods: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     validate(this: any) { return Promise.resolve(true) },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     handleFormSubmit(this: any, event: Event) {
       this.$emit('submit', event)
     },
@@ -116,6 +120,7 @@ const ElInputStub = {
   props: ['modelValue', 'placeholder', 'maxlength', 'showWordLimit'],
   emits: ['update:modelValue'],
   methods: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onInput(this: any, event: Event) {
       const target = event.target as HTMLInputElement
       this.$emit('update:modelValue', target.value)
@@ -129,6 +134,7 @@ const ElSelectStub = {
   props: ['modelValue', 'placeholder'],
   emits: ['update:modelValue'],
   methods: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onChange(this: any, event: Event) {
       const target = event.target as HTMLSelectElement
       this.$emit('update:modelValue', Number(target.value))

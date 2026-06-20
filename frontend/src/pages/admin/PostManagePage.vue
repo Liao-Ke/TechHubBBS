@@ -256,7 +256,7 @@ onMounted(() => {
         <el-table-column label="类型" width="90" align="center">
           <template #default="{ row }: { row: PostVO }">
             <el-tag
-              :type="postTypeTagType[row.type] as '' | 'danger'"
+              :type="postTypeTagType[row.type]"
               :effect="row.type === 0 ? 'plain' : 'dark'"
               size="small"
               :class="{ 'post-manage__tag-featured': row.type === 1 }"

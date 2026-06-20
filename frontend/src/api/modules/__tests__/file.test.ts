@@ -21,6 +21,7 @@ describe('fileApi', () => {
     expect(api).toHaveBeenCalledTimes(1)
     const mockCalls = vi.mocked(api).mock.calls
     const url = mockCalls[0]![0]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const options = mockCalls[0]![1] as any
     expect(url).toBe('/files/upload')
     expect(options.method).toBe('POST')
@@ -35,6 +36,7 @@ describe('fileApi', () => {
     fileApi.upload(file, 'user_avatar', onProgress)
     expect(api).toHaveBeenCalledTimes(1)
     const mockCalls = vi.mocked(api).mock.calls
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const options = mockCalls[0]![1] as any
     expect(options.onUploadProgress).toBeDefined()
   })
@@ -43,6 +45,7 @@ describe('fileApi', () => {
     const file = createMockFile('pic.png', 'image/png')
     fileApi.upload(file, 'post_image')
     const mockCalls = vi.mocked(api).mock.calls
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const options = mockCalls[0]![1] as any
     expect(options.onUploadProgress).toBeUndefined()
   })
@@ -53,6 +56,7 @@ describe('fileApi', () => {
     fileApi.upload(file, 'post_image', onProgress)
 
     const mockCalls = vi.mocked(api).mock.calls
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const options = mockCalls[0]![1] as any
     const progressFn = options.onUploadProgress
 

@@ -245,6 +245,7 @@ describe('DivineManagePage', () => {
   // ── Divine Actions ──
   describe('divine actions', () => {
     it('calls setDivine with true when 设为神评 clicked and confirmed', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.mocked(ElMessageBox.confirm).mockResolvedValue('confirm' as any)
       const { wrapper } = await mountPage()
 

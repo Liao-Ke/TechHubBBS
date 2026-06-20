@@ -27,6 +27,7 @@ const appStore = useAppStore()
 
 const props = withDefaults(defineProps<{
   type: 'bar' | 'line'
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any
   loading?: boolean
 }>(), {
@@ -80,6 +81,7 @@ const option = computed(() => {
         axisLabel: { color: textColor.value },
         ...base.yAxis,
       },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       series: (base.series ?? []).map((s: any) => ({
         type: 'bar' as const,
         emphasis: { focus: 'series' as const },
@@ -124,6 +126,7 @@ const option = computed(() => {
       axisLabel: { color: textColor.value },
       ...base.yAxis,
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     series: (base.series ?? []).map((s: any) => ({
       type: 'line' as const,
       smooth: true,

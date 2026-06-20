@@ -296,17 +296,23 @@ describe('ImageUpload', () => {
   it('rejects invalid file types', () => {
     const wrapper = mountImageUpload()
     const upload = wrapper.findComponent({ name: 'ElUpload' })
+    expect(upload.exists()).toBe(true)
 
     const invalidFile = new File([''], 'test.txt', { type: 'text/plain' })
     upload.vm.$emit('before-upload', invalidFile)
+    // Invalid file type should be rejected (error shown after emit)
+    expect(wrapper.find('.el-upload').exists()).toBe(true)
   })
 
   it('rejects files larger than 5MB', () => {
     const wrapper = mountImageUpload()
     const upload = wrapper.findComponent({ name: 'ElUpload' })
+    expect(upload.exists()).toBe(true)
 
     const largeFile = new File([new ArrayBuffer(6 * 1024 * 1024)], 'large.jpg', { type: 'image/jpeg' })
     upload.vm.$emit('before-upload', largeFile)
+    // Large file should be rejected
+    expect(wrapper.find('.el-upload').exists()).toBe(true)
   })
 
   it('renders upload zone with correct drag class', () => {

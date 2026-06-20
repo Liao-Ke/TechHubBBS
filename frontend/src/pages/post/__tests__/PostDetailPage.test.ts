@@ -452,11 +452,11 @@ describe('PostDetailPage', () => {
       const buttons = wrapper.findAll('.post-detail__actions-left .el-button')
       const shareBtn = buttons.find((btn) => btn.text().includes('分享'))
       expect(shareBtn).toBeDefined()
-      if (shareBtn) {
-        await shareBtn.trigger('click')
-        await flushPromises()
-        expect(writeText).toHaveBeenCalled()
-      }
+      if (!shareBtn) return
+
+      await shareBtn.trigger('click')
+      await flushPromises()
+      expect(writeText).toHaveBeenCalled()
     })
   })
 

@@ -35,7 +35,6 @@ const loadingExisting = ref(false)
 const hasExistingSummary = ref(false)
 
 let pollTimer: ReturnType<typeof setInterval> | null = null
-let currentPostId = ''
 
 const canGenerate = computed(() => {
   return props.postContent.length >= 50 && userStore.isLoggedIn
@@ -130,7 +129,6 @@ async function generateSummary() {
 
     // 2. 开始轮询 GET /summary 查询生成结果
     let pollCount = 0
-    currentPostId = props.postId
 
     pollTimer = setInterval(async () => {
       pollCount++
