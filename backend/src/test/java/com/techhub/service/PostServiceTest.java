@@ -454,12 +454,11 @@ class PostServiceTest {
             Post post = createPost(POST_ID, USER_ID, VisibilityEnum.PUBLIC.getCode());
 
             when(postMapper.selectById(POST_ID)).thenReturn(post);
-            when(postMapper.updateById(any(Post.class))).thenReturn(1);
+            when(postMapper.deleteById(POST_ID)).thenReturn(1);
 
             postService.deletePost(POST_ID);
 
-            assertEquals(1, post.getDeleted());
-            verify(postMapper).updateById(post);
+            verify(postMapper).deleteById(POST_ID);
         }
 
         @Test
@@ -502,12 +501,11 @@ class PostServiceTest {
             Post post = createPost(POST_ID, OTHER_USER_ID, VisibilityEnum.PUBLIC.getCode());
 
             when(postMapper.selectById(POST_ID)).thenReturn(post);
-            when(postMapper.updateById(any(Post.class))).thenReturn(1);
+            when(postMapper.deleteById(POST_ID)).thenReturn(1);
 
             postService.deletePost(POST_ID);
 
-            assertEquals(1, post.getDeleted());
-            verify(postMapper).updateById(post);
+            verify(postMapper).deleteById(POST_ID);
         }
     }
 }

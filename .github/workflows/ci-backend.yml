@@ -42,7 +42,7 @@ jobs:
         run: mvn compile -B -q
 
       - name: Run unit tests
-        run: mvn test -B -Dtest='com.techhub.*,!com.techhub.integration.*'
+        run: mvn test -B -Punit-tests
 
       - name: Upload unit test reports
         if: always()
@@ -73,7 +73,7 @@ jobs:
         run: mvn compile -B -q
 
       - name: Run integration tests
-        run: mvn test -B -Dtest='com.techhub.integration.*'
+        run: mvn test -B -Pintegration-tests
 
       - name: Upload integration test reports
         if: always()
