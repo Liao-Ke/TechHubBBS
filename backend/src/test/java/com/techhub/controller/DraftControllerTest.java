@@ -247,6 +247,18 @@ class DraftControllerTest {
                 .andExpect(jsonPath("$.message").value("草稿不存在"));
     }
 
+    @Test
+    @DisplayName("getDraft — 无权查看他人草稿返回 403")
+    void getDraft_NotOwner_Forbidden() throws Exception {
+        when(draftService.getById(200L))
+                .thenThrow(new BusinessException(ResultCode.FORBIDDEN, "无权查看他人草稿"));
+
+        mockMvc.perform(get("/api/v1/drafts/200")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value(403));
+    }
+
     // ==================== DELETE /api/v1/drafts/{id} ====================
 
     @Test
