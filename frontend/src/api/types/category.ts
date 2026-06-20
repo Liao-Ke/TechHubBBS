@@ -1,5 +1,3 @@
-import type { UserProfileVO } from './user'
-
 /**
  * Category (id is number — backend Long serialised as-is)
  */

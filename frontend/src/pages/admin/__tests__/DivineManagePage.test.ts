@@ -51,7 +51,7 @@ vi.mock('@/utils/format', () => ({
 }))
 
 import DivineManagePage from '@/pages/admin/DivineManagePage.vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessageBox } from 'element-plus'
 
 // ── Test Data ──
 function makeComment(overrides: Partial<AdminCommentItem> = {}): AdminCommentItem {

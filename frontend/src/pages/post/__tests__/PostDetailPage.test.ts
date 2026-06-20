@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createRouter, createWebHistory } from 'vue-router'
 import { createPinia, setActivePinia } from 'pinia'
-import { nextTick } from 'vue'
 
 // ---------------------------------------------------------------------------
 // Hoisted mock state (vi.mock is hoisted, so these must be hoisted too)

@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { nextTick } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
 import UserManagePage from '@/pages/admin/UserManagePage.vue'
 
 // ── Mock data ──

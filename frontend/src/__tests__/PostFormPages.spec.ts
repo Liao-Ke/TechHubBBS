@@ -229,14 +229,14 @@ describe('PostCreatePage', () => {
 
   it('shows error when categories fail to load', async () => {
     mockCategoryApi.getList.mockRejectedValueOnce(new Error('Network error'))
-    const wrapper = await mountPage()
+    await mountPage()
     await flushPromises()
 
     expect(ElMessage.error).toHaveBeenCalledWith('加载版块列表失败')
   })
 
   it('calls checkDraft on mount', async () => {
-    const wrapper = await mountPage()
+    await mountPage()
     await flushPromises()
 
     expect(mockDraft.checkDraft).toHaveBeenCalledOnce()
@@ -245,7 +245,7 @@ describe('PostCreatePage', () => {
   it('shows draft restore dialog when draft exists on mount', async () => {
     mockDraft.checkDraft.mockResolvedValueOnce({ id: 'draft-1', title: '草稿标题', content: '草稿内容' })
 
-    const wrapper = await mountPage()
+    await mountPage()
     await flushPromises()
 
     expect(ElMessageBox.confirm).toHaveBeenCalledWith(

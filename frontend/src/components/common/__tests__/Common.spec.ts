@@ -288,7 +288,7 @@ describe('ImageUpload', () => {
 
     const validFile = new File([''], 'test.jpg', { type: 'image/jpeg' })
     // beforeUpload should return true for valid files
-    const result = upload.vm.$emit('before-upload', validFile)
+    upload.vm.$emit('before-upload', validFile)
     // The component should not show error
     expect(wrapper.find('.is-error').exists()).toBe(false)
   })
