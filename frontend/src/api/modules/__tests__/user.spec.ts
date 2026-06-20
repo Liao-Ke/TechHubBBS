@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import type { R, UserDetailVO, UserProfileVO, UserUpdateRequest, FollowStatusVO, PageResult, PostVO } from '@/api/types'
 
-const mockApi = vi.fn()
+const mockApi = vi.fn<(...args: unknown[]) => unknown>()
 vi.mock('@/api', () => ({
   api: mockApi,
 }))

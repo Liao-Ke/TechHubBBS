@@ -9,9 +9,9 @@ import { nextTick } from 'vue'
 // ---------------------------------------------------------------------------
 const { mockNotificationApi } = vi.hoisted(() => ({
   mockNotificationApi: {
-    getList: vi.fn(),
-    markRead: vi.fn(),
-    markAllRead: vi.fn(),
+    getList: vi.fn<(...args: unknown[]) => unknown>(),
+    markRead: vi.fn<(...args: unknown[]) => unknown>(),
+    markAllRead: vi.fn<(...args: unknown[]) => unknown>(),
   },
 }))
 

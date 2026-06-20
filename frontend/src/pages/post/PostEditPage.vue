@@ -83,14 +83,14 @@ async function loadPost() {
 
     form.title = post.title
     form.content = post.content
-    form.categoryId = post.categoryId
+    form.categoryId = Number(post.categoryId)
     form.visibility = post.visibility
 
     // Initialise draft data with current post content
     draftData.value = {
       title: post.title,
       content: post.content,
-      categoryId: post.categoryId,
+      categoryId: Number(post.categoryId),
       visibility: post.visibility,
       postId,
     }

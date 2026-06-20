@@ -1,15 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mount, flushPromises, type VueWrapper } from '@vue/test-utils'
+import { mount, flushPromises } from '@vue/test-utils'
 import { createRouter, createWebHistory } from 'vue-router'
 import { createPinia, setActivePinia } from 'pinia'
-import { nextTick, type ComponentPublicInstance } from 'vue'
+import { nextTick } from 'vue'
 import type { PostVO, Category, PageResult } from '@/api/types'
 
 // ── Mock adminApi ──
-const mockGetPosts = vi.fn()
-const mockSetPostType = vi.fn()
-const mockLockPost = vi.fn()
-const mockDeletePost = vi.fn()
+const mockGetPosts = vi.fn<(...args: unknown[]) => unknown>()
+const mockSetPostType = vi.fn<(...args: unknown[]) => unknown>()
+const mockLockPost = vi.fn<(...args: unknown[]) => unknown>()
+const mockDeletePost = vi.fn<(...args: unknown[]) => unknown>()
 
 vi.mock('@/api/modules/admin', () => ({
   adminApi: {
@@ -21,7 +21,7 @@ vi.mock('@/api/modules/admin', () => ({
 }))
 
 // ── Mock categoryApi ──
-const mockGetList = vi.fn()
+const mockGetList = vi.fn<(...args: unknown[]) => unknown>()
 
 vi.mock('@/api/modules/category', () => ({
   categoryApi: {

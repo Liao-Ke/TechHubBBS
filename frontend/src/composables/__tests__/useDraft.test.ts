@@ -5,10 +5,10 @@ import { useDraft } from '@/composables/useDraft'
 // Mock the draft API module
 vi.mock('@/api/modules/draft', () => ({
   draftApi: {
-    check: vi.fn(),
-    save: vi.fn(),
-    remove: vi.fn(),
-    getDetail: vi.fn(),
+    check: vi.fn<(...args: unknown[]) => unknown>(),
+    save: vi.fn<(...args: unknown[]) => unknown>(),
+    remove: vi.fn<(...args: unknown[]) => unknown>(),
+    getDetail: vi.fn<(...args: unknown[]) => unknown>(),
   },
 }))
 

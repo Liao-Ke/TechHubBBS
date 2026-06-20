@@ -4,15 +4,15 @@ import { setActivePinia, createPinia } from 'pinia'
 // Mock auth API module
 vi.mock('@/api/modules/auth', () => ({
   authApi: {
-    login: vi.fn(),
-    register: vi.fn(),
+    login: vi.fn<(...args: unknown[]) => unknown>(),
+    register: vi.fn<(...args: unknown[]) => unknown>(),
   },
 }))
 
 // Mock user API module
 vi.mock('@/api/modules/user', () => ({
   userApi: {
-    getMe: vi.fn(),
+    getMe: vi.fn<(...args: unknown[]) => unknown>(),
   },
 }))
 
@@ -84,7 +84,7 @@ describe('useUserStore', () => {
       setItem: vi.fn((key: string, value: string) => { store[key] = value }),
       removeItem: vi.fn((key: string) => { delete store[key] }),
       clear: vi.fn(() => { Object.keys(store).forEach(k => delete store[k]) }),
-      key: vi.fn(),
+      key: vi.fn<(...args: unknown[]) => unknown>(),
       length: 0,
     })
     // Clear mocks between tests

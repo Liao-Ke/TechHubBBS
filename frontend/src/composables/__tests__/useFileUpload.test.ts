@@ -3,7 +3,7 @@ import { useFileUpload } from '@/composables/useFileUpload'
 
 vi.mock('@/api/modules/file', () => ({
   fileApi: {
-    upload: vi.fn(),
+    upload: vi.fn<(...args: unknown[]) => unknown>(),
   },
 }))
 

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { usePermission } from '../usePermission'
 
 // Mock useUserStore before importing the composable
-const mockUseUserStore = vi.fn()
+const mockUseUserStore = vi.fn<(...args: unknown[]) => unknown>()
 
 vi.mock('@/stores/user', () => ({
   useUserStore: () => mockUseUserStore(),

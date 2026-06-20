@@ -9,7 +9,7 @@ const mockStore = {
   role: 'USER' as string,
   isLoggedIn: false,
   userInfo: null as { id: string; username: string; role: string } | null,
-  fetchUserInfo: vi.fn(),
+  fetchUserInfo: vi.fn<(...args: unknown[]) => unknown>(),
 }
 
 vi.mock('@/stores/user', () => ({
@@ -72,7 +72,7 @@ describe('Navigation guards', () => {
     mockStore.role = 'USER'
     mockStore.isLoggedIn = false
     mockStore.userInfo = null
-    mockStore.fetchUserInfo = vi.fn().mockResolvedValue(undefined)
+    mockStore.fetchUserInfo = vi.fn<(...args: unknown[]) => unknown>().mockResolvedValue(undefined)
   })
 
   describe('unauthenticated users', () => {

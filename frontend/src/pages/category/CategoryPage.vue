@@ -39,7 +39,7 @@ async function fetchCategory() {
     if (res.data) {
       category.value = res.data.find((c) => c.id === categoryId.value) ?? null
     }
-  } catch (e: unknown) {
+  } catch {
     categoryError.value = true
   } finally {
     categoryLoading.value = false
@@ -63,7 +63,7 @@ async function fetchPosts() {
     }
   } catch (e: unknown) {
     postError.value = true
-    postErrorMsg.value = (e as { message?: string })?.message || '加载帖子失败，请稍后重试'
+    postErrorMsg.value = e instanceof Error ? e.message : '加载帖子失败，请稍后重试'
   } finally {
     postLoading.value = false
   }

@@ -10,16 +10,16 @@ vi.stubGlobal(
   'IntersectionObserver',
   vi.fn(function () {
     return {
-      observe: vi.fn(),
-      unobserve: vi.fn(),
-      disconnect: vi.fn(),
+      observe: vi.fn<(...args: unknown[]) => unknown>(),
+      unobserve: vi.fn<(...args: unknown[]) => unknown>(),
+      disconnect: vi.fn<(...args: unknown[]) => unknown>(),
     }
   }),
 )
 
 // ── Mock API modules ──
-const mockGetRecommendations = vi.fn()
-const mockGetList = vi.fn()
+const mockGetRecommendations = vi.fn<(...args: unknown[]) => unknown>()
+const mockGetList = vi.fn<(...args: unknown[]) => unknown>()
 
 vi.mock('@/api/modules/recommendation', () => ({
   recommendationApi: {

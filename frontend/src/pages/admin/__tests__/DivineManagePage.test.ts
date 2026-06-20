@@ -6,8 +6,8 @@ import { nextTick } from 'vue'
 import type { AdminCommentItem } from '@/api/types'
 
 // ── Mock adminApi ──
-const mockGetComments = vi.fn()
-const mockSetDivine = vi.fn()
+const mockGetComments = vi.fn<(...args: unknown[]) => unknown>()
+const mockSetDivine = vi.fn<(...args: unknown[]) => unknown>()
 
 vi.mock('@/api/modules/admin', () => ({
   adminApi: {
@@ -21,8 +21,8 @@ vi.mock('element-plus', async () => {
   const actual = await vi.importActual('element-plus')
   return {
     ...actual,
-    ElMessage: { success: vi.fn(), error: vi.fn(), warning: vi.fn() },
-    ElMessageBox: { confirm: vi.fn() },
+    ElMessage: { success: vi.fn<(...args: unknown[]) => unknown>(), error: vi.fn<(...args: unknown[]) => unknown>(), warning: vi.fn<(...args: unknown[]) => unknown>() },
+    ElMessageBox: { confirm: vi.fn<(...args: unknown[]) => unknown>() },
   }
 })
 

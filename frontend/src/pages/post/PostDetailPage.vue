@@ -14,7 +14,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   View, Star, ChatDotRound, Medal, Share, Edit, Delete,
-  Link, CopyDocument, ArrowDown, ChatLineSquare, WarningFilled,
+  ChatLineSquare, WarningFilled,
   Lock, Promotion,
 } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
@@ -23,7 +23,6 @@ import { commentApi } from '@/api/modules/comment'
 import { recommendationApi } from '@/api/modules/recommendation'
 import { ApiError } from '@/api'
 import { formatRelativeTime, formatNumber } from '@/utils/format'
-import { canView } from '@/composables/useVisibility'
 import type { PostVO, CommentVO, RelatedPostVO } from '@/api/types'
 
 import MdViewer from '@/components/markdown/MdViewer.vue'
@@ -31,7 +30,6 @@ import AiSummaryPanel from '@/components/ai/AiSummaryPanel.vue'
 import UserAvatar from '@/components/common/UserAvatar.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import DivineCommentBadge from '@/components/post/DivineCommentBadge.vue'
-import PostCard from '@/components/post/PostCard.vue'
 
 // ---------------------------------------------------------------------------
 // Router & Stores
@@ -757,7 +755,7 @@ onMounted(async () => {
                 {{ related.title }}
               </h4>
               <span class="post-detail__related-similarity">
-                相似度 {{ (related.similarityScore * 100).toFixed(0) }}%
+                相似度 {{ ((related.similarityScore ?? 0) * 100).toFixed(0) }}%
               </span>
             </router-link>
           </div>

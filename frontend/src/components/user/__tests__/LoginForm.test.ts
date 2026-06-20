@@ -6,7 +6,7 @@ import { nextTick } from 'vue'
 
 // Mock user store with controllable state
 const mockStore = {
-  login: vi.fn(),
+  login: vi.fn<() => Promise<void>>(),
   isLoggedIn: false,
 }
 
@@ -146,6 +146,10 @@ describe('LoginForm', () => {
       const form = wrapper.find('form')
       await form.trigger('submit.prevent')
       await nextTick()
+
+      await vi.waitFor(() => {
+        expect(mockStore.login).toHaveBeenCalled()
+      }, { timeout: 2000 })
     })
   })
 

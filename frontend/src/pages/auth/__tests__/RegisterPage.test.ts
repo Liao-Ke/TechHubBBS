@@ -7,7 +7,7 @@ import { nextTick } from 'vue'
 // Mock user store
 vi.mock('@/stores/user', () => ({
   useUserStore: () => ({
-    register: vi.fn(),
+    register: vi.fn<(...args: unknown[]) => unknown>(),
     isLoggedIn: false,
   }),
 }))

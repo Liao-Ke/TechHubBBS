@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { Loading } from '@element-plus/icons-vue'
 import { aiApi } from '@/api/modules/ai'
 import type { AiQaResponse } from '@/api/types'

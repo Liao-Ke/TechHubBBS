@@ -3,7 +3,7 @@ import { api } from '@/api'
 import { fileApi } from '@/api/modules/file'
 
 vi.mock('@/api', () => ({
-  api: vi.fn(),
+  api: vi.fn<(...args: unknown[]) => unknown>(),
 }))
 
 function createMockFile(name: string, type: string): File {
@@ -31,7 +31,7 @@ describe('fileApi', () => {
 
   it('upload passes onUploadProgress when callback provided', () => {
     const file = createMockFile('avatar.jpg', 'image/jpeg')
-    const onProgress = vi.fn()
+    const onProgress = vi.fn<(...args: unknown[]) => unknown>()
     fileApi.upload(file, 'user_avatar', onProgress)
     expect(api).toHaveBeenCalledTimes(1)
     const mockCalls = vi.mocked(api).mock.calls
@@ -49,7 +49,7 @@ describe('fileApi', () => {
 
   it('upload progress callback converts 0-1 ratio to 0-100 percent', () => {
     const file = createMockFile('test.png', 'image/png')
-    const onProgress = vi.fn()
+    const onProgress = vi.fn<(...args: unknown[]) => unknown>()
     fileApi.upload(file, 'post_image', onProgress)
 
     const mockCalls = vi.mocked(api).mock.calls

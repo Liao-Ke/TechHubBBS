@@ -21,8 +21,8 @@ vi.mock('@/composables/useFileUpload', () => ({
       if (file.size > 5 * 1024 * 1024) return '文件大小不能超过 5MB'
       return null
     }),
-    upload: vi.fn(),
-    reset: vi.fn(),
+    upload: vi.fn<(...args: unknown[]) => unknown>(),
+    reset: vi.fn<(...args: unknown[]) => unknown>(),
   })),
 }))
 
@@ -31,7 +31,7 @@ vi.mock('@/composables/useFileUpload', () => ({
 // ────────────────────────────────────────────────────────────
 vi.mock('@/api/modules/file', () => ({
   fileApi: {
-    upload: vi.fn(),
+    upload: vi.fn<(...args: unknown[]) => unknown>(),
   },
 }))
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { userApi } from '@/api/modules/user'
@@ -76,8 +76,6 @@ const passwordRules: FormRules = {
   ],
 }
 
-// ── Bio length ──
-const bioLength = computed(() => form.bio.length)
 
 // ── Save ──
 async function handleSave() {
@@ -114,8 +112,8 @@ async function handleSave() {
     showPasswordSection.value = false
 
     ElMessage.success('更新成功')
-  } catch (e: any) {
-    ElMessage.error(e?.message || '保存失败，请稍后重试')
+  } catch (e: unknown) {
+    ElMessage.error(e instanceof Error ? e.message : "保存失败，请稍后重试")
   } finally {
     saving.value = false
   }

@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mount, flushPromises, type VueWrapper } from '@vue/test-utils'
+import { mount, flushPromises } from '@vue/test-utils'
 import { createRouter, createWebHistory } from 'vue-router'
 import { createPinia, setActivePinia } from 'pinia'
-import { nextTick, type ComponentPublicInstance } from 'vue'
+import { nextTick } from 'vue'
 import type { AdminStatisticsData } from '@/api/types'
 
 // ── Mock ECharts / vue-echarts (jsdom has no canvas) ──
@@ -14,7 +14,7 @@ vi.mock('vue-echarts', () => ({
   },
 }))
 
-vi.mock('echarts/core', () => ({ use: vi.fn() }))
+vi.mock('echarts/core', () => ({ use: vi.fn<(...args: unknown[]) => unknown>() }))
 vi.mock('echarts/renderers', () => ({ CanvasRenderer: {} }))
 vi.mock('echarts/charts', () => ({ BarChart: {}, LineChart: {} }))
 vi.mock('echarts/components', () => ({
@@ -25,20 +25,20 @@ vi.mock('echarts/components', () => ({
 }))
 
 // ── Mock admin API ──
-const mockGetStatistics = vi.fn()
+const mockGetStatistics = vi.fn<(...args: unknown[]) => unknown>()
 
 vi.mock('@/api/modules/admin', () => ({
   adminApi: {
     getStatistics: (...args: unknown[]) => mockGetStatistics(...args),
-    getUsers: vi.fn(),
-    banUser: vi.fn(),
-    setRole: vi.fn(),
-    getPosts: vi.fn(),
-    setPostType: vi.fn(),
-    lockPost: vi.fn(),
-    deletePost: vi.fn(),
-    getNotices: vi.fn(),
-    setDivine: vi.fn(),
+    getUsers: vi.fn<(...args: unknown[]) => unknown>(),
+    banUser: vi.fn<(...args: unknown[]) => unknown>(),
+    setRole: vi.fn<(...args: unknown[]) => unknown>(),
+    getPosts: vi.fn<(...args: unknown[]) => unknown>(),
+    setPostType: vi.fn<(...args: unknown[]) => unknown>(),
+    lockPost: vi.fn<(...args: unknown[]) => unknown>(),
+    deletePost: vi.fn<(...args: unknown[]) => unknown>(),
+    getNotices: vi.fn<(...args: unknown[]) => unknown>(),
+    setDivine: vi.fn<(...args: unknown[]) => unknown>(),
   },
 }))
 
@@ -46,8 +46,8 @@ vi.mock('@/api/modules/admin', () => ({
 const mockStore = {
   isDarkMode: true,
   sidebarCollapsed: false,
-  toggleSidebar: vi.fn(),
-  toggleDarkMode: vi.fn(),
+  toggleSidebar: vi.fn<(...args: unknown[]) => unknown>(),
+  toggleDarkMode: vi.fn<(...args: unknown[]) => unknown>(),
 }
 
 vi.mock('@/stores/app', () => ({

@@ -14,7 +14,7 @@ describe('useAppStore', () => {
       setItem: vi.fn((key: string, value: string) => { store[key] = value }),
       removeItem: vi.fn((key: string) => { delete store[key] }),
       clear: vi.fn(() => { Object.keys(store).forEach(k => delete store[k]) }),
-      key: vi.fn(),
+      key: vi.fn<(...args: unknown[]) => unknown>(),
       length: 0,
     })
     // Mock document.documentElement
@@ -26,8 +26,8 @@ describe('useAppStore', () => {
           add: vi.fn((cls: string) => classList.add(cls)),
           remove: vi.fn((cls: string) => classList.delete(cls)),
           contains: vi.fn((cls: string) => classList.has(cls)),
-          toggle: vi.fn(),
-          replace: vi.fn(),
+          toggle: vi.fn<(...args: unknown[]) => unknown>(),
+          replace: vi.fn<(...args: unknown[]) => unknown>(),
         },
       },
     })

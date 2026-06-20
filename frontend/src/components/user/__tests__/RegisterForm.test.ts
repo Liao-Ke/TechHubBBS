@@ -6,7 +6,7 @@ import { nextTick } from 'vue'
 
 // Mock user store with controllable state
 const mockStore = {
-  register: vi.fn(),
+  register: vi.fn<(...args: unknown[]) => unknown>(),
   isLoggedIn: false,
 }
 

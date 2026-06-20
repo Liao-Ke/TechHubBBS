@@ -6,8 +6,8 @@ import { nextTick } from 'vue'
 import type { UserProfileVO } from '@/api/types'
 
 // ── Mock API modules ──
-const mockUpdateMe = vi.fn()
-const mockApi = vi.fn() // direct api() call for password change
+const mockUpdateMe = vi.fn<(...args: unknown[]) => unknown>()
+const mockApi = vi.fn<(...args: unknown[]) => unknown>() // direct api() call for password change
 
 vi.mock('@/api/modules/user', () => ({
   userApi: {
@@ -31,7 +31,7 @@ const mockStore = {
     status: 1,
     createTime: '2026-01-01T00:00:00Z',
   } as UserProfileVO,
-  fetchUserInfo: vi.fn(),
+  fetchUserInfo: vi.fn<(...args: unknown[]) => unknown>(),
 }
 
 vi.mock('@/stores/user', () => ({
@@ -39,7 +39,7 @@ vi.mock('@/stores/user', () => ({
 }))
 
 // ── Mock router push ──
-const mockPush = vi.fn()
+const mockPush = vi.fn<(...args: unknown[]) => unknown>()
 vi.mock('vue-router', async () => {
   const actual = await vi.importActual('vue-router') as { createRouter: typeof createRouter; createWebHistory: typeof createWebHistory; [key: string]: unknown }
   return {
@@ -58,8 +58,8 @@ vi.mock('element-plus', async () => {
   return {
     ...actual,
     ElMessage: {
-      success: vi.fn(),
-      error: vi.fn(),
+      success: vi.fn<(...args: unknown[]) => unknown>(),
+      error: vi.fn<(...args: unknown[]) => unknown>(),
     },
   }
 })
@@ -110,7 +110,7 @@ describe('SettingsPage', () => {
       status: 1,
       createTime: '2026-01-01T00:00:00Z',
     } as UserProfileVO
-    mockStore.fetchUserInfo = vi.fn()
+    mockStore.fetchUserInfo = vi.fn<(...args: unknown[]) => unknown>()
     mockUpdateMe.mockReset()
     mockApi.mockReset()
     mockPush.mockReset()

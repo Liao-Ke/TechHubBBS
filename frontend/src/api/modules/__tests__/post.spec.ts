@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import type { R, PostVO, PostListParams, PostCreateRequest, PostUpdateRequest, PageResult } from '@/api/types'
 
-const mockApi = vi.fn()
+const mockApi = vi.fn<(...args: unknown[]) => unknown>()
 vi.mock('@/api', () => ({
   api: mockApi,
 }))
@@ -55,24 +55,24 @@ describe('postApi', () => {
   it('like sends POST /posts/{id}/like', async () => {
     mockApi.mockResolvedValue({} as R<null>)
     await postApi.like('p1')
-    expect(mockApi).toHaveBeenCalledWith('/posts/p1/like', { method: 'POST' })
+    expect(mockApi).toHaveBeenCalledWith('/posts/p1/likes', { method: 'POST' })
   })
 
   it('unlike sends DELETE /posts/{id}/like', async () => {
     mockApi.mockResolvedValue({} as R<null>)
     await postApi.unlike('p1')
-    expect(mockApi).toHaveBeenCalledWith('/posts/p1/like', { method: 'DELETE' })
+    expect(mockApi).toHaveBeenCalledWith('/posts/p1/likes', { method: 'DELETE' })
   })
 
   it('favorite sends POST /posts/{id}/favorite', async () => {
     mockApi.mockResolvedValue({} as R<null>)
     await postApi.favorite('p1')
-    expect(mockApi).toHaveBeenCalledWith('/posts/p1/favorite', { method: 'POST' })
+    expect(mockApi).toHaveBeenCalledWith('/posts/p1/favorites', { method: 'POST' })
   })
 
   it('unfavorite sends DELETE /posts/{id}/favorite', async () => {
     mockApi.mockResolvedValue({} as R<null>)
     await postApi.unfavorite('p1')
-    expect(mockApi).toHaveBeenCalledWith('/posts/p1/favorite', { method: 'DELETE' })
+    expect(mockApi).toHaveBeenCalledWith('/posts/p1/favorites', { method: 'DELETE' })
   })
 })

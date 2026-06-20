@@ -13,20 +13,20 @@ const {
   mockRecommendationApi,
 } = vi.hoisted(() => ({
   mockPostApi: {
-    getDetail: vi.fn(),
-    like: vi.fn(),
-    unlike: vi.fn(),
-    favorite: vi.fn(),
-    unfavorite: vi.fn(),
-    remove: vi.fn(),
+    getDetail: vi.fn<(...args: unknown[]) => unknown>(),
+    like: vi.fn<(...args: unknown[]) => unknown>(),
+    unlike: vi.fn<(...args: unknown[]) => unknown>(),
+    favorite: vi.fn<(...args: unknown[]) => unknown>(),
+    unfavorite: vi.fn<(...args: unknown[]) => unknown>(),
+    remove: vi.fn<(...args: unknown[]) => unknown>(),
   },
   mockCommentApi: {
-    getList: vi.fn(),
-    create: vi.fn(),
-    getDivineComments: vi.fn(),
+    getList: vi.fn<(...args: unknown[]) => unknown>(),
+    create: vi.fn<(...args: unknown[]) => unknown>(),
+    getDivineComments: vi.fn<(...args: unknown[]) => unknown>(),
   },
   mockRecommendationApi: {
-    getRelatedPosts: vi.fn(),
+    getRelatedPosts: vi.fn<(...args: unknown[]) => unknown>(),
   },
 }))
 
@@ -53,12 +53,12 @@ vi.mock('element-plus', async () => {
   return {
     ...actual,
     ElMessage: {
-      success: vi.fn(),
-      error: vi.fn(),
-      warning: vi.fn(),
+      success: vi.fn<(...args: unknown[]) => unknown>(),
+      error: vi.fn<(...args: unknown[]) => unknown>(),
+      warning: vi.fn<(...args: unknown[]) => unknown>(),
     },
     ElMessageBox: {
-      confirm: vi.fn(),
+      confirm: vi.fn<(...args: unknown[]) => unknown>(),
     },
   }
 })
@@ -443,7 +443,7 @@ describe('PostDetailPage', () => {
 
     it('share button copies URL to clipboard', async () => {
       // Mock clipboard API
-      const writeText = vi.fn().mockResolvedValue(undefined)
+      const writeText = vi.fn<(...args: unknown[]) => unknown>().mockResolvedValue(undefined)
       Object.assign(navigator, {
         clipboard: { writeText },
       })
@@ -493,24 +493,22 @@ describe('PostDetailPage', () => {
   // SECTION 5 — AI PANEL (placeholder)
   // ========================================================================
   describe('Section 5 — AI Panel', () => {
-    it('shows AI placeholder when logged in and content length >= 50', async () => {
+    it('shows AI section with generate button when logged in and content length >= 50', async () => {
       const { wrapper } = await mountPage({
         loggedIn: true,
         userInfo: { id: '99', username: 'reader', role: 'USER' },
       })
       const aiSection = wrapper.find('.post-detail__ai')
       expect(aiSection.exists()).toBe(true)
-      expect(aiSection.text()).toContain('AI 总结功能即将上线')
+      expect(aiSection.text()).toContain('生成 AI 总结')
     })
 
     it('shows login prompt when not logged in', async () => {
       const { wrapper } = await mountPage()
-      const aiLogin = wrapper.find('.post-detail__ai--login')
-      expect(aiLogin.exists()).toBe(true)
-      expect(aiLogin.text()).toContain('登录后使用 AI 智能总结')
+      expect(wrapper.text()).toContain('登录后使用 AI 智能总结')
     })
 
-    it('does not show AI section when content length < 50', async () => {
+    it('shows content too short message when content length < 50', async () => {
       mockPostApi.getDetail.mockResolvedValue({
         data: { ...mockPost, content: '短内容' },
       })
@@ -518,7 +516,9 @@ describe('PostDetailPage', () => {
         loggedIn: true,
         userInfo: { id: '99', username: 'reader', role: 'USER' },
       })
-      expect(wrapper.find('.post-detail__ai').exists()).toBe(false)
+      const aiSection = wrapper.find('.post-detail__ai')
+      expect(aiSection.exists()).toBe(true)
+      expect(aiSection.text()).toContain('帖子内容过短')
     })
   })
 

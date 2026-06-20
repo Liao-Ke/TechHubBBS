@@ -8,7 +8,7 @@ import { createPinia, setActivePinia } from 'pinia'
 // ---------------------------------------------------------------------------
 const { mockNotificationApi } = vi.hoisted(() => ({
   mockNotificationApi: {
-    getUnreadCount: vi.fn(),
+    getUnreadCount: vi.fn<(...args: unknown[]) => unknown>(),
   },
 }))
 
@@ -18,8 +18,8 @@ vi.mock('@/api/modules/notification', () => ({
 
 vi.mock('@/utils/token', () => ({
   getToken: vi.fn(() => null),
-  setToken: vi.fn(),
-  removeToken: vi.fn(),
+  setToken: vi.fn<(...args: unknown[]) => unknown>(),
+  removeToken: vi.fn<(...args: unknown[]) => unknown>(),
 }))
 
 import NotificationBell from '@/components/notification/NotificationBell.vue'

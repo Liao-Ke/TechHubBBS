@@ -22,14 +22,14 @@ vi.mock('@/stores/user', () => ({
     userInfo: null,
     token: null,
     role: 'USER',
-    fetchUserInfo: vi.fn(),
-    logout: vi.fn(),
+    fetchUserInfo: vi.fn<(...args: unknown[]) => unknown>(),
+    logout: vi.fn<(...args: unknown[]) => unknown>(),
   }),
 }))
 
 vi.mock('@/stores/notification', () => ({
   useNotificationStore: () => ({
-    fetchUnreadCount: vi.fn(),
+    fetchUnreadCount: vi.fn<(...args: unknown[]) => unknown>(),
   }),
 }))
 

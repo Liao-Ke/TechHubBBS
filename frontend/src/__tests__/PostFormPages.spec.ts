@@ -4,8 +4,8 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 
 // ---- Mocks ----
 
-const mockRouterPush = vi.fn()
-const mockRouterReplace = vi.fn()
+const mockRouterPush = vi.fn<(...args: unknown[]) => unknown>()
+const mockRouterReplace = vi.fn<(...args: unknown[]) => unknown>()
 const mockRouteParams = { id: '123' }
 
 vi.mock('vue-router', () => ({
@@ -14,13 +14,13 @@ vi.mock('vue-router', () => ({
 }))
 
 const mockPostApi = {
-  create: vi.fn(),
-  update: vi.fn(),
-  getDetail: vi.fn(),
+  create: vi.fn<(...args: unknown[]) => unknown>(),
+  update: vi.fn<(...args: unknown[]) => unknown>(),
+  getDetail: vi.fn<(...args: unknown[]) => unknown>(),
 }
 
 const mockCategoryApi = {
-  getList: vi.fn(),
+  getList: vi.fn<(...args: unknown[]) => unknown>(),
 }
 
 vi.mock('@/api/modules/post', () => ({
@@ -36,12 +36,12 @@ const mockDraft = {
   draftData: { value: {} as Record<string, unknown> },
   isDirty: { value: false },
   saving: { value: false },
-  checkDraft: vi.fn(),
-  restoreDraft: vi.fn(),
-  discardDraft: vi.fn(),
-  saveDraft: vi.fn(),
-  startAutoSave: vi.fn(),
-  stopAutoSave: vi.fn(),
+  checkDraft: vi.fn<(...args: unknown[]) => unknown>(),
+  restoreDraft: vi.fn<(...args: unknown[]) => unknown>(),
+  discardDraft: vi.fn<(...args: unknown[]) => unknown>(),
+  saveDraft: vi.fn<(...args: unknown[]) => unknown>(),
+  startAutoSave: vi.fn<(...args: unknown[]) => unknown>(),
+  stopAutoSave: vi.fn<(...args: unknown[]) => unknown>(),
 }
 
 vi.mock('@/composables/useDraft', () => ({
@@ -54,13 +54,13 @@ vi.mock('element-plus', async () => {
   return {
     ...(actual as object),
     ElMessage: {
-      success: vi.fn(),
-      error: vi.fn(),
-      warning: vi.fn(),
-      info: vi.fn(),
+      success: vi.fn<(...args: unknown[]) => unknown>(),
+      error: vi.fn<(...args: unknown[]) => unknown>(),
+      warning: vi.fn<(...args: unknown[]) => unknown>(),
+      info: vi.fn<(...args: unknown[]) => unknown>(),
     },
     ElMessageBox: {
-      confirm: vi.fn(),
+      confirm: vi.fn<(...args: unknown[]) => unknown>(),
     },
   }
 })
@@ -243,9 +243,7 @@ describe('PostCreatePage', () => {
   })
 
   it('shows draft restore dialog when draft exists on mount', async () => {
-    mockDraft.checkDraft.mockResolvedValueOnce({
-      data: { id: 'draft-1', title: '草稿标题', content: '草稿内容' },
-    })
+    mockDraft.checkDraft.mockResolvedValueOnce({ id: 'draft-1', title: '草稿标题', content: '草稿内容' })
 
     const wrapper = await mountPage()
     await flushPromises()
@@ -258,9 +256,7 @@ describe('PostCreatePage', () => {
   })
 
   it('restores draft content into form when user confirms', async () => {
-    mockDraft.checkDraft.mockResolvedValueOnce({
-      data: { id: 'draft-1' },
-    })
+    mockDraft.checkDraft.mockResolvedValueOnce({ id: 'draft-1' })
     mockDraft.restoreDraft.mockResolvedValueOnce({
       id: 'draft-1',
       title: '草稿标题',
@@ -277,9 +273,7 @@ describe('PostCreatePage', () => {
   })
 
   it('discards draft when user cancels restore dialog', async () => {
-    mockDraft.checkDraft.mockResolvedValueOnce({
-      data: { id: 'draft-1' },
-    })
+    mockDraft.checkDraft.mockResolvedValueOnce({ id: 'draft-1' })
     vi.mocked(ElMessageBox.confirm).mockRejectedValueOnce('cancel' as never)
 
     const wrapper = await mountPage()
@@ -411,9 +405,7 @@ describe('PostEditPage', () => {
   })
 
   it('restores draft when editing and draft exists', async () => {
-    mockDraft.checkDraft.mockResolvedValueOnce({
-      data: { id: 'draft-edit-1' },
-    })
+    mockDraft.checkDraft.mockResolvedValueOnce({ data: { id: 'draft-edit-1' } })
     mockDraft.restoreDraft.mockResolvedValueOnce({
       id: 'draft-edit-1',
       title: '草稿修改后的标题',

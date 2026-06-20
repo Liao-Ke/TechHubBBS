@@ -5,16 +5,16 @@ describe('useInfiniteScroll', () => {
   beforeEach(() => {
     vi.stubGlobal('IntersectionObserver', vi.fn(function () {
       return {
-        observe: vi.fn(),
-        unobserve: vi.fn(),
-        disconnect: vi.fn(),
+        observe: vi.fn<(...args: unknown[]) => unknown>(),
+        unobserve: vi.fn<(...args: unknown[]) => unknown>(),
+        disconnect: vi.fn<(...args: unknown[]) => unknown>(),
       }
     }))
   })
 
   describe('state management', () => {
     it('initializes with correct default state', () => {
-      const loadFn = vi.fn()
+      const loadFn = vi.fn<() => Promise<void>>()
       const { loading, hasMore, error, sentinelRef } = useInfiniteScroll(loadFn)
 
       expect(sentinelRef.value).toBeNull()
@@ -26,7 +26,7 @@ describe('useInfiniteScroll', () => {
 
   describe('loadMore', () => {
     it('calls loadFn when hasMore is true and not loading', async () => {
-      const loadFn = vi.fn().mockResolvedValue(undefined)
+      const loadFn = vi.fn<() => Promise<void>>().mockResolvedValue(undefined)
       const { loadMore, loading } = useInfiniteScroll(loadFn)
 
       await loadMore()
@@ -46,7 +46,7 @@ describe('useInfiniteScroll', () => {
     })
 
     it('does NOT call loadFn when hasMore is false', async () => {
-      const loadFn = vi.fn()
+      const loadFn = vi.fn<() => Promise<void>>()
       const { loadMore, hasMore } = useInfiniteScroll(loadFn)
 
       hasMore.value = false
@@ -56,7 +56,7 @@ describe('useInfiniteScroll', () => {
 
     it('sets error when loadFn throws', async () => {
       const testError = new Error('Load failed')
-      const loadFn = vi.fn().mockRejectedValue(testError)
+      const loadFn = vi.fn<() => Promise<void>>().mockRejectedValue(testError)
       const { loadMore, error, hasMore, loading } = useInfiniteScroll(loadFn)
 
       await loadMore()
@@ -66,7 +66,7 @@ describe('useInfiniteScroll', () => {
     })
 
     it('handles non-Error thrown values', async () => {
-      const loadFn = vi.fn().mockRejectedValue('Some string error')
+      const loadFn = vi.fn<() => Promise<void>>().mockRejectedValue('Some string error')
       const { loadMore, error } = useInfiniteScroll(loadFn)
 
       await loadMore()
@@ -75,7 +75,7 @@ describe('useInfiniteScroll', () => {
     })
 
     it('clears previous error on subsequent successful load', async () => {
-      const loadFn = vi.fn()
+      const loadFn = vi.fn<() => Promise<void>>()
         .mockRejectedValueOnce(new Error('First fail'))
         .mockResolvedValueOnce(undefined)
       const { loadMore, error } = useInfiniteScroll(loadFn)
@@ -90,7 +90,7 @@ describe('useInfiniteScroll', () => {
 
   describe('reset', () => {
     it('restores default state', () => {
-      const loadFn = vi.fn()
+      const loadFn = vi.fn<() => Promise<void>>()
       const { hasMore, error, loading, reset } = useInfiniteScroll(loadFn)
 
       hasMore.value = false
@@ -107,14 +107,14 @@ describe('useInfiniteScroll', () => {
 
   describe('options defaults', () => {
     it('uses default threshold and rootMargin when not specified', () => {
-      const loadFn = vi.fn()
+      const loadFn = vi.fn<() => Promise<void>>()
       const { loading, hasMore } = useInfiniteScroll(loadFn)
       expect(loading.value).toBe(false)
       expect(hasMore.value).toBe(true)
     })
 
     it('accepts custom options', () => {
-      const loadFn = vi.fn()
+      const loadFn = vi.fn<() => Promise<void>>()
       const { loading } = useInfiniteScroll(loadFn, {
         threshold: 0.5,
         rootMargin: '200px',

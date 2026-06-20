@@ -5,10 +5,9 @@ import { ApiError, onRequestInterceptor, onResponseInterceptor, onResponseErrorI
 // Mocks
 // ---------------------------------------------------------------------------
 
-const mockGetToken = vi.fn()
-const mockRemoveToken = vi.fn()
-const mockRouterPush = vi.fn()
-let mockFullPath = '/'
+const mockGetToken = vi.fn<(...args: unknown[]) => unknown>()
+const mockRemoveToken = vi.fn<(...args: unknown[]) => unknown>()
+const mockRouterPush = vi.fn<(...args: unknown[]) => unknown>()
 
 vi.mock('@/utils/token', () => ({
   getToken: mockGetToken,
@@ -38,14 +37,9 @@ function mockResponse(status: number, data: unknown): { _data: unknown; status: 
 
 beforeEach(() => {
   vi.clearAllMocks()
-  mockFullPath = '/'
   vi.mocked(mockGetToken).mockReset()
   vi.mocked(mockRemoveToken).mockReset()
   mockRouterPush.mockReset()
-
-  // Sync the router mock's currentRoute with our variable
-  const routerModule = vi.mocked(vi.importActual('@/router') as any)
-  // Re-mock doesn't work here; we'll handle it in tests via vi.mocked
 })
 
 // ===========================================================================
@@ -224,6 +218,6 @@ describe('onResponseErrorInterceptor', () => {
     const result = onResponseErrorInterceptor({ response: resp })
 
     // It should be a rejected promise, never a fulfilled one
-    await expect(result).rejects.toThrow()
+    await expect(result).rejects.toThrow('服务器错误，请稍后重试')
   })
 })

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { UploadFilled, PictureFilled, Plus } from '@element-plus/icons-vue'
+import { PictureFilled, Plus } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { useFileUpload } from '@/composables/useFileUpload'
 import { fileApi } from '@/api/modules/file'
@@ -61,12 +61,6 @@ function handleRetry() {
   fileList.value = []
 }
 
-function handleReset() {
-  previewUrl.value = ''
-  uploadError.value = false
-  progress.value = 0
-  fileList.value = []
-}
 </script>
 
 <template>
