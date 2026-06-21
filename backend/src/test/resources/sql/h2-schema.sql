@@ -1,5 +1,22 @@
 -- H2-compatible schema for integration tests
 -- Must stay in sync with production schema.sql
+-- DROP tables first (reverse dependency order) to ensure clean state between test classes
+
+DROP TABLE IF EXISTS "post_similarity" CASCADE;
+DROP TABLE IF EXISTS "post_keyword" CASCADE;
+DROP TABLE IF EXISTS "ai_qa_history" CASCADE;
+DROP TABLE IF EXISTS "ai_summary" CASCADE;
+DROP TABLE IF EXISTS "notification" CASCADE;
+DROP TABLE IF EXISTS "comment_recommend" CASCADE;
+DROP TABLE IF EXISTS "user_like" CASCADE;
+DROP TABLE IF EXISTS "favorite" CASCADE;
+DROP TABLE IF EXISTS "follow" CASCADE;
+DROP TABLE IF EXISTS "post_draft" CASCADE;
+DROP TABLE IF EXISTS "comment" CASCADE;
+DROP TABLE IF EXISTS "user_profile" CASCADE;
+DROP TABLE IF EXISTS "post" CASCADE;
+DROP TABLE IF EXISTS "category" CASCADE;
+DROP TABLE IF EXISTS "user" CASCADE;
 
 CREATE TABLE IF NOT EXISTS "user" (
     "id"          BIGINT       NOT NULL,
