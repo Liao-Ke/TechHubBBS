@@ -28,25 +28,39 @@ class VisibilityMatrixIntegrationTest extends BaseIntegrationTest {
     private String strangerToken;
     private String adminToken;
 
+    private String authorId;
+
     @BeforeEach
     void setUpUsers() throws Exception {
         // Register author
         registerAndLogin("vis_author", "vis_author@test.com");
-        authorToken = login("vis_author");
+        String authorResp = mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"vis_author\",\"password\":\"password123\"}"))
+                .andReturn().getResponse().getContentAsString();
+        authorToken = objectMapper.readTree(authorResp).get("data").get("token").asText();
+        authorId = objectMapper.readTree(authorResp).get("data").get("userId").asText();
 
         // Register follower — will follow author
         registerAndLogin("vis_follower", "vis_follower@test.com");
-        followerToken = login("vis_follower");
+        String followerResp = mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"vis_follower\",\"password\":\"password123\"}"))
+                .andReturn().getResponse().getContentAsString();
+        followerToken = objectMapper.readTree(followerResp).get("data").get("token").asText();
 
         // Register stranger — will NOT follow author
         registerAndLogin("vis_stranger", "vis_stranger@test.com");
-        strangerToken = login("vis_stranger");
+        String strangerResp = mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"vis_stranger\",\"password\":\"password123\"}"))
+                .andReturn().getResponse().getContentAsString();
+        strangerToken = objectMapper.readTree(strangerResp).get("data").get("token").asText();
 
         // Admin — use generated token with ADMIN role
         adminToken = generateToken(777L, "vis_admin", "ADMIN");
 
         // Follower follows author
-        String authorId = getUserId(authorToken);
         mockMvc.perform(post("/api/v1/users/{id}/follow", authorId)
                 .header("Authorization", bearerToken(followerToken)));
     }
@@ -70,7 +84,6 @@ class VisibilityMatrixIntegrationTest extends BaseIntegrationTest {
     private String getUserId(String token) throws Exception {
         return jwtTokenProvider.getUserIdFromToken(token).toString();
     }
-
     private String createPost(int visibility) throws Exception {
         String resp = mockMvc.perform(post("/api/v1/posts")
                         .header("Authorization", bearerToken(authorToken))
@@ -342,5 +355,78 @@ class VisibilityMatrixIntegrationTest extends BaseIntegrationTest {
         mockMvc.perform(get("/api/v1/posts/{id}", post2)
                         .header("Authorization", bearerToken(adminToken)))
                 .andExpect(status().isOk());
+    }
+
+    // ==================== 用户帖子列表可见性验证 ====================
+
+    @Nested
+    @DisplayName("用户帖子列表 GET /users/{id}/posts")
+    class UserPostsListVisibility {
+
+        private String authorId;
+
+        @BeforeEach
+        void setUpPosts() throws Exception {
+            authorId = getUserId(authorToken);
+            createPost(0); // PUBLIC
+            createPost(1); // LOGIN_ONLY
+            createPost(2); // FOLLOWERS_ONLY
+            createPost(3); // PRIVATE
+        }
+
+        @Test
+        @DisplayName("游客 → 只能看到公开帖(1条)")
+        void guestOnlySeesPublic() throws Exception {
+            mockMvc.perform(get("/api/v1/users/{id}/posts", authorId)
+                            .param("page", "1")
+                            .param("size", "20"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.records", hasSize(1)))
+                    .andExpect(jsonPath("$.data.records[0].title").value("Visibility=0 Post"));
+        }
+
+        @Test
+        @DisplayName("陌生人 → 看到公开+登录可见(2条)")
+        void strangerSeesPublicAndLoginOnly() throws Exception {
+            mockMvc.perform(get("/api/v1/users/{id}/posts", authorId)
+                            .header("Authorization", bearerToken(strangerToken))
+                            .param("page", "1")
+                            .param("size", "20"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.records", hasSize(2)));
+        }
+
+        @Test
+        @DisplayName("粉丝 → 看到公开+登录可见+粉丝可见(3条)")
+        void followerSeesPublicLoginAndFollowersOnly() throws Exception {
+            mockMvc.perform(get("/api/v1/users/{id}/posts", authorId)
+                            .header("Authorization", bearerToken(followerToken))
+                            .param("page", "1")
+                            .param("size", "20"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.records", hasSize(3)));
+        }
+
+        @Test
+        @DisplayName("作者 → 看到自己所有帖子含私密(4条)")
+        void authorSeesAllOwnPosts() throws Exception {
+            mockMvc.perform(get("/api/v1/users/{id}/posts", authorId)
+                            .header("Authorization", bearerToken(authorToken))
+                            .param("page", "1")
+                            .param("size", "20"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.records", hasSize(4)));
+        }
+
+        @Test
+        @DisplayName("管理员 → 通过权限看到所有帖子(4条)")
+        void adminSeesAllPosts() throws Exception {
+            mockMvc.perform(get("/api/v1/users/{id}/posts", authorId)
+                            .header("Authorization", bearerToken(adminToken))
+                            .param("page", "1")
+                            .param("size", "20"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.records", hasSize(4)));
+        }
     }
 }

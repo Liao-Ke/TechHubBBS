@@ -39,7 +39,8 @@ public class UserController {
 
     @GetMapping("/{id}/posts")
     public R<PageResult<PostVO>> getUserPosts(@PathVariable Long id, PostListQuery query) {
-        return R.ok(userService.getUserPosts(id, query));
+        Long currentUserId = SecurityUtils.getCurrentUserId();
+        return R.ok(userService.getUserPosts(id, query, currentUserId));
     }
 
     @PatchMapping("/me/password")

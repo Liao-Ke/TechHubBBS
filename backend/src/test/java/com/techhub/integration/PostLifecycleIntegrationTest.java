@@ -248,7 +248,7 @@ class PostLifecycleIntegrationTest extends BaseIntegrationTest {
                         .param("page", "1")
                         .param("size", "100"))
                 .andExpect(status().isOk());
-        // The service layer caps at 50 — we trust service tests for exact cap verification
+        // Service 层兜底 size 上限 50，返回 200
     }
 
     // ==================== 查询帖子详情 ====================

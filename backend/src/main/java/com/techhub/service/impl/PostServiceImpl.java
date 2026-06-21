@@ -204,8 +204,9 @@ public class PostServiceImpl implements PostService {
             throw new BusinessException(ResultCode.FORBIDDEN, "无权删除他人帖子");
         }
 
-        post.setDeleted(1);
-        postMapper.updateById(post);
+        if (postMapper.deleteById(postId) == 0) {
+            throw new BusinessException(ResultCode.NOT_FOUND, "帖子不存在或已被删除");
+        }
     }
 
     // --- 私有辅助方法 -------------------------------------------------------
