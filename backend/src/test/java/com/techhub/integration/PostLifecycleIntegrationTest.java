@@ -228,7 +228,7 @@ class PostLifecycleIntegrationTest extends BaseIntegrationTest {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(String.format("""
                             {"title":"Post %d","content":"Content %d Content %d Content %d Content %d Content %d ","categoryId":1000,"visibility":0}
-                            """, i, i)));
+                            """, i, i, i, i, i, i)));
         }
 
         mockMvc.perform(get("/api/v1/posts")
