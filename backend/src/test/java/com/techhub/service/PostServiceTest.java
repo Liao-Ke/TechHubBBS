@@ -149,8 +149,6 @@ class PostServiceTest {
 
             when(postMapper.selectPage(any(Page.class), any(LambdaQueryWrapper.class)))
                     .thenReturn(mpPage);
-            when(postVisibilityService.isVisible(any(Post.class), any(), anyBoolean(), anyBoolean()))
-                    .thenReturn(true);
             mockMapperRelations();
 
             PageResult<PostVO> result = postService.listPosts(query, USER_ID);
@@ -161,30 +159,26 @@ class PostServiceTest {
         }
 
         @Test
-        @DisplayName("filters out invisible posts")
-        void filtersInvisiblePosts() {
+        @DisplayName("total 和 records 数量一致 — 回归 issue #14 分页不准确")
+        void totalMatchesRecords() {
             PostListQuery query = new PostListQuery();
             query.setPage(1);
             query.setSize(10);
 
-            Post visible = createPost(100L, USER_ID, VisibilityEnum.PUBLIC.getCode());
-            Post invisible = createPost(101L, OTHER_USER_ID, VisibilityEnum.PRIVATE.getCode());
+            Post p1 = createPost(100L, USER_ID, VisibilityEnum.PUBLIC.getCode());
+            Post p2 = createPost(101L, OTHER_USER_ID, VisibilityEnum.PUBLIC.getCode());
             Page<Post> mpPage = new Page<>(1, 10);
-            mpPage.setRecords(List.of(visible, invisible));
+            mpPage.setRecords(List.of(p1, p2));
             mpPage.setTotal(2);
 
             when(postMapper.selectPage(any(Page.class), any(LambdaQueryWrapper.class)))
                     .thenReturn(mpPage);
-            when(postVisibilityService.isVisible(eq(visible), any(), anyBoolean(), anyBoolean()))
-                    .thenReturn(true);
-            when(postVisibilityService.isVisible(eq(invisible), any(), anyBoolean(), anyBoolean()))
-                    .thenReturn(false);
             mockMapperRelations();
 
             PageResult<PostVO> result = postService.listPosts(query, USER_ID);
 
-            assertEquals(1, result.getRecords().size());
-            assertEquals("100", result.getRecords().get(0).getId());
+            assertEquals(2, result.getRecords().size());
+            assertEquals(2, result.getTotal());
         }
 
         @Test
@@ -222,8 +216,6 @@ class PostServiceTest {
 
             when(postMapper.selectPage(any(Page.class), any(LambdaQueryWrapper.class)))
                     .thenReturn(mpPage);
-            when(postVisibilityService.isVisible(any(Post.class), any(), anyBoolean(), anyBoolean()))
-                    .thenReturn(true);
             mockMapperRelations();
 
             PageResult<PostVO> result = postService.listPosts(query, USER_ID);

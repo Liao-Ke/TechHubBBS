@@ -12,9 +12,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @DisplayName("PostVisibilityService")
@@ -213,6 +217,69 @@ class PostVisibilityServiceTest {
         @DisplayName("null post → not visible")
         void nullPostNotVisible() {
             assertFalse(service.isVisible(null, AUTHOR_ID, true, false));
+        }
+    }
+
+    // -- applyVisibilityFilter tests ----------------------------------------
+
+    @Nested
+    @DisplayName("applyVisibilityFilter — 可见性条件下推到 SQL")
+    class ApplyVisibilityFilterTests {
+
+        @Test
+        @DisplayName("游客 → 仅包含 visibility=PUBLIC 条件")
+        void guestOnlyPublic() {
+            LambdaQueryWrapper<Post> wrapper = new LambdaQueryWrapper<>();
+            service.applyVisibilityFilter(wrapper, null, false, false);
+
+            String sql = wrapper.getCustomSqlSegment();
+            assertTrue(sql.contains("visibility"), "应包含 visibility 条件");
+            verify(followMapper, never()).selectList(any(LambdaQueryWrapper.class));
+            verify(followMapper, never()).selectCount(any(LambdaQueryWrapper.class));
+        }
+
+        @Test
+        @DisplayName("管理员 → 无可见性过滤条件")
+        void adminNoFilter() {
+            LambdaQueryWrapper<Post> wrapper = new LambdaQueryWrapper<>();
+            String sqlBefore = wrapper.getCustomSqlSegment();
+
+            service.applyVisibilityFilter(wrapper, ADMIN_ID, true, true);
+
+            assertEquals(sqlBefore, wrapper.getCustomSqlSegment(), "管理员不添加可见性条件");
+            verify(followMapper, never()).selectList(any(LambdaQueryWrapper.class));
+        }
+
+        @Test
+        @DisplayName("登录非管理员有关注 → 查询 followMapper 并加入 FOLLOWERS_ONLY 分支")
+        void loggedInWithFollows() {
+            Follow follow = new Follow();
+            follow.setFollowerId(FOLLOWER_ID);
+            follow.setFolloweeId(AUTHOR_ID);
+            when(followMapper.selectList(any(LambdaQueryWrapper.class)))
+                    .thenReturn(List.of(follow));
+
+            LambdaQueryWrapper<Post> wrapper = new LambdaQueryWrapper<>();
+            service.applyVisibilityFilter(wrapper, FOLLOWER_ID, true, false);
+
+            String sql = wrapper.getCustomSqlSegment();
+            assertTrue(sql.contains("author_id"), "应包含 author_id 条件");
+            assertTrue(sql.contains("visibility"), "应包含 visibility 条件");
+            verify(followMapper).selectList(any(LambdaQueryWrapper.class));
+        }
+
+        @Test
+        @DisplayName("登录非管理员无关注 → 仍查询 followMapper，但不含 FOLLOWERS_ONLY 分支")
+        void loggedInWithoutFollows() {
+            when(followMapper.selectList(any(LambdaQueryWrapper.class)))
+                    .thenReturn(List.of());
+
+            LambdaQueryWrapper<Post> wrapper = new LambdaQueryWrapper<>();
+            service.applyVisibilityFilter(wrapper, STRANGER_ID, true, false);
+
+            String sql = wrapper.getCustomSqlSegment();
+            assertTrue(sql.contains("visibility"), "应包含 visibility 条件");
+            verify(followMapper).selectList(any(LambdaQueryWrapper.class));
         }
     }
 
