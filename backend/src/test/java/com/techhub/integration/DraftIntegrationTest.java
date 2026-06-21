@@ -117,15 +117,15 @@ class DraftIntegrationTest extends BaseIntegrationTest {
     @Test
     @DisplayName("查询草稿列表 → 返回用户所有草稿")
     void listDrafts_ReturnsUserDrafts() throws Exception {
-        // Save multiple drafts
+        // Save multiple drafts with distinct postIds to avoid upsert collision
         mockMvc.perform(post("/api/v1/drafts")
                 .header("Authorization", bearerToken(userToken))
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"title\":\"Draft 1\",\"content\":\"Content 1\",\"categoryId\":1000}"));
+                .content("{\"postId\":101,\"title\":\"Draft 1\",\"content\":\"Content 1\",\"categoryId\":1000}"));
         mockMvc.perform(post("/api/v1/drafts")
                 .header("Authorization", bearerToken(userToken))
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"title\":\"Draft 2\",\"content\":\"Content 2\",\"categoryId\":1000}"));
+                .content("{\"postId\":102,\"title\":\"Draft 2\",\"content\":\"Content 2\",\"categoryId\":1000}"));
 
         assertOk(mockMvc.perform(get("/api/v1/drafts")
                         .header("Authorization", bearerToken(userToken))))

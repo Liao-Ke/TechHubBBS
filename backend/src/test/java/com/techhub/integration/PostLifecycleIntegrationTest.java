@@ -228,7 +228,7 @@ class PostLifecycleIntegrationTest extends BaseIntegrationTest {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(String.format("""
                             {"title":"Post %d","content":"Content %d Content %d Content %d Content %d Content %d ","categoryId":1000,"visibility":0}
-                            """, i, i)));
+                            """, i, i, i, i, i, i)));
         }
 
         mockMvc.perform(get("/api/v1/posts")
@@ -247,8 +247,8 @@ class PostLifecycleIntegrationTest extends BaseIntegrationTest {
         mockMvc.perform(get("/api/v1/posts")
                         .param("page", "1")
                         .param("size", "100"))
-                .andExpect(status().isOk());
-        // The service layer caps at 50 — we trust service tests for exact cap verification
+                .andExpect(status().isBadRequest());
+        // @Max(50) validation in PostListQuery rejects size > 50
     }
 
     // ==================== 查询帖子详情 ====================

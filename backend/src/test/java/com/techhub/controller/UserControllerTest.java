@@ -117,7 +117,7 @@ class UserControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
-                .andExpect(jsonPath("$.message").value("更新成功"));
+                .andExpect(jsonPath("$.message").value("success"));
     }
 
     // ==================== GET /users/{id} ====================
@@ -170,7 +170,7 @@ class UserControllerTest {
 
         PageResult<PostVO> pageResult = PageResult.of(List.of(post), 1, 10, 1);
 
-        when(userService.getUserPosts(eq(1L), any(PostListQuery.class)))
+        when(userService.getUserPosts(eq(1L), any(PostListQuery.class), eq(1L)))
                 .thenReturn(pageResult);
 
         mockMvc.perform(get("/api/v1/users/1/posts")

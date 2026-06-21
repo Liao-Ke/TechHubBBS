@@ -1,5 +1,6 @@
 package com.techhub.integration;
 
+import com.techhub.service.impl.AiSummaryAsyncExecutor;
 import com.techhub.util.AiClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -163,9 +164,10 @@ class AiIntegrationTest extends BaseIntegrationTest {
     @Test
     @DisplayName("AI问答 → 摘要已生成 → 返回问答结果")
     void askQuestion_WithSummary() throws Exception {
-        // Trigger generation first
+        // Trigger generation first — wait for async completion (mock AiClient returns instantly)
         mockMvc.perform(post("/api/v1/posts/{postId}/ai/summary", postId)
                 .header("Authorization", bearerToken(userToken)));
+        Thread.sleep(300);
 
         // Ask question
         mockMvc.perform(post("/api/v1/posts/{postId}/ai/qa", postId)
@@ -204,9 +206,11 @@ class AiIntegrationTest extends BaseIntegrationTest {
     @Test
     @DisplayName("问答历史 → 分页返回 → 包含问答记录")
     void getQaHistory_Paginated() throws Exception {
-        // Trigger summary + ask a question
+        // Trigger summary — wait for async completion (mock AiClient returns instantly)
         mockMvc.perform(post("/api/v1/posts/{postId}/ai/summary", postId)
                 .header("Authorization", bearerToken(userToken)));
+        Thread.sleep(300);
+
         mockMvc.perform(post("/api/v1/posts/{postId}/ai/qa", postId)
                 .header("Authorization", bearerToken(userToken))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -251,9 +255,10 @@ class AiIntegrationTest extends BaseIntegrationTest {
     @Test
     @DisplayName("AI问答历史隔离 → 用户A的历史用户B不可见")
     void qaHistoryIsolation() throws Exception {
-        // User asks question
+        // User asks question — wait for async summary completion
         mockMvc.perform(post("/api/v1/posts/{postId}/ai/summary", postId)
                 .header("Authorization", bearerToken(userToken)));
+        Thread.sleep(300);
         mockMvc.perform(post("/api/v1/posts/{postId}/ai/qa", postId)
                 .header("Authorization", bearerToken(userToken))
                 .contentType(MediaType.APPLICATION_JSON)

@@ -225,7 +225,7 @@ class AiControllerTest {
         mockMvc.perform(post("/api/v1/posts/10/ai/qa")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value(400));
     }
 
