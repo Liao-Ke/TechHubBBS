@@ -113,10 +113,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public PageResult<PostVO> getFavorites(Long userId, int page, int size) {
         Page<Favorite> favPage = new Page<>(page, size);
-        Page<Favorite> favResult = favoriteMapper.selectPage(favPage,
-                new LambdaQueryWrapper<Favorite>()
-                        .eq(Favorite::getUserId, userId)
-                        .orderByDesc(Favorite::getCreateTime));
+        Page<Favorite> favResult = favoriteMapper.selectVisibleFavorites(favPage, userId);
 
         if (favResult.getRecords().isEmpty()) {
             return PageResult.of(Collections.emptyList(), 0, size, page);
@@ -126,9 +123,7 @@ public class UserServiceImpl implements UserService {
                 .map(Favorite::getPostId)
                 .collect(Collectors.toList());
 
-        List<Post> posts = postMapper.selectBatchIds(postIds).stream()
-                .filter(p -> p.getDeleted() == 0)
-                .collect(Collectors.toList());
+        List<Post> posts = postMapper.selectBatchIds(postIds);
 
         List<PostVO> records = posts.stream()
                 .map(this::toPostVO)
