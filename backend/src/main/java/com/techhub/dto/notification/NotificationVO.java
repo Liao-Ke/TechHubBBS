@@ -9,6 +9,7 @@ public class NotificationVO {
     private String type;
     private String sourceType;
     private String sourceId;
+    private String parentId;
     private String content;
     private Boolean isRead;
     private LocalDateTime createTime;

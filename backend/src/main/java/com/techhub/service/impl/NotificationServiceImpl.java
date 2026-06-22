@@ -76,11 +76,13 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void create(Long userId, String type, Long sourceId, String content) {
+    public void create(Long userId, String type, Long sourceId, String sourceType, Long parentId, String content) {
         Notification notification = new Notification();
         notification.setUserId(userId);
         notification.setType(type);
         notification.setSourceId(sourceId);
+        notification.setSourceType(sourceType);
+        notification.setParentId(parentId);
         notification.setContent(content);
         notification.setIsRead(0);
         notification.setCreateTime(LocalDateTime.now());
@@ -94,26 +96,11 @@ public class NotificationServiceImpl implements NotificationService {
         vo.setId(n.getId().toString());
         vo.setType(n.getType());
         vo.setSourceId(n.getSourceId() != null ? n.getSourceId().toString() : null);
+        vo.setSourceType(n.getSourceType() != null ? n.getSourceType() : "UNKNOWN");
+        vo.setParentId(n.getParentId() != null ? n.getParentId().toString() : null);
         vo.setContent(n.getContent());
         vo.setIsRead(n.getIsRead() != null && n.getIsRead() == 1);
         vo.setCreateTime(n.getCreateTime());
-        // 根据通知类型推导 sourceType
-        switch (n.getType()) {
-            case "REPLY":
-                vo.setSourceType("post");
-                break;
-            case "LIKE":
-                vo.setSourceType("post");
-                break;
-            case "FOLLOW":
-                vo.setSourceType("user");
-                break;
-            case "DIVINE":
-                vo.setSourceType("comment");
-                break;
-            default:
-                vo.setSourceType("unknown");
-        }
         return vo;
     }
 }

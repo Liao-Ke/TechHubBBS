@@ -65,7 +65,7 @@ public class InteractionServiceImpl implements InteractionService {
 
         try {
             if (!userId.equals(post.getAuthorId())) {
-                notificationService.create(post.getAuthorId(), "LIKE", postId, "赞了你的帖子");
+                notificationService.create(post.getAuthorId(), "LIKE", postId, "POST", null, "赞了你的帖子");
             }
         } catch (Exception e) {
             log.warn("创建帖子点赞通知失败: postId={}, error={}", postId, e.getMessage());
@@ -167,7 +167,7 @@ public class InteractionServiceImpl implements InteractionService {
 
         try {
             if (!userId.equals(comment.getUserId())) {
-                notificationService.create(comment.getUserId(), "LIKE", commentId, "赞了你的评论");
+                notificationService.create(comment.getUserId(), "LIKE", commentId, "COMMENT", comment.getPostId(), "赞了你的评论");
             }
         } catch (Exception e) {
             log.warn("创建评论点赞通知失败: commentId={}, error={}", commentId, e.getMessage());

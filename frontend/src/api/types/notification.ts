@@ -12,6 +12,7 @@ export interface NotificationVO {
   content: string
   sourceId: string | null
   sourceType: string | null
+  parentId: string | null
   isRead: boolean
   createTime: string
 }

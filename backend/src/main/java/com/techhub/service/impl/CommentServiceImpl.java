@@ -109,7 +109,7 @@ public class CommentServiceImpl implements CommentService {
         // 通知帖子作者（评论者不是帖子作者本人时）
         try {
             if (!userId.equals(post.getAuthorId())) {
-                notificationService.create(post.getAuthorId(), "REPLY", comment.getId(), "回复了你的帖子");
+                notificationService.create(post.getAuthorId(), "REPLY", comment.getId(), "COMMENT", postId, "回复了你的帖子");
             }
         } catch (Exception e) {
             log.warn("创建回复通知失败: postId={}, commentId={}, error={}", postId, comment.getId(), e.getMessage());
