@@ -3,6 +3,11 @@
 -- 全部表强制：ENGINE=InnoDB, utf8mb4, BIGINT 雪花主键
 -- 索引已按索引审计员评审结果优化
 
+-- 强制初始化会话字符集为 utf8mb4
+-- MySQL Docker entrypoint 执行 /docker-entrypoint-initdb.d/*.sql 时会话字符集默认可能为 latin1,
+-- --character-set-server 只影响服务端字符集,不影响客户端连接协商,会导致表注释/中文写入乱码。
+SET NAMES utf8mb4;
+
 -- 创建数据库（如不存在）
 CREATE DATABASE IF NOT EXISTS `techhub`
     DEFAULT CHARACTER SET utf8mb4

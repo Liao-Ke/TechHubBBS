@@ -4,6 +4,9 @@
 -- 说明: 所有密码均为 BCrypt 加密，明文均为 '123456'
 -- ============================================================
 
+-- 强制初始化会话字符集为 utf8mb4,防止中文种子数据按 latin1 解码写入导致乱码
+SET NAMES utf8mb4;
+
 -- ==================== 用户 ====================
 INSERT INTO `user` (`id`, `username`, `password`, `email`, `avatar_url`, `bio`, `role`, `status`, `create_time`, `update_time`) VALUES
 (1, 'admin',     '$2a$10$sDZZncozKdyznb.ePB7qxuQGQWRjk/EFENqWsi8c82DSCRAdthDT2', 'admin@techhub.com',    'https://api.dicebear.com/9.x/initials/svg?seed=admin',     '系统管理员，热爱技术，擅长全栈开发',                              'ADMIN',     1, '2026-01-01 08:00:00', '2026-01-01 08:00:00'),
