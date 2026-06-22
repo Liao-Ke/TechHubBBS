@@ -1,6 +1,7 @@
 package com.techhub.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.techhub.common.BusinessException;
 import com.techhub.common.PageResult;
@@ -144,9 +145,11 @@ public class PostServiceImpl implements PostService {
         boolean isAdmin = isAdmin();
         postVisibilityService.checkVisibleOrThrow(post, currentUserId, isAdmin);
 
-        // 浏览量 +1
+        // 浏览量 +1（原子更新，避免读-改-写竞态条件导致漏计数）
+        postMapper.update(null, new LambdaUpdateWrapper<Post>()
+                .eq(Post::getId, postId)
+                .setSql("view_count = view_count + 1"));
         post.setViewCount(post.getViewCount() + 1);
-        postMapper.updateById(post);
 
         return toPostVO(post, currentUserId);
     }
