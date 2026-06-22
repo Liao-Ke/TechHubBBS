@@ -754,8 +754,8 @@ onMounted(async () => {
               <h4 class="post-detail__related-card-title">
                 {{ related.title }}
               </h4>
-              <span class="post-detail__related-similarity">
-                相似度 {{ ((related.similarityScore ?? 0) * 100).toFixed(0) }}%
+              <span v-if="related.similarityScore != null" class="post-detail__related-similarity">
+                相似度 {{ (related.similarityScore * 100).toFixed(0) }}%
               </span>
             </router-link>
           </div>
