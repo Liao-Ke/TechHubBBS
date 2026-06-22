@@ -117,7 +117,7 @@ class UserControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
-                .andExpect(jsonPath("$.message").value("success"));
+                .andExpect(jsonPath("$.message").value("更新成功"));
     }
 
     // ==================== GET /users/{id} ====================
