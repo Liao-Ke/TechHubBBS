@@ -72,7 +72,7 @@ public class InteractionServiceImpl implements InteractionService {
                                 .eq(Notification::getType, "LIKE")
                                 .eq(Notification::getSourceId, postId));
                 if (count == null || count == 0) {
-                    notificationService.create(post.getAuthorId(), "LIKE", postId, "赞了你的帖子");
+                    notificationService.create(post.getAuthorId(), "LIKE", postId, "POST", null, "赞了你的帖子");
                 }
             }
         } catch (Exception e) {
@@ -181,7 +181,7 @@ public class InteractionServiceImpl implements InteractionService {
                                 .eq(Notification::getType, "LIKE")
                                 .eq(Notification::getSourceId, commentId));
                 if (count == null || count == 0) {
-                    notificationService.create(comment.getUserId(), "LIKE", commentId, "赞了你的评论");
+                    notificationService.create(comment.getUserId(), "LIKE", commentId, "COMMENT", comment.getPostId(), "赞了你的评论");
                 }
             }
         } catch (Exception e) {

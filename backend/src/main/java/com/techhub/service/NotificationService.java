@@ -44,10 +44,12 @@ public interface NotificationService {
     /**
      * 创建一条通知（纯数据写入，不做任何查询或业务逻辑）。
      *
-     * @param userId   接收通知的用户 ID
-     * @param type     通知类型（REPLY / LIKE / FOLLOW / DIVINE）
-     * @param sourceId 触发通知的源 ID
-     * @param content  通知内容（纯文本）
+     * @param userId     接收通知的用户 ID
+     * @param type       通知类型（REPLY / LIKE / FOLLOW / DIVINE）
+     * @param sourceId   触发通知的源 ID
+     * @param sourceType 来源类型（POST / COMMENT / USER）
+     * @param parentId   上级帖子 ID（来源为评论时记录所属帖子 ID，否则传 null）
+     * @param content    通知内容（纯文本）
      */
-    void create(Long userId, String type, Long sourceId, String content);
+    void create(Long userId, String type, Long sourceId, String sourceType, Long parentId, String content);
 }

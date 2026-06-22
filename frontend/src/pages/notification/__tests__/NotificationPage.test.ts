@@ -78,16 +78,18 @@ const mockNotifications: NotificationVO[] = [
     type: 'REPLY',
     content: '张三 回复了你的帖子《Vue 3 入门》',
     sourceId: '100',
-    sourceType: 'POST',
+    sourceType: 'COMMENT',
+    parentId: '10',
     isRead: false,
     createTime: '2025-05-27T10:00:00',
   },
   {
     id: 'n2',
     type: 'LIKE',
-    content: '李四 赞了你的评论',
+    content: '李四 赞了你的帖子',
     sourceId: '200',
     sourceType: 'POST',
+    parentId: null,
     isRead: false,
     createTime: '2025-05-28T08:00:00',
   },
@@ -97,6 +99,7 @@ const mockNotifications: NotificationVO[] = [
     content: '王五 关注了你',
     sourceId: '300',
     sourceType: 'USER',
+    parentId: null,
     isRead: true,
     createTime: '2025-05-27T12:00:00',
   },
@@ -106,6 +109,7 @@ const mockNotifications: NotificationVO[] = [
     content: '你的评论被设为神评',
     sourceId: '400',
     sourceType: 'COMMENT',
+    parentId: '50',
     isRead: false,
     createTime: '2025-05-28T06:00:00',
   },
@@ -114,7 +118,8 @@ const mockNotifications: NotificationVO[] = [
     type: 'SYSTEM',
     content: '系统维护通知：今晚 22:00-24:00 维护',
     sourceId: null,
-    sourceType: null,
+    sourceType: 'UNKNOWN',
+    parentId: null,
     isRead: true,
     createTime: '2025-05-27T08:00:00',
   },
@@ -123,10 +128,11 @@ const mockNotifications: NotificationVO[] = [
 const pageTwoNotifications: NotificationVO[] = [
   {
     id: 'n6',
-    type: 'REPLY',
-    content: '赵六 回复了你的帖子',
+    type: 'LIKE',
+    content: '赵六 赞了你的评论',
     sourceId: '500',
-    sourceType: 'POST',
+    sourceType: 'COMMENT',
+    parentId: '60',
     isRead: false,
     createTime: '2025-05-26T10:00:00',
   },
@@ -266,7 +272,7 @@ describe('NotificationPage', () => {
     it('renders notification content text', async () => {
       const { wrapper } = await mountPage()
       expect(wrapper.text()).toContain('张三 回复了你的帖子《Vue 3 入门》')
-      expect(wrapper.text()).toContain('李四 赞了你的评论')
+      expect(wrapper.text()).toContain('李四 赞了你的帖子')
     })
 
     it('renders type tags with correct colors', async () => {
@@ -336,12 +342,24 @@ describe('NotificationPage', () => {
     it('navigates to post source on click', async () => {
       const { wrapper, router } = await mountPage()
 
-      // Click first notification (n1, sourceType=POST, sourceId=100)
+      // Click second notification (n2, sourceType=POST, sourceId=200)
+      const items = wrapper.findAll('.notification-item')
+      await items[1]!.trigger('click')
+      await flushPromises()
+
+      expect(router.currentRoute.value.path).toBe('/posts/200')
+    })
+
+    it('navigates to comment source with anchor on click', async () => {
+      const { wrapper, router } = await mountPage()
+
+      // Click first notification (n1, sourceType=COMMENT, sourceId=100, parentId=10)
       const items = wrapper.findAll('.notification-item')
       await items[0]!.trigger('click')
       await flushPromises()
 
-      expect(router.currentRoute.value.path).toBe('/posts/100')
+      expect(router.currentRoute.value.path).toBe('/posts/10')
+      expect(router.currentRoute.value.hash).toBe('#comment-100')
     })
 
     it('navigates to user source on click', async () => {

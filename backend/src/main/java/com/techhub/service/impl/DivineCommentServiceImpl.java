@@ -161,7 +161,7 @@ public class DivineCommentServiceImpl implements DivineCommentService {
         }
 
         try {
-            notificationService.create(comment.getUserId(), "DIVINE", comment.getId(), "你的评论被推荐为神评");
+            notificationService.create(comment.getUserId(), "DIVINE", comment.getId(), "COMMENT", comment.getPostId(), "你的评论被推荐为神评");
         } catch (Exception e) {
             log.warn("创建神评通知失败: commentId={}, error={}", comment.getId(), e.getMessage());
         }

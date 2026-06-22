@@ -67,7 +67,7 @@ public class FollowServiceImpl implements FollowService {
                             .eq(Notification::getType, "FOLLOW")
                             .eq(Notification::getSourceId, userId));
             if (count == null || count == 0) {
-                notificationService.create(followeeId, "FOLLOW", userId, "关注了你");
+                notificationService.create(followeeId, "FOLLOW", userId, "USER", null, "关注了你");
             }
         } catch (Exception e) {
             log.warn("创建关注通知失败: followerId={}, followeeId={}, error={}", userId, followeeId, e.getMessage());
