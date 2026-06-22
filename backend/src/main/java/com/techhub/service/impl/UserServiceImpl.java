@@ -24,7 +24,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -72,22 +71,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public PageResult<PostVO> getUserPosts(Long userId, PostListQuery query, Long currentUserId) {
-        Page<Post> page = new Page<>(query.getPage(), query.getSize());
-        Page<Post> resultPage = postMapper.selectPage(page,
-                new LambdaQueryWrapper<Post>()
-                        .eq(Post::getAuthorId, userId)
-                        .eq(Post::getDeleted, 0)
-                        .orderByDesc(Post::getCreateTime));
+        LambdaQueryWrapper<Post> wrapper = new LambdaQueryWrapper<Post>()
+                .eq(Post::getAuthorId, userId)
+                .orderByDesc(Post::getCreateTime);
 
         boolean isLoggedIn = currentUserId != null;
         boolean isAdmin = isAdmin();
+        postVisibilityService.applyVisibilityFilter(wrapper, currentUserId, isLoggedIn, isAdmin);
 
-        List<PostVO> records = new ArrayList<>();
-        for (Post post : resultPage.getRecords()) {
-            if (postVisibilityService.isVisible(post, currentUserId, isLoggedIn, isAdmin)) {
-                records.add(toPostVO(post));
-            }
-        }
+        Page<Post> page = new Page<>(query.getPage(), query.getSize());
+        Page<Post> resultPage = postMapper.selectPage(page, wrapper);
+
+        List<PostVO> records = resultPage.getRecords().stream()
+                .map(this::toPostVO)
+                .toList();
         return PageResult.of(records, resultPage.getTotal(), resultPage.getSize(), resultPage.getCurrent());
     }
 
