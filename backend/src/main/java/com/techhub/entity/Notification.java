@@ -16,6 +16,10 @@ public class Notification {
 
     private Long sourceId;
 
+    private String sourceType;
+
+    private Long parentId;
+
     private String content;
 
     private Integer isRead;

@@ -6,9 +6,9 @@
 
 -- ==================== 用户 ====================
 INSERT INTO `user` (`id`, `username`, `password`, `email`, `avatar_url`, `bio`, `role`, `status`, `create_time`, `update_time`) VALUES
-(1, 'admin',    '$2a$10$sDZZncozKdyznb.ePB7qxuQGQWRjk/EFENqWsi8c82DSCRAdthDT2', 'admin@techhub.com',    NULL, '系统管理员，热爱技术，擅长全栈开发',                              'ADMIN',     1, '2026-01-01 08:00:00', '2026-01-01 08:00:00'),
-(2, 'moderator', '$2a$10$sDZZncozKdyznb.ePB7qxuQGQWRjk/EFENqWsi8c82DSCRAdthDT2', 'moderator@techhub.com', NULL, '版主，Java 后端开发者，开源爱好者',                               'MODERATOR', 1, '2026-01-02 10:00:00', '2026-01-02 10:00:00'),
-(3, 'user',     '$2a$10$sDZZncozKdyznb.ePB7qxuQGQWRjk/EFENqWsi8c82DSCRAdthDT2', 'user@techhub.com',      NULL, '全栈工程师，正在学习 Spring Boot 和 Vue 3，欢迎交流',                'USER',      1, '2026-01-15 14:30:00', '2026-01-15 14:30:00');
+(1, 'admin',     '$2a$10$sDZZncozKdyznb.ePB7qxuQGQWRjk/EFENqWsi8c82DSCRAdthDT2', 'admin@techhub.com',    'https://api.dicebear.com/9.x/initials/svg?seed=admin',     '系统管理员，热爱技术，擅长全栈开发',                              'ADMIN',     1, '2026-01-01 08:00:00', '2026-01-01 08:00:00'),
+(2, 'moderator', '$2a$10$sDZZncozKdyznb.ePB7qxuQGQWRjk/EFENqWsi8c82DSCRAdthDT2', 'moderator@techhub.com', 'https://api.dicebear.com/9.x/initials/svg?seed=moderator', '版主，Java 后端开发者，开源爱好者',                               'MODERATOR', 1, '2026-01-02 10:00:00', '2026-01-02 10:00:00'),
+(3, 'user',      '$2a$10$sDZZncozKdyznb.ePB7qxuQGQWRjk/EFENqWsi8c82DSCRAdthDT2', 'user@techhub.com',      'https://api.dicebear.com/9.x/initials/svg?seed=user',      '全栈工程师，正在学习 Spring Boot 和 Vue 3，欢迎交流',                'USER',      1, '2026-01-15 14:30:00', '2026-01-15 14:30:00');
 
 -- ==================== 版块 ====================
 INSERT INTO `category` (`id`, `name`, `description`, `sort_order`, `status`, `create_time`) VALUES
@@ -264,21 +264,21 @@ INSERT INTO `comment_recommend` (`id`, `comment_id`, `user_id`, `create_time`) V
 (160, 55, 1, '2026-02-22 09:00:00');
 
 -- ==================== 通知 ====================
-INSERT INTO `notification` (`id`, `user_id`, `type`, `source_id`, `content`, `is_read`, `create_time`) VALUES
-(170, 1, 'LIKE', 30, '用户 moderator 点赞了你的帖子《Spring Boot 3.5 最佳实践总结》', 1, '2026-02-01 12:00:00'),
-(171, 1, 'LIKE', 30, '用户 admin 点赞了你的帖子《Spring Boot 3.5 最佳实践总结》', 0, '2026-02-01 13:00:00'),
-(172, 1, 'REPLY', 30, '用户 admin 回复了你的帖子《Spring Boot 3.5 最佳实践总结》', 1, '2026-02-01 16:00:00'),
-(173, 1, 'LIKE', 30, '用户 user 点赞了你的评论', 1, '2026-02-02 09:00:00'),
-(174, 3, 'DIVINE', 51, '你的评论被选为神评！', 0, '2026-02-03 10:00:00'),
-(175, 3, 'FOLLOW', 140, '用户 user 关注了你', 1, '2026-02-01 12:00:00'),
-(176, 2, 'FOLLOW', 141, '用户 user 关注了你', 0, '2026-02-10 15:00:00'),
-(177, 1, 'FOLLOW', 142, '用户 moderator 关注了你', 1, '2026-01-15 10:00:00'),
-(178, 1, 'LIKE', 33, '用户 user 点赞了你的帖子《微服务架构设计中的十大陷阱》', 0, '2026-02-21 10:00:00'),
-(179, 3, 'LIKE', 34, '用户 admin 点赞了你的帖子《MySQL 联合索引最左前缀原则求助》', 0, '2026-03-10 12:00:00'),
-(180, 3, 'DIVINE', 57, '你的评论被选为神评！', 0, '2026-03-12 15:00:00'),
-(181, 3, 'DIVINE', 60, '你的评论被选为神评！', 0, '2026-03-17 10:00:00'),
-(182, 1, 'LIKE', 38, '用户 moderator 点赞了你的帖子《TechHub 技术社区论坛 —— 全栈开源项目》', 0, '2026-03-20 10:00:00'),
-(183, 1, 'LIKE', 38, '用户 user 点赞了你的帖子《TechHub 技术社区论坛 —— 全栈开源项目》', 0, '2026-03-20 11:00:00'),
-(184, 1, 'REPLY', 38, '用户 user 回复了你的帖子《TechHub 技术社区论坛 —— 全栈开源项目》', 0, '2026-03-21 10:00:00'),
-(185, 1, 'DIVINE', 63, '你的评论被选为神评！', 0, '2026-03-25 14:00:00'),
-(186, 2, 'DIVINE', 67, '你的评论被选为神评！', 0, '2026-05-03 10:00:00');
+INSERT INTO `notification` (`id`, `user_id`, `type`, `source_id`, `source_type`, `parent_id`, `content`, `is_read`, `create_time`) VALUES
+(170, 1, 'LIKE', 30, 'POST', NULL, '用户 moderator 点赞了你的帖子《Spring Boot 3.5 最佳实践总结》', 1, '2026-02-01 12:00:00'),
+(171, 1, 'LIKE', 30, 'POST', NULL, '用户 admin 点赞了你的帖子《Spring Boot 3.5 最佳实践总结》', 0, '2026-02-01 13:00:00'),
+(172, 1, 'REPLY', 51, 'COMMENT', 30, '用户 admin 回复了你的帖子《Spring Boot 3.5 最佳实践总结》', 1, '2026-02-01 16:00:00'),
+(173, 1, 'LIKE', 51, 'COMMENT', 30, '用户 user 点赞了你的评论', 1, '2026-02-02 09:00:00'),
+(174, 3, 'DIVINE', 51, 'COMMENT', 30, '你的评论被选为神评！', 0, '2026-02-03 10:00:00'),
+(175, 3, 'FOLLOW', 140, 'USER', NULL, '用户 user 关注了你', 1, '2026-02-01 12:00:00'),
+(176, 2, 'FOLLOW', 141, 'USER', NULL, '用户 user 关注了你', 0, '2026-02-10 15:00:00'),
+(177, 1, 'FOLLOW', 142, 'USER', NULL, '用户 moderator 关注了你', 1, '2026-01-15 10:00:00'),
+(178, 1, 'LIKE', 33, 'POST', NULL, '用户 user 点赞了你的帖子《微服务架构设计中的十大陷阱》', 0, '2026-02-21 10:00:00'),
+(179, 3, 'LIKE', 34, 'POST', NULL, '用户 admin 点赞了你的帖子《MySQL 联合索引最左前缀原则求助》', 0, '2026-03-10 12:00:00'),
+(180, 3, 'DIVINE', 57, 'COMMENT', 34, '你的评论被选为神评！', 0, '2026-03-12 15:00:00'),
+(181, 3, 'DIVINE', 60, 'COMMENT', 35, '你的评论被选为神评！', 0, '2026-03-17 10:00:00'),
+(182, 1, 'LIKE', 38, 'POST', NULL, '用户 moderator 点赞了你的帖子《TechHub 技术社区论坛 —— 全栈开源项目》', 0, '2026-03-20 10:00:00'),
+(183, 1, 'LIKE', 38, 'POST', NULL, '用户 user 点赞了你的帖子《TechHub 技术社区论坛 —— 全栈开源项目》', 0, '2026-03-20 11:00:00'),
+(184, 1, 'REPLY', 63, 'COMMENT', 38, '用户 user 回复了你的帖子《TechHub 技术社区论坛 —— 全栈开源项目》', 0, '2026-03-21 10:00:00'),
+(185, 1, 'DIVINE', 63, 'COMMENT', 38, '你的评论被选为神评！', 0, '2026-03-25 14:00:00'),
+(186, 2, 'DIVINE', 67, 'COMMENT', 45, '你的评论被选为神评！', 0, '2026-05-03 10:00:00');

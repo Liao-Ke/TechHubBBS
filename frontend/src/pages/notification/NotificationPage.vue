@@ -72,7 +72,7 @@ async function handleNotificationClick(item: NotificationVO) {
     if (item.sourceType === 'POST') {
       router.push(`/posts/${item.sourceId}`)
     } else if (item.sourceType === 'COMMENT') {
-      router.push(`/posts/${item.sourceId}`)
+      router.push(`/posts/${item.parentId}#comment-${item.sourceId}`)
     } else if (item.sourceType === 'USER') {
       router.push(`/users/${item.sourceId}`)
     }

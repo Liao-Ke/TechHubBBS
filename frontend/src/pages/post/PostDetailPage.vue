@@ -9,7 +9,7 @@
  *   6. Comments (list + nested replies + comment form)
  *   7. Related Posts (horizontal scroll mini cards)
  */
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
@@ -310,8 +310,29 @@ onMounted(async () => {
       fetchComments(1),
       fetchRelatedPosts(),
     ])
+    // 消息通知跳转携带 hash 时滚动到对应评论
+    if (route.hash) {
+      nextTick(() => scrollToHash(route.hash))
+    }
   }
 })
+
+watch(() => route.hash, (hash) => {
+  if (hash) {
+    nextTick(() => scrollToHash(hash))
+  }
+})
+
+/** 滚动到 hash 对应的评论元素，带重试机制（评论列表可能分页延迟加载） */
+function scrollToHash(hash: string, retries = 5) {
+  const id = hash.startsWith('#') ? hash.slice(1) : hash
+  const el = document.getElementById(id)
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  } else if (retries > 0) {
+    setTimeout(() => scrollToHash(hash, retries - 1), 300)
+  }
+}
 </script>
 
 <template>
@@ -502,6 +523,7 @@ onMounted(async () => {
           <li
             v-for="comment in divineComments"
             :key="comment.id"
+            :id="`comment-${comment.id}`"
             class="post-detail__divine-item"
           >
             <div class="post-detail__divine-item-author">
@@ -603,6 +625,7 @@ onMounted(async () => {
           <li
             v-for="comment in comments"
             :key="comment.id"
+            :id="`comment-${comment.id}`"
             class="post-detail__comment"
           >
             <!-- Comment header -->
@@ -683,6 +706,7 @@ onMounted(async () => {
               <li
                 v-for="child in comment.children"
                 :key="child.id"
+                :id="`comment-${child.id}`"
                 class="post-detail__comment-child"
               >
                 <div class="post-detail__comment-child-header">
@@ -754,8 +778,8 @@ onMounted(async () => {
               <h4 class="post-detail__related-card-title">
                 {{ related.title }}
               </h4>
-              <span class="post-detail__related-similarity">
-                相似度 {{ ((related.similarityScore ?? 0) * 100).toFixed(0) }}%
+              <span v-if="related.similarityScore != null" class="post-detail__related-similarity">
+                相似度 {{ (related.similarityScore * 100).toFixed(0) }}%
               </span>
             </router-link>
           </div>
