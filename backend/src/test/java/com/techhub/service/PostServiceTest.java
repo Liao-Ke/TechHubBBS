@@ -1,6 +1,7 @@
 package com.techhub.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.techhub.common.BusinessException;
 import com.techhub.common.PageResult;
@@ -286,7 +287,7 @@ class PostServiceTest {
 
             when(postMapper.selectById(POST_ID)).thenReturn(post);
             doNothing().when(postVisibilityService).checkVisibleOrThrow(any(Post.class), any(), anyBoolean());
-            when(postMapper.updateById(any(Post.class))).thenReturn(1);
+            when(postMapper.update(any(), any(LambdaUpdateWrapper.class))).thenReturn(1);
             mockMapperRelations();
 
             PostVO result = postService.getPostDetail(POST_ID, USER_ID);
@@ -294,7 +295,7 @@ class PostServiceTest {
             assertNotNull(result);
             assertEquals(POST_ID.toString(), result.getId());
             assertEquals(originalViews + 1, post.getViewCount());
-            verify(postMapper).updateById(post);
+            verify(postMapper).update(isNull(), any(LambdaUpdateWrapper.class));
         }
 
         @Test
