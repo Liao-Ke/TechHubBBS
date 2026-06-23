@@ -1,0 +1,9 @@
+# MySQL 客户端默认字符集配置
+# 作用:确保 docker-entrypoint 执行初始化 SQL 时 mysql 客户端使用 utf8mb4,
+#       不依赖 --character-set-server 的服务端设置或镜像版本协商。
+# 挂载位置:docker-compose.yml 中映射到 /etc/mysql/conf.d/client-charset.cnf
+[client]
+default-character-set = utf8mb4
+
+[mysql]
+default-character-set = utf8mb4

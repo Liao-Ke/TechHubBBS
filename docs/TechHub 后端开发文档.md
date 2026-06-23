@@ -1116,7 +1116,9 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
-    @Value("${jwt.secret:TechHubSecretKeyForJWTTokenGenerationMustBeAtLeast256BitsLong}")
+    // 安全：jwt.secret 无默认回退，缺失 JWT_SECRET 环境变量时应用拒绝启动（fail-fast）。
+    // 生产必须通过环境变量注入强随机密钥（解码后 >= 32 字节）；本地开发在 backend/.env 配置。
+    @Value("${jwt.secret}")
     private String jwtSecret;
 
     @Value("${jwt.expiration:86400000}") // 默认 24 小时
@@ -3475,6 +3477,8 @@ docker build -t techhub-backend:latest .
 docker compose --profile full up -d
 
 # 单独启动后端
+# 注意：JWT_SECRET 为必填项，缺失会拒绝启动；以下 secret 仅作示例，生产必须替换为
+# 强随机密钥（可用 `openssl rand -base64 48` 生成）。
 docker run -d \
   --name techhub-backend \
   -p 8080:8080 \
@@ -3482,6 +3486,7 @@ docker run -d \
   -e DB_USERNAME=root \
   -e DB_PASSWORD=your_password \
   -e REDIS_HOST=redis \
+  -e JWT_SECRET=REPLACE_WITH_STRONG_RANDOM_BASE64_KEY \
   techhub-backend:latest
 ```
 
