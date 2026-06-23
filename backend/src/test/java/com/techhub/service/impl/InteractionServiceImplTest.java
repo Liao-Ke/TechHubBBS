@@ -1,5 +1,6 @@
 package com.techhub.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.techhub.common.BusinessException;
 import com.techhub.common.ResultCode;
 import com.techhub.entity.Comment;
@@ -83,6 +84,7 @@ class InteractionServiceImplTest {
     @DisplayName("likePost 通知：sourceType=POST, parentId=null")
     void likePostShouldCreateNotificationWithPostSourceType() {
         doReturn(1).when(userLikeMapper).insert(any(UserLike.class));
+        when(postMapper.update(isNull(), any(LambdaUpdateWrapper.class))).thenReturn(1);
 
         interactionService.likePost(POST_ID);
 
@@ -101,6 +103,7 @@ class InteractionServiceImplTest {
         post.setLikeCount(0);
 
         when(postMapper.selectById(postId)).thenReturn(post);
+        when(postMapper.update(isNull(), any(LambdaUpdateWrapper.class))).thenReturn(1);
 
         // 用户 B（id=3）点赞帖子 A（作者=2）
         givenCurrentUser(3L);
@@ -125,6 +128,7 @@ class InteractionServiceImplTest {
         post.setLikeCount(0);
 
         when(postMapper.selectById(postId)).thenReturn(post);
+        when(postMapper.update(isNull(), any(LambdaUpdateWrapper.class))).thenReturn(1);
         givenCurrentUser(authorId);
 
         interactionService.likePost(postId);
@@ -184,7 +188,7 @@ class InteractionServiceImplTest {
         when(commentMapper.selectById(COMMENT_ID)).thenReturn(mockComment);
         doReturn(1).when(userLikeMapper).insert(any(UserLike.class));
         doNothing().when(divineCommentService).checkAndUpdateDivineStatus(any());
-        doReturn(1).when(commentMapper).updateById(any(Comment.class));
+        when(commentMapper.update(isNull(), any(LambdaUpdateWrapper.class))).thenReturn(1);
 
         interactionService.likeComment(COMMENT_ID);
 
@@ -205,6 +209,7 @@ class InteractionServiceImplTest {
         comment.setLikeCount(0);
 
         when(commentMapper.selectById(commentId)).thenReturn(comment);
+        when(commentMapper.update(isNull(), any(LambdaUpdateWrapper.class))).thenReturn(1);
 
         // 用户 B（id=3）点赞评论
         givenCurrentUser(3L);
@@ -229,6 +234,7 @@ class InteractionServiceImplTest {
         comment.setLikeCount(0);
 
         when(commentMapper.selectById(commentId)).thenReturn(comment);
+        when(commentMapper.update(isNull(), any(LambdaUpdateWrapper.class))).thenReturn(1);
         givenCurrentUser(authorId);
 
         interactionService.likeComment(commentId);
@@ -285,13 +291,13 @@ class InteractionServiceImplTest {
         post.setLikeCount(0);
 
         when(postMapper.selectById(1L)).thenReturn(post);
+        when(postMapper.update(isNull(), any(LambdaUpdateWrapper.class))).thenReturn(1);
         doThrow(new RuntimeException("通知服务不可用"))
                 .when(notificationService).create(anyLong(), anyString(), anyLong(), any(), any(), anyString());
         givenCurrentUser(3L);
 
         assertDoesNotThrow(() -> interactionService.likePost(1L));
-        // 点赞操作应完成
-        verify(postMapper).updateById(post);
-        assertEquals(1, post.getLikeCount());
+        // 点赞操作应完成（使用原子 SQL 更新）
+        verify(postMapper).update(isNull(), any(LambdaUpdateWrapper.class));
     }
 }

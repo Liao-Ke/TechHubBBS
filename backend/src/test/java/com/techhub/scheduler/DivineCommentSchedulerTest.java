@@ -1,6 +1,8 @@
 package com.techhub.scheduler;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.techhub.entity.Comment;
 import com.techhub.entity.Post;
 import com.techhub.mapper.CommentMapper;
@@ -70,15 +72,14 @@ class DivineCommentSchedulerTest {
                     .thenReturn(List.of());  // eligible posts 下 isDivine=0 的评论
             when(postMapper.selectList(any(LambdaQueryWrapper.class)))
                     .thenReturn(List.of());
-            when(postMapper.selectById(100L)).thenReturn(createPost(100L, 1, 1));
+            when(commentMapper.update(isNull(), any(UpdateWrapper.class))).thenReturn(1);
+            when(postMapper.update(isNull(), any(LambdaUpdateWrapper.class))).thenReturn(1);
 
             scheduler.scanDivineComments();
 
-            ArgumentCaptor<Comment> captor = ArgumentCaptor.forClass(Comment.class);
-            verify(commentMapper, atLeastOnce()).updateById(captor.capture());
-            Comment updated = captor.getValue();
-            assertEquals(0, updated.getIsDivine());
-            assertNull(updated.getDivineTime());
+            // 验证 comment 和 post 的原子更新被调用
+            verify(commentMapper).update(isNull(), any(UpdateWrapper.class));
+            verify(postMapper).update(isNull(), any(LambdaUpdateWrapper.class));
         }
 
         @Test
@@ -89,13 +90,13 @@ class DivineCommentSchedulerTest {
                     .thenReturn(List.of(c)).thenReturn(List.of());
             when(postMapper.selectList(any(LambdaQueryWrapper.class)))
                     .thenReturn(List.of());
-            when(postMapper.selectById(100L)).thenReturn(createPost(100L, 1, 1));
+            when(commentMapper.update(isNull(), any(UpdateWrapper.class))).thenReturn(1);
+            when(postMapper.update(isNull(), any(LambdaUpdateWrapper.class))).thenReturn(1);
 
             scheduler.scanDivineComments();
 
-            ArgumentCaptor<Comment> captor = ArgumentCaptor.forClass(Comment.class);
-            verify(commentMapper, atLeastOnce()).updateById(captor.capture());
-            assertEquals(0, captor.getValue().getIsDivine());
+            // 验证 comment 的原子更新被调用
+            verify(commentMapper).update(isNull(), any(UpdateWrapper.class));
         }
 
         @Test
@@ -109,7 +110,7 @@ class DivineCommentSchedulerTest {
 
             scheduler.scanDivineComments();
 
-            verify(commentMapper, never()).updateById(c);
+            verify(commentMapper, never()).update(isNull(), any(UpdateWrapper.class));
         }
     }
 
@@ -127,15 +128,14 @@ class DivineCommentSchedulerTest {
                     .thenReturn(List.of(c)); // eligible post: isDivine=0
             when(postMapper.selectList(any(LambdaQueryWrapper.class)))
                     .thenReturn(List.of(post));
-            when(postMapper.selectById(200L)).thenReturn(post);
+            when(commentMapper.update(isNull(), any(UpdateWrapper.class))).thenReturn(1);
+            when(postMapper.update(isNull(), any(LambdaUpdateWrapper.class))).thenReturn(1);
 
             scheduler.scanDivineComments();
 
-            ArgumentCaptor<Comment> captor = ArgumentCaptor.forClass(Comment.class);
-            verify(commentMapper, atLeastOnce()).updateById(captor.capture());
-            Comment promoted = captor.getValue();
-            assertEquals(1, promoted.getIsDivine());
-            assertNotNull(promoted.getDivineTime());
+            // 验证 comment 和 post 的原子更新被调用
+            verify(commentMapper).update(isNull(), any(UpdateWrapper.class));
+            verify(postMapper).update(isNull(), any(LambdaUpdateWrapper.class));
         }
 
         @Test
@@ -150,7 +150,7 @@ class DivineCommentSchedulerTest {
 
             scheduler.scanDivineComments();
 
-            verify(commentMapper, never()).updateById(c);
+            verify(commentMapper, never()).update(isNull(), any(UpdateWrapper.class));
         }
 
         @Test
@@ -164,7 +164,7 @@ class DivineCommentSchedulerTest {
 
             scheduler.scanDivineComments();
 
-            verify(commentMapper, never()).updateById(any(Comment.class));
+            verify(commentMapper, never()).update(isNull(), any(UpdateWrapper.class));
         }
 
         @Test
@@ -179,7 +179,7 @@ class DivineCommentSchedulerTest {
 
             scheduler.scanDivineComments();
 
-            verify(commentMapper, never()).updateById(c);
+            verify(commentMapper, never()).update(isNull(), any(UpdateWrapper.class));
         }
     }
 }

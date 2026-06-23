@@ -1,6 +1,8 @@
 package com.techhub.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.techhub.common.BusinessException;
 import com.techhub.common.ResultCode;
 import com.techhub.dto.comment.CommentVO;
@@ -72,8 +74,11 @@ public class DivineCommentServiceImpl implements DivineCommentService {
         record.setCommentId(commentId);
         record.setUserId(userId);
         commentRecommendMapper.insert(record);
-        comment.setRecommendCount(comment.getRecommendCount() == null ? 1 : comment.getRecommendCount() + 1);
-        commentMapper.updateById(comment);
+        // 原子更新 recommendCount，避免读-改-写竞态条件
+        commentMapper.update(null, new LambdaUpdateWrapper<Comment>()
+                .eq(Comment::getId, commentId)
+                .setSql("recommend_count = IFNULL(recommend_count, 0) + 1"));
+        // checkAndUpdateDivineStatus 内部会重新读取评论，获取原子递增后的 recommendCount
         checkAndUpdateDivineStatus(comment);
     }
 
@@ -95,9 +100,11 @@ public class DivineCommentServiceImpl implements DivineCommentService {
         if (deleted == 0) {
             throw new BusinessException(ResultCode.NOT_FOUND, "未推荐过该评论");
         }
-        int currentCount = comment.getRecommendCount() == null ? 0 : comment.getRecommendCount();
-        comment.setRecommendCount(Math.max(0, currentCount - 1));
-        commentMapper.updateById(comment);
+        // 原子更新 recommendCount，避免读-改-写竞态条件
+        commentMapper.update(null, new LambdaUpdateWrapper<Comment>()
+                .eq(Comment::getId, commentId)
+                .setSql("recommend_count = GREATEST(IFNULL(recommend_count, 0) - 1, 0)"));
+        // checkAndUpdateDivineStatus 内部会重新读取评论，获取原子递减后的 recommendCount
         checkAndUpdateDivineStatus(comment);
     }
 
@@ -151,14 +158,15 @@ public class DivineCommentServiceImpl implements DivineCommentService {
     }
 
     private void promoteToDivine(Comment comment) {
-        comment.setIsDivine(1);
-        comment.setDivineTime(LocalDateTime.now());
-        commentMapper.updateById(comment);
-        Post post = postMapper.selectById(comment.getPostId());
-        if (post != null) {
-            post.setDivineCommentCount(post.getDivineCommentCount() == null ? 1 : post.getDivineCommentCount() + 1);
-            postMapper.updateById(post);
-        }
+        // 仅更新 isDivine 和 divineTime，避免 updateById 覆盖并发的计数器变更
+        commentMapper.update(null, new UpdateWrapper<Comment>()
+                .eq("id", comment.getId())
+                .set("is_divine", 1)
+                .set("divine_time", LocalDateTime.now()));
+        // 原子更新 divineCommentCount
+        postMapper.update(null, new LambdaUpdateWrapper<Post>()
+                .eq(Post::getId, comment.getPostId())
+                .setSql("divine_comment_count = IFNULL(divine_comment_count, 0) + 1"));
 
         try {
             notificationService.create(comment.getUserId(), "DIVINE", comment.getId(), "COMMENT", comment.getPostId(), "你的评论被推荐为神评");
@@ -168,14 +176,16 @@ public class DivineCommentServiceImpl implements DivineCommentService {
     }
 
     private void demoteFromDivine(Comment comment) {
-        comment.setIsDivine(0);
-        comment.setDivineTime(null);
-        commentMapper.updateById(comment);
-        Post post = postMapper.selectById(comment.getPostId());
-        if (post != null && post.getDivineCommentCount() != null && post.getDivineCommentCount() > 0) {
-            post.setDivineCommentCount(post.getDivineCommentCount() - 1);
-            postMapper.updateById(post);
-        }
+        // 仅更新 isDivine 和 divineTime，避免 updateById 覆盖并发的计数器变更
+        commentMapper.update(null, new UpdateWrapper<Comment>()
+                .eq("id", comment.getId())
+                .set("is_divine", 0)
+                .set("divine_time", null));
+        // 原子更新 divineCommentCount
+        postMapper.update(null, new LambdaUpdateWrapper<Post>()
+                .eq(Post::getId, comment.getPostId())
+                .gt(Post::getDivineCommentCount, 0)
+                .setSql("divine_comment_count = divine_comment_count - 1"));
     }
 
     private CommentVO toCommentVO(Comment comment) {
