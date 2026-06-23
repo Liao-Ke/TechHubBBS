@@ -1,6 +1,7 @@
 package com.techhub.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.techhub.common.BusinessException;
 import com.techhub.common.PageResult;
@@ -101,9 +102,10 @@ public class CommentServiceImpl implements CommentService {
         comment.setIsDivine(0);
         commentMapper.insert(comment);
 
-        // 帖子评论数 +1
-        post.setCommentCount(post.getCommentCount() + 1);
-        postMapper.updateById(post);
+        // 帖子评论数 +1（原子更新，避免读-改-写竞态条件）
+        postMapper.update(null, new LambdaUpdateWrapper<Post>()
+                .eq(Post::getId, postId)
+                .setSql("comment_count = comment_count + 1"));
 
         // 通知帖子作者（评论者不是帖子作者本人时）
         try {
@@ -137,17 +139,18 @@ public class CommentServiceImpl implements CommentService {
 
         commentMapper.deleteById(commentId);
 
-        // 帖子评论数 -1，若被删评论为神评则同步递减神评计数
-        Post post = postMapper.selectById(comment.getPostId());
-        if (post != null) {
-            if (post.getCommentCount() != null && post.getCommentCount() > 0) {
-                post.setCommentCount(post.getCommentCount() - 1);
-            }
-            if (comment.getIsDivine() != null && comment.getIsDivine() == 1
-                    && post.getDivineCommentCount() != null && post.getDivineCommentCount() > 0) {
-                post.setDivineCommentCount(post.getDivineCommentCount() - 1);
-            }
-            postMapper.updateById(post);
+        // 帖子评论数 -1（原子更新，避免读-改-写竞态条件）
+        postMapper.update(null, new LambdaUpdateWrapper<Post>()
+                .eq(Post::getId, comment.getPostId())
+                .gt(Post::getCommentCount, 0)
+                .setSql("comment_count = comment_count - 1"));
+
+        // 若被删评论为神评，同步递减神评计数（原子更新）
+        if (comment.getIsDivine() != null && comment.getIsDivine() == 1) {
+            postMapper.update(null, new LambdaUpdateWrapper<Post>()
+                    .eq(Post::getId, comment.getPostId())
+                    .gt(Post::getDivineCommentCount, 0)
+                    .setSql("divine_comment_count = divine_comment_count - 1"));
         }
     }
 

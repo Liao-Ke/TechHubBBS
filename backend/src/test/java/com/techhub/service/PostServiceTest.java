@@ -2,6 +2,7 @@ package com.techhub.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.techhub.common.BusinessException;
 import com.techhub.common.PageResult;
@@ -338,7 +339,7 @@ class PostServiceTest {
             request.setContent("New Content");
 
             when(postMapper.selectById(POST_ID)).thenReturn(post);
-            when(postMapper.updateById(any(Post.class))).thenReturn(1);
+            when(postMapper.update(isNull(), any(UpdateWrapper.class))).thenReturn(1);
             mockMapperRelations();
 
             PostVO result = postService.updatePost(POST_ID, request);
@@ -346,7 +347,7 @@ class PostServiceTest {
             assertNotNull(result);
             assertEquals("New Title", result.getTitle());
             assertEquals("New Content", result.getContent());
-            verify(postMapper).updateById(post);
+            verify(postMapper).update(isNull(), any(UpdateWrapper.class));
         }
 
         @Test
@@ -358,7 +359,7 @@ class PostServiceTest {
             request.setTitle("New Title");
 
             when(postMapper.selectById(POST_ID)).thenReturn(post);
-            when(postMapper.updateById(any(Post.class))).thenReturn(1);
+            when(postMapper.update(isNull(), any(UpdateWrapper.class))).thenReturn(1);
             mockMapperRelations();
 
             PostVO result = postService.updatePost(POST_ID, request);
@@ -418,7 +419,7 @@ class PostServiceTest {
             request.setTitle("Admin Edit");
 
             when(postMapper.selectById(POST_ID)).thenReturn(post);
-            when(postMapper.updateById(any(Post.class))).thenReturn(1);
+            when(postMapper.update(isNull(), any(UpdateWrapper.class))).thenReturn(1);
             mockMapperRelations();
 
             PostVO result = postService.updatePost(POST_ID, request);

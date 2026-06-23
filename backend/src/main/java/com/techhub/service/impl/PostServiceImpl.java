@@ -2,6 +2,7 @@ package com.techhub.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.techhub.common.BusinessException;
 import com.techhub.common.PageResult;
@@ -171,18 +172,23 @@ public class PostServiceImpl implements PostService {
             throw new BusinessException(ResultCode.FORBIDDEN, "无权修改他人帖子");
         }
 
-        // PATCH 语义：仅更新非 null 字段
+        // PATCH 语义：仅更新非 null 字段，使用 UpdateWrapper 避免 updateById 覆盖并发的计数器变更
+        UpdateWrapper<Post> wrapper = new UpdateWrapper<Post>()
+                .eq("id", postId);
         if (request.getTitle() != null) {
+            wrapper.set("title", request.getTitle());
             post.setTitle(request.getTitle());
         }
         if (request.getContent() != null) {
+            wrapper.set("content", request.getContent());
             post.setContent(request.getContent());
         }
         if (request.getVisibility() != null) {
+            wrapper.set("visibility", request.getVisibility());
             post.setVisibility(request.getVisibility());
         }
 
-        postMapper.updateById(post);
+        postMapper.update(null, wrapper);
 
         return toPostVO(post, userId);
     }

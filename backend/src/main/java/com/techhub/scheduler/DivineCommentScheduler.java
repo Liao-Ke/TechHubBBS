@@ -1,6 +1,8 @@
 package com.techhub.scheduler;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.techhub.entity.Comment;
 import com.techhub.entity.Post;
 import com.techhub.mapper.CommentMapper;
@@ -73,29 +75,30 @@ public class DivineCommentScheduler {
     }
 
     private void promoteComment(Comment comment) {
-        comment.setIsDivine(1);
-        comment.setDivineTime(LocalDateTime.now());
-        commentMapper.updateById(comment);
-
-        Post post = postMapper.selectById(comment.getPostId());
-        if (post != null) {
-            post.setDivineCommentCount(post.getDivineCommentCount() == null ? 1 : post.getDivineCommentCount() + 1);
-            postMapper.updateById(post);
-            log.debug("DivineCommentScheduler: 评论 {} 晋升为神评", comment.getId());
-        }
+        // 仅更新 isDivine 和 divineTime，避免 updateById 覆盖并发的计数器变更
+        commentMapper.update(null, new UpdateWrapper<Comment>()
+                .eq("id", comment.getId())
+                .set("is_divine", 1)
+                .set("divine_time", LocalDateTime.now()));
+        // 原子更新 divineCommentCount
+        postMapper.update(null, new LambdaUpdateWrapper<Post>()
+                .eq(Post::getId, comment.getPostId())
+                .setSql("divine_comment_count = IFNULL(divine_comment_count, 0) + 1"));
+        log.debug("DivineCommentScheduler: 评论 {} 晋升为神评", comment.getId());
     }
 
     private void demoteComment(Comment comment) {
-        comment.setIsDivine(0);
-        comment.setDivineTime(null);
-        commentMapper.updateById(comment);
-
-        Post post = postMapper.selectById(comment.getPostId());
-        if (post != null && post.getDivineCommentCount() != null && post.getDivineCommentCount() > 0) {
-            post.setDivineCommentCount(post.getDivineCommentCount() - 1);
-            postMapper.updateById(post);
-            log.debug("DivineCommentScheduler: 评论 {} 撤销神评", comment.getId());
-        }
+        // 仅更新 isDivine 和 divineTime，避免 updateById 覆盖并发的计数器变更
+        commentMapper.update(null, new UpdateWrapper<Comment>()
+                .eq("id", comment.getId())
+                .set("is_divine", 0)
+                .set("divine_time", null));
+        // 原子更新 divineCommentCount
+        postMapper.update(null, new LambdaUpdateWrapper<Post>()
+                .eq(Post::getId, comment.getPostId())
+                .gt(Post::getDivineCommentCount, 0)
+                .setSql("divine_comment_count = divine_comment_count - 1"));
+        log.debug("DivineCommentScheduler: 评论 {} 撤销神评", comment.getId());
     }
 
     // ponytail: 每小时对账一次，修正因删除评论等路径导致的 divineCommentCount 漂移。

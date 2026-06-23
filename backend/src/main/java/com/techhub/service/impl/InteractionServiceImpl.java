@@ -1,6 +1,7 @@
 package com.techhub.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.techhub.common.BusinessException;
 import com.techhub.common.ResultCode;
 import com.techhub.entity.Comment;
@@ -63,8 +64,10 @@ public class InteractionServiceImpl implements InteractionService {
             throw new BusinessException(ResultCode.CONFLICT, "已经点赞过了");
         }
 
-        post.setLikeCount(post.getLikeCount() + 1);
-        postMapper.updateById(post);
+        // 原子更新 likeCount，避免读-改-写竞态条件
+        postMapper.update(null, new LambdaUpdateWrapper<Post>()
+                .eq(Post::getId, postId)
+                .setSql("like_count = like_count + 1"));
 
         try {
             if (!userId.equals(post.getAuthorId())) {
@@ -95,9 +98,12 @@ public class InteractionServiceImpl implements InteractionService {
                 .eq(UserLike::getTargetId, postId);
         int deleted = userLikeMapper.delete(wrapper);
 
-        if (deleted > 0 && post.getLikeCount() > 0) {
-            post.setLikeCount(post.getLikeCount() - 1);
-            postMapper.updateById(post);
+        if (deleted > 0) {
+            // 原子更新 likeCount，避免读-改-写竞态条件
+            postMapper.update(null, new LambdaUpdateWrapper<Post>()
+                    .eq(Post::getId, postId)
+                    .gt(Post::getLikeCount, 0)
+                    .setSql("like_count = like_count - 1"));
         }
         // 幂等：不存在时不抛异常
     }
@@ -180,9 +186,12 @@ public class InteractionServiceImpl implements InteractionService {
             throw new BusinessException(ResultCode.CONFLICT, "已经点赞过了");
         }
 
-        comment.setLikeCount(comment.getLikeCount() + 1);
+        // 原子更新 likeCount，避免读-改-写竞态条件
+        commentMapper.update(null, new LambdaUpdateWrapper<Comment>()
+                .eq(Comment::getId, commentId)
+                .setSql("like_count = like_count + 1"));
+        // checkAndUpdateDivineStatus 内部会重新读取评论，获取原子递增后的 likeCount
         divineCommentService.checkAndUpdateDivineStatus(comment);
-        commentMapper.updateById(comment);
 
         try {
             if (!userId.equals(comment.getUserId())) {
@@ -219,11 +228,14 @@ public class InteractionServiceImpl implements InteractionService {
         int deleted = userLikeMapper.delete(wrapper);
 
         if (deleted > 0) {
-            Comment fresh = commentMapper.selectById(commentId);
-            if (fresh != null && fresh.getLikeCount() > 0) {
-                fresh.setLikeCount(fresh.getLikeCount() - 1);
-                divineCommentService.checkAndUpdateDivineStatus(fresh);
-                commentMapper.updateById(fresh);
+            Comment comment = commentMapper.selectById(commentId);
+            if (comment != null && comment.getLikeCount() > 0) {
+                // 原子更新 likeCount，避免读-改-写竞态条件
+                commentMapper.update(null, new LambdaUpdateWrapper<Comment>()
+                        .eq(Comment::getId, commentId)
+                        .setSql("like_count = like_count - 1"));
+                // checkAndUpdateDivineStatus 内部会重新读取评论，获取原子递减后的 likeCount
+                divineCommentService.checkAndUpdateDivineStatus(comment);
             }
         }
         // 幂等：不存在时不抛异常

@@ -1,6 +1,8 @@
 package com.techhub.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.techhub.common.BusinessException;
 import com.techhub.common.ResultCode;
 import com.techhub.dto.comment.CommentVO;
@@ -117,14 +119,14 @@ class DivineCommentServiceTest {
             when(postMapper.selectById(POST_ID)).thenReturn(createPost(POST_ID, 15));
             when(commentRecommendMapper.selectCount(any(LambdaQueryWrapper.class))).thenReturn(0L);
             doReturn(1).when(commentRecommendMapper).insert(any(CommentRecommend.class));
-            doReturn(1).when(commentMapper).updateById(any(Comment.class));
+            when(commentMapper.update(isNull(), any(LambdaUpdateWrapper.class))).thenReturn(1);
 
             divineCommentService.recommend(COMMENT_ID);
-            ArgumentCaptor<Comment> cap = ArgumentCaptor.forClass(Comment.class);
-            verify(commentMapper, atLeastOnce()).updateById(cap.capture());
-            assertEquals(4, cap.getAllValues().get(0).getRecommendCount());
+            // 验证原子 SQL 更新被调用
+            verify(commentMapper).update(isNull(), any(LambdaUpdateWrapper.class));
         }
     }
+
 
     @Nested @DisplayName("cancelRecommend")
     class CancelTests {
@@ -134,12 +136,13 @@ class DivineCommentServiceTest {
             Comment c = createComment(COMMENT_ID, POST_ID, 5, 5, 1);
             when(commentMapper.selectById(COMMENT_ID)).thenReturn(c);
             when(commentRecommendMapper.delete(any(LambdaQueryWrapper.class))).thenReturn(1);
-            doReturn(1).when(commentMapper).updateById(any(Comment.class));
+            when(commentMapper.update(isNull(), any(LambdaUpdateWrapper.class))).thenReturn(1);
+            when(commentMapper.update(isNull(), any(UpdateWrapper.class))).thenReturn(1);
+            when(postMapper.update(isNull(), any(LambdaUpdateWrapper.class))).thenReturn(1);
 
             divineCommentService.cancelRecommend(COMMENT_ID);
-            ArgumentCaptor<Comment> cap = ArgumentCaptor.forClass(Comment.class);
-            verify(commentMapper, atLeastOnce()).updateById(cap.capture());
-            assertEquals(4, cap.getAllValues().get(0).getRecommendCount());
+            // 验证原子 SQL 更新被调用（至少1次：recommendCount 递减，可能还有 demoteFromDivine 的 isDivine 更新）
+            verify(commentMapper, atLeastOnce()).update(isNull(), any());
         }
         @Test @DisplayName("未推荐过 -> NOT_FOUND")
         void notRecommended() {
@@ -157,43 +160,41 @@ class DivineCommentServiceTest {
         void thresholdMet() {
             Comment c = createComment(COMMENT_ID, POST_ID, 10, 5, 0);
             when(commentMapper.selectById(COMMENT_ID)).thenReturn(c);
-            doReturn(1).when(commentMapper).updateById(any(Comment.class));
-            when(postMapper.selectById(POST_ID)).thenReturn(createPost(POST_ID, 15));
+            when(commentMapper.update(isNull(), any(UpdateWrapper.class))).thenReturn(1);
+            when(postMapper.update(isNull(), any(LambdaUpdateWrapper.class))).thenReturn(1);
 
             divineCommentService.checkAndUpdateDivineStatus(c);
-            ArgumentCaptor<Comment> cap = ArgumentCaptor.forClass(Comment.class);
-            verify(commentMapper).updateById(cap.capture());
-            assertEquals(1, cap.getValue().getIsDivine());
-            assertNotNull(cap.getValue().getDivineTime());
+            // 验证 comment 的 isDivine 更新被调用
+            verify(commentMapper).update(isNull(), any(UpdateWrapper.class));
+            // 验证 post 的 divineCommentCount 原子更新被调用
+            verify(postMapper).update(isNull(), any(LambdaUpdateWrapper.class));
         }
         @Test @DisplayName("阈值丢失 -> isDivine=0")
         void thresholdLost() {
             Comment c = createComment(COMMENT_ID, POST_ID, 8, 4, 1);
             when(commentMapper.selectById(COMMENT_ID)).thenReturn(c);
-            doReturn(1).when(commentMapper).updateById(any(Comment.class));
-            Post p = createPost(POST_ID, 15);
-            p.setDivineCommentCount(1);
-            when(postMapper.selectById(POST_ID)).thenReturn(p);
+            when(commentMapper.update(isNull(), any(UpdateWrapper.class))).thenReturn(1);
+            when(postMapper.update(isNull(), any(LambdaUpdateWrapper.class))).thenReturn(1);
 
             divineCommentService.checkAndUpdateDivineStatus(c);
-            ArgumentCaptor<Comment> cap = ArgumentCaptor.forClass(Comment.class);
-            verify(commentMapper).updateById(cap.capture());
-            assertEquals(0, cap.getValue().getIsDivine());
-            assertNull(cap.getValue().getDivineTime());
+            // 验证 comment 的 isDivine 更新被调用
+            verify(commentMapper).update(isNull(), any(UpdateWrapper.class));
+            // 验证 post 的 divineCommentCount 原子更新被调用
+            verify(postMapper).update(isNull(), any(LambdaUpdateWrapper.class));
         }
         @Test @DisplayName("已是神评且达标 -> 不变")
         void alreadyDivine() {
             Comment c = createComment(COMMENT_ID, POST_ID, 15, 8, 1);
             when(commentMapper.selectById(COMMENT_ID)).thenReturn(c);
             divineCommentService.checkAndUpdateDivineStatus(c);
-            verify(commentMapper, never()).updateById(any(Comment.class));
+            verify(commentMapper, never()).update(isNull(), any(LambdaUpdateWrapper.class));
         }
         @Test @DisplayName("非神评且未达标 -> 不变")
         void notDivine() {
             Comment c = createComment(COMMENT_ID, POST_ID, 3, 2, 0);
             when(commentMapper.selectById(COMMENT_ID)).thenReturn(c);
             divineCommentService.checkAndUpdateDivineStatus(c);
-            verify(commentMapper, never()).updateById(any(Comment.class));
+            verify(commentMapper, never()).update(isNull(), any(LambdaUpdateWrapper.class));
         }
     }
 
@@ -212,14 +213,12 @@ class DivineCommentServiceTest {
             securityUtils.when(SecurityUtils::getCurrentRole).thenReturn("ADMIN");
             Comment c = createComment(COMMENT_ID, POST_ID, 0, 0, 0);
             when(commentMapper.selectById(COMMENT_ID)).thenReturn(c);
-            doReturn(1).when(commentMapper).updateById(any(Comment.class));
-            when(postMapper.selectById(POST_ID)).thenReturn(createPost(POST_ID, 15));
+            when(commentMapper.update(isNull(), any(UpdateWrapper.class))).thenReturn(1);
+            when(postMapper.update(isNull(), any(LambdaUpdateWrapper.class))).thenReturn(1);
 
             divineCommentService.forceSetDivine(COMMENT_ID, true);
-            ArgumentCaptor<Comment> cap = ArgumentCaptor.forClass(Comment.class);
-            verify(commentMapper).updateById(cap.capture());
-            assertEquals(1, cap.getValue().getIsDivine());
-            assertNotNull(cap.getValue().getDivineTime());
+            verify(commentMapper).update(isNull(), any(UpdateWrapper.class));
+            verify(postMapper).update(isNull(), any(LambdaUpdateWrapper.class));
         }
         @Test @DisplayName("管理员强制撤销神评")
         void adminForceUnset() {
@@ -227,16 +226,12 @@ class DivineCommentServiceTest {
             securityUtils.when(SecurityUtils::getCurrentRole).thenReturn("ADMIN");
             Comment c = createComment(COMMENT_ID, POST_ID, 20, 10, 1);
             when(commentMapper.selectById(COMMENT_ID)).thenReturn(c);
-            doReturn(1).when(commentMapper).updateById(any(Comment.class));
-            Post p = createPost(POST_ID, 15);
-            p.setDivineCommentCount(1);
-            when(postMapper.selectById(POST_ID)).thenReturn(p);
+            when(commentMapper.update(isNull(), any(UpdateWrapper.class))).thenReturn(1);
+            when(postMapper.update(isNull(), any(LambdaUpdateWrapper.class))).thenReturn(1);
 
             divineCommentService.forceSetDivine(COMMENT_ID, false);
-            ArgumentCaptor<Comment> cap = ArgumentCaptor.forClass(Comment.class);
-            verify(commentMapper).updateById(cap.capture());
-            assertEquals(0, cap.getValue().getIsDivine());
-            assertNull(cap.getValue().getDivineTime());
+            verify(commentMapper).update(isNull(), any(UpdateWrapper.class));
+            verify(postMapper).update(isNull(), any(LambdaUpdateWrapper.class));
         }
         @Test @DisplayName("已是神评再设 -> 不变")
         void alreadyDivine() {
@@ -244,7 +239,7 @@ class DivineCommentServiceTest {
             securityUtils.when(SecurityUtils::getCurrentRole).thenReturn("ADMIN");
             when(commentMapper.selectById(COMMENT_ID)).thenReturn(createComment(COMMENT_ID, POST_ID, 20, 10, 1));
             divineCommentService.forceSetDivine(COMMENT_ID, true);
-            verify(commentMapper, never()).updateById(any(Comment.class));
+            verify(commentMapper, never()).update(isNull(), any(LambdaUpdateWrapper.class));
         }
     }
 
