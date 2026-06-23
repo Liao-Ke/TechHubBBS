@@ -11,7 +11,6 @@ import com.techhub.entity.Comment;
 import com.techhub.entity.Post;
 import com.techhub.entity.User;
 import com.techhub.enums.PostStatusEnum;
-import com.techhub.enums.RoleEnum;
 import com.techhub.mapper.CommentMapper;
 import com.techhub.mapper.PostMapper;
 import com.techhub.mapper.UserLikeMapper;
@@ -188,7 +187,7 @@ public class CommentServiceImpl implements CommentService {
      */
     private boolean isAdmin() {
         String role = SecurityUtils.getCurrentRole();
-        return RoleEnum.ADMIN.getCode().equals(role);
+        return "ADMIN".equals(role);
     }
 
     /**
@@ -196,6 +195,6 @@ public class CommentServiceImpl implements CommentService {
      */
     private boolean isAdminOrModerator() {
         String role = SecurityUtils.getCurrentRole();
-        return RoleEnum.ADMIN.getCode().equals(role) || RoleEnum.MODERATOR.getCode().equals(role);
+        return "ADMIN".equals(role) || "MODERATOR".equals(role);
     }
 }
