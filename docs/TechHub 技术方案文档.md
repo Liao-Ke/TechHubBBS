@@ -675,7 +675,7 @@ Production:
 | **推荐冷启动** | 高 | 中 | 默认降级为热门帖子排行，新用户展示热门内容引导互动，积累数据后切换个性化推荐 |
 | **雪花 ID 时钟回拨** | 低 | 高 | 服务器 NTP 时间同步，MyBatis-Plus ASSIGN_ID 内置容错，极端情况回退 UUID |
 | **大文件上传性能** | 中 | 低 | 前端限制 5MB + 格式白名单，Nginx `client_max_body_size` 限制，后续可扩展分片上传 |
-| **JWT Secret 泄露** | 低 | 严重 | Secret 仅通过环境变量注入 `JWT_SECRET`，不写入配置文件或仓库，建立定期轮换机制 |
+| **JWT Secret 泄露** | 低 | 严重 | Secret 仅通过环境变量注入 `JWT_SECRET`，配置与代码均**无默认回退**，缺失即 fail-fast 拒绝启动；不写入配置文件或仓库；建立定期轮换机制 |
 | **XSS via Markdown** | 中 | 高 | `markdown-it` 禁用原始 HTML + DOMPurify 白名单清洗，服务端可增加二次清洗 |
 | **高并发下 DB 压力** | 中 | 中 | Redis 缓存热点数据（热门帖子、推荐结果），HikariCP 连接池调优，读写分离后续扩展 |
 | **可见权限逻辑复杂** | 低 | 中 | PostVisibilityService 集中管理，充分的单元测试覆盖所有角色 × 可见性组合，404 策略防信息泄露 |

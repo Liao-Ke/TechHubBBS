@@ -22,7 +22,7 @@ public class JwtTokenProvider {
      */
     @Autowired
     public JwtTokenProvider(
-            @Value("${jwt.secret:dGVzdC1zZWNyZXQta2V5LWZvci1qd3QtdG9rZW4tZ2VuZXJhdGlvbi1tdXN0LWJlLWF0LWxlYXN0LTI1Ni1iaXRzLWxvbmctZW5vdWdo}") String secret,
+            @Value("${jwt.secret}") String secret,
             @Value("${jwt.expiration:3600000}") long expiration) {
         this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
         this.expiration = expiration;
