@@ -71,7 +71,9 @@ mybatis-plus:
 
 # ==================== JWT 配置 ====================
 jwt:
-  secret: ${JWT_SECRET:TechHubSecretKeyForJWTTokenGenerationMustBeAtLeast256BitsLong}
+  # 安全说明：jwt.secret 无默认回退值，缺失 JWT_SECRET 环境变量时应用拒绝启动。
+  # ponytail: 上限 — 无；升级路径：接入密钥管理服务（Vault/KMS）后改读外部密钥 ID。
+  secret: ${JWT_SECRET}
   expiration: 86400000  # 24 小时 (毫秒)
 
 # ==================== AI 服务配置 ====================
