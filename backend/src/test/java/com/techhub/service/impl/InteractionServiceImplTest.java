@@ -12,6 +12,7 @@ import com.techhub.mapper.UserLikeMapper;
 import com.techhub.security.SecurityUtils;
 import com.techhub.service.DivineCommentService;
 import com.techhub.service.NotificationService;
+import com.techhub.service.PostVisibilityService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -46,6 +47,8 @@ class InteractionServiceImplTest {
     private DivineCommentService divineCommentService;
     @Mock
     private NotificationService notificationService;
+    @Mock
+    private PostVisibilityService postVisibilityService;
 
     @InjectMocks
     private InteractionServiceImpl interactionService;
@@ -206,6 +209,10 @@ class InteractionServiceImplTest {
 
         when(commentMapper.selectById(commentId)).thenReturn(comment);
 
+        Post parentPost = new Post();
+        parentPost.setId(postId);
+        when(postMapper.selectById(postId)).thenReturn(parentPost);
+
         // 用户 B（id=3）点赞评论
         givenCurrentUser(3L);
         interactionService.likeComment(commentId);
@@ -229,6 +236,9 @@ class InteractionServiceImplTest {
         comment.setLikeCount(0);
 
         when(commentMapper.selectById(commentId)).thenReturn(comment);
+        Post parentPost = new Post();
+        parentPost.setId(10L);
+        when(postMapper.selectById(10L)).thenReturn(parentPost);
         givenCurrentUser(authorId);
 
         interactionService.likeComment(commentId);
@@ -256,6 +266,9 @@ class InteractionServiceImplTest {
         comment.setLikeCount(0);
 
         when(commentMapper.selectById(1L)).thenReturn(comment);
+        Post parentPost = new Post();
+        parentPost.setId(10L);
+        when(postMapper.selectById(10L)).thenReturn(parentPost);
         when(userLikeMapper.insert(any(UserLike.class))).thenThrow(new DuplicateKeyException("dup"));
         givenCurrentUser(3L);
 
@@ -293,5 +306,119 @@ class InteractionServiceImplTest {
         // 点赞操作应完成
         verify(postMapper).updateById(post);
         assertEquals(1, post.getLikeCount());
+    }
+
+    // ==================== 可见性校验 ====================
+
+    @Test
+    @DisplayName("不可见帖子点赞抛出 NOT_FOUND")
+    void likePost_PostNotVisible_ThrowsNotFound() {
+        Post post = new Post();
+        post.setId(1L);
+        post.setAuthorId(2L);
+
+        when(postMapper.selectById(1L)).thenReturn(post);
+        doThrow(new BusinessException(ResultCode.NOT_FOUND, "帖子不存在"))
+                .when(postVisibilityService).checkVisibleOrThrow(post, USER_ID, false);
+        givenCurrentUser(USER_ID);
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> interactionService.likePost(1L));
+        assertEquals(ResultCode.NOT_FOUND.getCode(), ex.getCode());
+    }
+
+    @Test
+    @DisplayName("不可见帖子取消点赞抛出 NOT_FOUND")
+    void unlikePost_PostNotVisible_ThrowsNotFound() {
+        Post post = new Post();
+        post.setId(1L);
+        post.setAuthorId(2L);
+
+        when(postMapper.selectById(1L)).thenReturn(post);
+        doThrow(new BusinessException(ResultCode.NOT_FOUND, "帖子不存在"))
+                .when(postVisibilityService).checkVisibleOrThrow(post, USER_ID, false);
+        givenCurrentUser(USER_ID);
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> interactionService.unlikePost(1L));
+        assertEquals(ResultCode.NOT_FOUND.getCode(), ex.getCode());
+    }
+
+    @Test
+    @DisplayName("不可见帖子收藏抛出 NOT_FOUND")
+    void favoritePost_PostNotVisible_ThrowsNotFound() {
+        Post post = new Post();
+        post.setId(1L);
+        post.setAuthorId(2L);
+
+        when(postMapper.selectById(1L)).thenReturn(post);
+        doThrow(new BusinessException(ResultCode.NOT_FOUND, "帖子不存在"))
+                .when(postVisibilityService).checkVisibleOrThrow(post, USER_ID, false);
+        givenCurrentUser(USER_ID);
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> interactionService.favoritePost(1L));
+        assertEquals(ResultCode.NOT_FOUND.getCode(), ex.getCode());
+    }
+
+    @Test
+    @DisplayName("不可见帖子取消收藏抛出 NOT_FOUND")
+    void unfavoritePost_PostNotVisible_ThrowsNotFound() {
+        Post post = new Post();
+        post.setId(1L);
+        post.setAuthorId(2L);
+
+        when(postMapper.selectById(1L)).thenReturn(post);
+        doThrow(new BusinessException(ResultCode.NOT_FOUND, "帖子不存在"))
+                .when(postVisibilityService).checkVisibleOrThrow(post, USER_ID, false);
+        givenCurrentUser(USER_ID);
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> interactionService.unfavoritePost(1L));
+        assertEquals(ResultCode.NOT_FOUND.getCode(), ex.getCode());
+    }
+
+    @Test
+    @DisplayName("点赞不可见帖子的评论抛出 NOT_FOUND")
+    void likeComment_ParentPostNotVisible_ThrowsNotFound() {
+        Comment comment = new Comment();
+        comment.setId(1L);
+        comment.setUserId(3L);
+        comment.setPostId(10L);
+        comment.setLikeCount(0);
+
+        when(commentMapper.selectById(1L)).thenReturn(comment);
+        Post post = new Post();
+        post.setId(10L);
+        when(postMapper.selectById(10L)).thenReturn(post);
+        doThrow(new BusinessException(ResultCode.NOT_FOUND, "帖子不存在"))
+                .when(postVisibilityService).checkVisibleOrThrow(post, USER_ID, false);
+        givenCurrentUser(USER_ID);
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> interactionService.likeComment(1L));
+        assertEquals(ResultCode.NOT_FOUND.getCode(), ex.getCode());
+    }
+
+    @Test
+    @DisplayName("取消点赞不可见帖子的评论抛出 NOT_FOUND")
+    void unlikeComment_ParentPostNotVisible_ThrowsNotFound() {
+        Comment comment = new Comment();
+        comment.setId(1L);
+        comment.setUserId(3L);
+        comment.setPostId(10L);
+        comment.setLikeCount(0);
+
+        when(commentMapper.selectById(1L)).thenReturn(comment);
+        Post post = new Post();
+        post.setId(10L);
+        when(postMapper.selectById(10L)).thenReturn(post);
+        doThrow(new BusinessException(ResultCode.NOT_FOUND, "帖子不存在"))
+                .when(postVisibilityService).checkVisibleOrThrow(post, USER_ID, false);
+        givenCurrentUser(USER_ID);
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> interactionService.unlikeComment(1L));
+        assertEquals(ResultCode.NOT_FOUND.getCode(), ex.getCode());
     }
 }
