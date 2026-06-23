@@ -138,10 +138,16 @@ public class CommentServiceImpl implements CommentService {
 
         commentMapper.deleteById(commentId);
 
-        // 帖子评论数 -1
+        // 帖子评论数 -1，若被删评论为神评则同步递减神评计数
         Post post = postMapper.selectById(comment.getPostId());
-        if (post != null && post.getCommentCount() > 0) {
-            post.setCommentCount(post.getCommentCount() - 1);
+        if (post != null) {
+            if (post.getCommentCount() != null && post.getCommentCount() > 0) {
+                post.setCommentCount(post.getCommentCount() - 1);
+            }
+            if (comment.getIsDivine() != null && comment.getIsDivine() == 1
+                    && post.getDivineCommentCount() != null && post.getDivineCommentCount() > 0) {
+                post.setDivineCommentCount(post.getDivineCommentCount() - 1);
+            }
             postMapper.updateById(post);
         }
     }
