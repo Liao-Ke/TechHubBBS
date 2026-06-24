@@ -164,10 +164,23 @@ class AiIntegrationTest extends BaseIntegrationTest {
     @Test
     @DisplayName("AI问答 → 摘要已生成 → 返回问答结果")
     void askQuestion_WithSummary() throws Exception {
-        // Trigger generation first — wait for async completion (mock AiClient returns instantly)
+        // Trigger generation first
         mockMvc.perform(post("/api/v1/posts/{postId}/ai/summary", postId)
                 .header("Authorization", bearerToken(userToken)));
-        Thread.sleep(300);
+
+        // Poll for async summary generation to complete (max 5s)
+        for (int i = 0; i < 50; i++) {
+            var result = mockMvc.perform(get("/api/v1/posts/{postId}/ai/summary", postId)
+                            .header("Authorization", bearerToken(userToken)))
+                    .andReturn();
+            if (result.getResponse().getStatus() == 200) {
+                String body = result.getResponse().getContentAsString();
+                if (objectMapper.readTree(body).path("data").path("summary").asText("").length() > 0) {
+                    break;
+                }
+            }
+            Thread.sleep(100);
+        }
 
         // Ask question
         mockMvc.perform(post("/api/v1/posts/{postId}/ai/qa", postId)
