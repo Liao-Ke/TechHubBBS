@@ -105,14 +105,11 @@ class CommentServiceImplTest {
             Comment comment = createComment(COMMENT_ID, POST_ID, OTHER_USER_ID, "其他用户评论");
             when(commentMapper.selectById(COMMENT_ID)).thenReturn(comment);
             when(commentMapper.deleteById(COMMENT_ID)).thenReturn(1);
-            Post post = createPost(POST_ID, AUTHOR_ID, 3);
-            when(postMapper.selectById(POST_ID)).thenReturn(post);
-            when(postMapper.updateById(any(Post.class))).thenReturn(1);
 
             commentService.delete(COMMENT_ID);
 
             verify(commentMapper).deleteById(COMMENT_ID);
-            verify(postMapper).updateById(any(Post.class));
+            verify(postMapper).update(isNull(), any(com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper.class));
         }
 
         @Test
@@ -122,9 +119,6 @@ class CommentServiceImplTest {
             Comment comment = createComment(COMMENT_ID, POST_ID, OTHER_USER_ID, "其他用户评论");
             when(commentMapper.selectById(COMMENT_ID)).thenReturn(comment);
             when(commentMapper.deleteById(COMMENT_ID)).thenReturn(1);
-            Post post = createPost(POST_ID, AUTHOR_ID, 3);
-            when(postMapper.selectById(POST_ID)).thenReturn(post);
-            when(postMapper.updateById(any(Post.class))).thenReturn(1);
 
             commentService.delete(COMMENT_ID);
 
@@ -151,9 +145,6 @@ class CommentServiceImplTest {
             Comment comment = createComment(COMMENT_ID, POST_ID, USER_ID, "我的评论");
             when(commentMapper.selectById(COMMENT_ID)).thenReturn(comment);
             when(commentMapper.deleteById(COMMENT_ID)).thenReturn(1);
-            Post post = createPost(POST_ID, AUTHOR_ID, 3);
-            when(postMapper.selectById(POST_ID)).thenReturn(post);
-            when(postMapper.updateById(any(Post.class))).thenReturn(1);
 
             commentService.delete(COMMENT_ID);
 
@@ -234,7 +225,6 @@ class CommentServiceImplTest {
             when(postMapper.selectById(POST_ID)).thenReturn(post);
             doAnswer(inv -> { inv.getArgument(0, Comment.class).setId(200L); return 1; })
                     .when(commentMapper).insert(any(Comment.class));
-            when(postMapper.updateById(any(Post.class))).thenReturn(1);
             when(userMapper.selectById(USER_ID)).thenReturn(createUser(USER_ID, "admin"));
 
             CommentCreateRequest request = new CommentCreateRequest();
@@ -252,7 +242,6 @@ class CommentServiceImplTest {
             when(postMapper.selectById(POST_ID)).thenReturn(post);
             doAnswer(inv -> { inv.getArgument(0, Comment.class).setId(200L); return 1; })
                     .when(commentMapper).insert(any(Comment.class));
-            when(postMapper.updateById(any(Post.class))).thenReturn(1);
             when(userMapper.selectById(USER_ID)).thenReturn(createUser(USER_ID, "testuser"));
 
             CommentCreateRequest request = new CommentCreateRequest();

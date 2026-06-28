@@ -228,7 +228,7 @@ public class InteractionServiceImpl implements InteractionService {
         int deleted = userLikeMapper.delete(wrapper);
 
         if (deleted > 0) {
-            Comment comment = commentMapper.selectById(commentId);
+            comment = commentMapper.selectById(commentId);
             if (comment != null && comment.getLikeCount() > 0) {
                 // 原子更新 likeCount，避免读-改-写竞态条件
                 commentMapper.update(null, new LambdaUpdateWrapper<Comment>()
